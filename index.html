@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html> 
 <html lang="bn">
 <head>
 <base target="_top">
@@ -741,6 +741,251 @@
     .userbar small { display:none !important; }
     .dhero { padding:16px 16px; border-radius:24px; }
   }
+
+  /* ===== আধুনিক UI স্তর (v8) — মুছে ফেললেই আগের চেহারা ফিরবে; HTML/JS অপরিবর্তিত ===== */
+  :root { --ac1:#004d38; --ac2:#0a9070; --glow:rgba(0,106,78,.28); --soft:0 1px 2px rgba(8,56,47,.06), 0 10px 30px -12px rgba(8,56,47,.18); --r:22px; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --ac1:#27a883; --ac2:#4fd6ae; --glow:rgba(63,201,160,.25); --soft:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6); } }
+  :root[data-theme="dark"] { --ac1:#27a883; --ac2:#4fd6ae; --glow:rgba(63,201,160,.25); --soft:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6); }
+
+  body { background:
+    radial-gradient(900px 380px at 12% -80px, color-mix(in srgb, var(--ac2) 16%, transparent), transparent 70%),
+    radial-gradient(700px 320px at 100% 0, color-mix(in srgb, var(--ac1) 12%, transparent), transparent 70%),
+    var(--bg); background-attachment:fixed; letter-spacing:.1px; }
+
+  header { position:relative; overflow:hidden; border-radius:0 0 32px 32px;
+           background:linear-gradient(135deg,#00382a 0%,#005a42 55%,#0a8a68 130%); box-shadow:0 14px 34px -14px rgba(0,56,42,.55); }
+  header::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+           background:radial-gradient(260px 160px at 88% 10%, rgba(95,224,180,.35), transparent 70%), radial-gradient(200px 140px at 0 100%, rgba(255,255,255,.12), transparent 70%); }
+  .head-in { position:relative; }
+  header #title { font-size:24px; letter-spacing:.2px; }
+  header small { display:inline-block; background:rgba(255,255,255,.14); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+           padding:3px 11px; border-radius:99px; color:#d9fff1; font-weight:600; font-size:13px; margin-top:7px; }
+  .today { border-left:none; background:rgba(255,255,255,.12); padding:8px 13px; border-radius:16px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+
+  .tabs-in { border:1px solid color-mix(in srgb, var(--line) 70%, transparent); background:color-mix(in srgb, var(--surface) 82%, transparent);
+           -webkit-backdrop-filter:blur(16px) saturate(1.4); backdrop-filter:blur(16px) saturate(1.4); border-radius:22px; box-shadow:var(--soft); padding:5px; gap:4px; }
+  .tab { border-radius:17px; transition:background .25s, color .25s, transform .15s, box-shadow .25s; }
+  .tab:active { transform:scale(.95); }
+  .tab.on, :root[data-theme="dark"] .tab.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; box-shadow:0 8px 18px -6px var(--glow); }
+  @media (prefers-color-scheme:dark) { .tab.on { color:#05201a; } }
+  :root[data-theme="dark"] .tab.on { color:#05201a; }
+  :root[data-theme="light"] .tab.on { color:#fff; }
+
+  .card, .hero, .row { border:1px solid color-mix(in srgb, var(--line) 60%, transparent); border-radius:var(--r); box-shadow:var(--soft); }
+  .card { padding:18px; }
+  label { text-transform:none; letter-spacing:.2px; font-weight:600; font-size:12.5px; }
+  select, input[type=date], input[type=month], input[type=search] { border-radius:14px; border:1.5px solid transparent; background-color:color-mix(in srgb, var(--ink) 5%, var(--surface));
+           transition:border-color .2s, box-shadow .2s, background-color .2s; }
+  select:focus, input:focus { border-color:var(--ac2); box-shadow:0 0 0 4px var(--glow); outline:none; }
+  .note { border-radius:14px; border:1px solid color-mix(in srgb, var(--l) 25%, transparent); }
+
+  .hero { padding:18px; gap:20px; background:linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--pine-l) 55%, var(--surface))); }
+  .ring { width:100px; height:100px; background:conic-gradient(from -90deg, var(--ac1), var(--ac2) calc(var(--pc) * 1%), color-mix(in srgb, var(--ink) 8%, transparent) 0);
+          filter:drop-shadow(0 6px 10px var(--glow)); transition:background .6s; }
+  .ring::after { inset:11px; }
+  .ring b { font-size:24px; }
+  .hc { background:color-mix(in srgb, var(--ink) 4%, transparent); border-radius:14px; padding:8px 10px; }
+  .hc i { box-shadow:0 0 0 3px color-mix(in srgb, currentColor 0%, transparent); width:10px; height:10px; }
+
+  .chipbtn { border:none; box-shadow:var(--soft); font-weight:600; transition:transform .15s, box-shadow .2s; }
+  .chipbtn:active { transform:scale(.96); }
+  .row { padding:14px 15px; transition:background .25s, box-shadow .25s, transform .2s; }
+  .row[data-s="1"] { box-shadow:inset 4px 0 0 var(--a), var(--soft); }
+  .row[data-s="2"] { box-shadow:inset 4px 0 0 var(--l), var(--soft); }
+  .row[data-s="3"] { box-shadow:inset 4px 0 0 var(--t), var(--soft); }
+  .roll { width:42px; min-width:42px; height:42px; background:linear-gradient(145deg, var(--pine-l), color-mix(in srgb, var(--ac2) 28%, var(--pine-l))); color:var(--pine-d); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ac2) 30%, transparent); }
+  @media (prefers-color-scheme:dark) { .roll { color:var(--pine); } }
+  .btns { background:color-mix(in srgb, var(--ink) 6%, transparent); border-radius:16px; padding:4px; gap:4px; }
+  .sb { border-radius:12px; transition:background .2s, color .2s, transform .12s, box-shadow .2s; }
+  .sb.on { box-shadow:0 6px 14px -5px rgba(0,0,0,.35); }
+  .sb.on.s0 { background:linear-gradient(135deg,#0f8a50,#27c47c); }
+  .sb.on.s1 { background:linear-gradient(135deg,#d41f35,#f05a6a); }
+  .sb.on.s2 { background:linear-gradient(135deg,#b97b00,#e3a824); }
+  .sb.on.s3 { background:linear-gradient(135deg,#2b5bc4,#5b8cf0); }
+
+  .bar-in { border-radius:26px; border:1px solid color-mix(in srgb, var(--line) 60%, transparent); box-shadow:0 18px 40px -14px rgba(8,56,47,.4), var(--soft);
+           -webkit-backdrop-filter:blur(18px) saturate(1.5); backdrop-filter:blur(18px) saturate(1.5); }
+  .save, .act { border-radius:18px; letter-spacing:.2px; transition:transform .15s, box-shadow .25s, filter .2s; }
+  .save:not(:disabled), .act:not(.alt):not(.rej):not(:disabled) { background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 12px 24px -10px var(--glow); }
+  @media (prefers-color-scheme:dark) { .save:not(:disabled) { color:#05201a; } }
+  :root[data-theme="dark"] .save:not(:disabled) { color:#05201a; }
+  :root[data-theme="light"] .save:not(:disabled) { color:#fff; }
+  .save:not(:disabled):hover { filter:brightness(1.06); }
+  .save:active, .act:active { transform:scale(.98); }
+
+  @keyframes upIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  .card, .hero, .row { animation:upIn .35s cubic-bezier(.2,.7,.2,1) both; }
+  .row:nth-child(-n+8) { animation-delay:calc(var(--i, 0) * 0ms); }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:color-mix(in srgb, var(--ink) 18%, transparent); border-radius:99px; border:3px solid transparent; background-clip:padding-box; }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+  /* ===== আধুনিক লগইন (v8) — মুছে ফেললেই আগের লগইন চেহারা ফিরবে ===== */
+  body.lgmode { background:
+      radial-gradient(520px 380px at 85% -6%, rgba(95,224,180,.42), transparent 70%),
+      radial-gradient(460px 360px at -8% 92%, rgba(10,144,112,.55), transparent 70%),
+      radial-gradient(300px 240px at 60% 55%, rgba(244,42,65,.14), transparent 70%),
+      linear-gradient(165deg,#00362a 0%,#00503c 48%,#003326 100%); background-attachment:fixed; }
+  body.lgmode .lg-orb.o1 { background:radial-gradient(circle at 30% 30%, rgba(95,224,180,.38), rgba(95,224,180,0) 70%); filter:blur(6px); }
+  body.lgmode .lg-orb.o2 { background:radial-gradient(circle at 60% 40%, rgba(255,255,255,.16), rgba(255,255,255,0) 70%); filter:blur(4px); }
+  body.lgmode .lg-orb.o3 { background:radial-gradient(circle at 40% 40%, rgba(244,42,65,.28), rgba(244,42,65,0) 70%); filter:blur(8px); }
+
+  body.lgmode .lg-hero { padding:44px 0 26px; }
+  body.lgmode .lg-logo { width:88px; height:88px; border-radius:30px; background:linear-gradient(145deg,#ffffff,#d4f7ea);
+        box-shadow:0 18px 38px -10px rgba(0,25,18,.6), inset 0 -3px 0 rgba(0,106,78,.12); }
+  body.lgmode .lg-logo::after { border-radius:30px; border-color:rgba(95,224,180,.75); }
+  body.lgmode .lg-logo svg { width:46px; height:46px; stroke:#00704f; stroke-width:2.4; }
+  body.lgmode .lg-app { font-size:29px; font-weight:700; letter-spacing:.2px; text-shadow:0 4px 20px rgba(0,25,18,.5); }
+  body.lgmode .lg-sub { color:#bff3df; opacity:1; font-size:15px; }
+
+  body.lgmode .lg-card { border-radius:32px; padding:26px 22px 24px; background:rgba(255,255,255,.86);
+        border:1px solid rgba(255,255,255,.65); -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
+        box-shadow:0 30px 60px -18px rgba(0,22,16,.65), 0 2px 0 rgba(255,255,255,.5) inset; }
+  body.lgmode .lg-card .cls-title { font-size:20px; font-weight:700; }
+  body.lgmode .lg-card label { font-weight:600; letter-spacing:.2px; }
+  body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] {
+        border-radius:16px; border:1.5px solid transparent; background:rgba(0,70,50,.055); box-shadow:none; transition:border-color .2s, box-shadow .2s, background .2s; }
+  body.lgmode .lg-card input:focus { background:#fff; border-color:#0a9070; box-shadow:0 0 0 4px rgba(10,144,112,.2); }
+  body.lgmode .fi { stroke:#0a8a68; transition:stroke .2s; }
+  body.lgmode .fld:focus-within .fi, body.lgmode .pw:focus-within .fi { stroke:#004d38; opacity:1; }
+  body.lgmode .pwbtn { background:rgba(10,144,112,.12); color:#00704f; border-radius:99px; font-weight:600; }
+  body.lgmode #lgBtn { background:linear-gradient(135deg,#00583f 0%,#0a9070 100%); color:#fff; border-radius:18px;
+        box-shadow:0 16px 28px -10px rgba(0,106,78,.65); }
+  body.lgmode #lgBtn:not(:disabled):hover { filter:brightness(1.07); }
+  body.lgmode #lgBtn:active { box-shadow:0 6px 14px -6px rgba(0,106,78,.6); }
+  body.lgmode .lg-foot { display:table; margin:20px auto 8px; padding:7px 16px; border-radius:99px; background:rgba(255,255,255,.12);
+        border:1px solid rgba(255,255,255,.18); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#dcfff2; font-size:12.5px; }
+
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) body.lgmode .lg-card,
+    :root:not([data-theme="light"]) body.lgmode .lg-card { background:rgba(14,26,24,.8); border-color:rgba(255,255,255,.09); }
+    :root:not([data-theme="light"]) body.lgmode .lg-card input[type=email], :root:not([data-theme="light"]) body.lgmode .lg-card input[type=password], :root:not([data-theme="light"]) body.lgmode .lg-card input[type=text] { background:rgba(255,255,255,.07); }
+    :root:not([data-theme="light"]) body.lgmode .lg-card input:focus { background:rgba(255,255,255,.1); border-color:#4fd6ae; box-shadow:0 0 0 4px rgba(79,214,174,.22); }
+    :root:not([data-theme="light"]) body.lgmode .fi { stroke:#4fd6ae; }
+    :root:not([data-theme="light"]) body.lgmode .pwbtn { background:rgba(79,214,174,.16); color:#7ee8c4; } }
+  :root[data-theme="dark"] body.lgmode .lg-card { background:rgba(14,26,24,.8); border-color:rgba(255,255,255,.09); }
+  :root[data-theme="dark"] body.lgmode .lg-card input[type=email], :root[data-theme="dark"] body.lgmode .lg-card input[type=password], :root[data-theme="dark"] body.lgmode .lg-card input[type=text] { background:rgba(255,255,255,.07); }
+  :root[data-theme="dark"] body.lgmode .lg-card input:focus { background:rgba(255,255,255,.1); border-color:#4fd6ae; box-shadow:0 0 0 4px rgba(79,214,174,.22); }
+  :root[data-theme="dark"] body.lgmode .fi { stroke:#4fd6ae; }
+  :root[data-theme="dark"] body.lgmode .pwbtn { background:rgba(79,214,174,.16); color:#7ee8c4; }
+
+  /* ===== আধুনিক জমা বোতাম (v8) — মুছে ফেললেই আগের বার ফিরবে ===== */
+  .bar-in { display:grid; grid-template-columns:1fr; gap:10px; padding:12px 12px 12px 16px; }
+  .bar-in .meter { height:6px; margin:0; border-radius:99px; background:color-mix(in srgb, var(--ink) 8%, transparent); }
+  .bar-in .meter span { border-radius:99px; }
+  .bar-in .sum { margin:0; text-align:left; font-size:13px; font-weight:600; line-height:1.45; color:var(--mute); }
+  .bar-in .save { position:relative; width:100%; min-height:54px; padding:0 22px; border-radius:99px; display:flex; align-items:center; justify-content:center; gap:10px;
+        font-size:17px; font-weight:700; letter-spacing:.2px; color:#fff; border:1px solid rgba(255,255,255,.22);
+        background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 14px 26px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.35);
+        transition:transform .15s, box-shadow .25s, filter .2s, background .3s; }
+  .bar-in .save::before { content:""; flex:none; width:22px; height:22px; background:currentColor;
+        -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
+        mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat; }
+  .bar-in .save:not(:disabled):hover { filter:brightness(1.07); box-shadow:0 18px 30px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.35); }
+  .bar-in .save:not(:disabled):active { transform:scale(.97); }
+  .bar-in .save:disabled { background:color-mix(in srgb, var(--ink) 10%, transparent); color:var(--mute); box-shadow:none; border-color:transparent; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .bar-in .save:not(:disabled) { color:#05201a; } }
+  :root[data-theme="dark"] .bar-in .save:not(:disabled) { color:#05201a; }
+  @media (min-width:480px) {
+    .bar-in { grid-template-columns:1fr auto; align-items:center; column-gap:14px; }
+    .bar-in .meter { grid-column:1 / -1; }
+    .bar-in .save { width:auto; min-width:230px; }
+  }
+
+  /* ===== পতাকা শুধু ব্যাকগ্রাউন্ডে (v8) — মুছে ফেললেই আগের পতাকা-আইকন ফিরবে ===== */
+  .flag, .lg-flag, header .flag, body.appmode .side-brand .flag, body.lgmode .lg-flag { display:none !important; }
+  body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.075;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Crect width='100' height='60' fill='%23006a4e'/%3E%3Ccircle cx='45' cy='30' r='20' fill='%23f42a41'/%3E%3C/svg%3E") center center / cover no-repeat;
+    -webkit-mask:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%); mask:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%); }
+  body.lgmode::before { opacity:.2; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) body::before { opacity:.12; } :root:not([data-theme="light"]) body.lgmode::before { opacity:.22; } }
+  :root[data-theme="dark"] body::before { opacity:.12; }
+  :root[data-theme="dark"] body.lgmode::before { opacity:.22; }
+
+  /* ===== লগইনের ওপরের পতাকা ও লোগো-চিহ্ন সরানো (v8) ===== */
+  .lg-hero .flag, .lg-hero .lg-flag, .lg-hero .lg-logo, body.lgmode .lg-logo, body.lgmode .lg-flag { display:none !important; }
+  body.lgmode .lg-hero { padding:56px 0 24px; }
+
+  /* ===== জমা বার: শুধু একটি ভাসমান বোতাম (v8) ===== */
+  .bar-in { display:block; max-width:420px; padding:0; background:transparent; border:none; box-shadow:none; border-radius:0;
+            -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .bar-in .meter, .bar-in .sum { display:none; }
+  .bar-in .save { width:100%; min-width:0; min-height:58px; box-shadow:0 16px 30px -10px var(--glow), 0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
+  .bar-in .save:disabled { background:var(--surface); color:var(--mute); border:1px solid var(--line); }
+
+  /* ===== জমা বোতাম: শিক্ষার্থী তালিকা লোড হলে তালিকার শেষেই বসবে (v8) ===== */
+  body .bar { position:static; left:auto; right:auto; bottom:auto; z-index:auto; margin:18px 0 6px; display:none; }
+  #list:has(.row) + .bar { display:block; }
+  body.nobar #list + .bar { display:none; }
+  .bar-in { margin:0 auto; }
+
+  /* ===== আরও উন্নত UI (v9) — মুছে ফেললেই v8 ফিরবে ===== */
+  .cls-title { font-weight:700; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+  .name { letter-spacing:.1px; }
+  .row:hover { transform:translateY(-1px); }
+  .row[data-s="0"] .roll { background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--p) 30%,var(--p-l))); color:var(--p-t); }
+  .row[data-s="1"] .roll { background:linear-gradient(145deg,#fff,var(--a-l)); color:var(--a-t); }
+  .row[data-s="2"] .roll { background:linear-gradient(145deg,#fff,var(--l-l)); color:var(--l-t); }
+  .row[data-s="3"] .roll { background:linear-gradient(145deg,#fff,var(--t-l)); color:var(--t-t); }
+  .sb:not(.on):hover { background:color-mix(in srgb,var(--ink) 7%,transparent); }
+  .sb .sc { letter-spacing:.3px; }
+
+  .chip, .pill { border-radius:99px; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .chipbtn, .abtn, .btn2, .act.alt { border-radius:99px; }
+  .act.alt, .abtn.alt, .btn2 { background:color-mix(in srgb,var(--surface) 90%,transparent); border:1px solid var(--line); box-shadow:var(--soft); }
+  .abtn, .btn2 { transition:transform .15s, box-shadow .2s; } .abtn:active, .btn2:active { transform:scale(.96); }
+
+  .empty { border:1.5px dashed color-mix(in srgb,var(--ink) 18%,transparent); border-radius:22px; background:color-mix(in srgb,var(--surface) 70%,transparent);
+           padding:26px 18px; text-align:center; }
+  .empty b { font-size:17px; }
+
+  .tw { border-radius:20px; border:1px solid color-mix(in srgb,var(--line) 70%,transparent); box-shadow:var(--soft); background:var(--surface); overflow:auto; }
+  table.mt { border-collapse:separate; border-spacing:0; }
+  .mt th { position:sticky; top:0; z-index:2; background:color-mix(in srgb,var(--pine-l) 80%,var(--surface)); font-weight:700; }
+  .mt tbody tr:nth-child(even) td { background-image:linear-gradient(color-mix(in srgb,var(--ink) 3%,transparent),color-mix(in srgb,var(--ink) 3%,transparent)); }
+  .mt tbody tr { transition:background .15s; } .mt tbody tr:hover td { background-image:linear-gradient(var(--glow),var(--glow)); }
+
+  .toast { border-radius:99px; padding:12px 20px; font-weight:600; box-shadow:0 18px 40px -12px rgba(0,0,0,.5);
+           -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.18); }
+  .loading { -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .spin { border-width:4px; filter:drop-shadow(0 4px 10px var(--glow)); }
+
+  .logout, .hbtn { border-radius:99px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .userbar { border-radius:99px; }
+  .modal > * { border-radius:26px; box-shadow:0 30px 70px -20px rgba(0,0,0,.55); }
+  .modal { -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  input[type=text], input[type=password], input[type=email], input[type=tel], input[type=number], textarea { border-radius:14px; transition:border-color .2s, box-shadow .2s; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, input[type=number]:focus, textarea:focus { border-color:var(--ac2); box-shadow:0 0 0 4px var(--glow); outline:none; }
+  h3 { letter-spacing:.2px; }
+  .legend { background:color-mix(in srgb,var(--ink) 4%,transparent); border-radius:14px; padding:8px 12px; margin:0 0 12px; }
+  ::selection { background:var(--glow); }
+
+  /* ===== রিপোর্ট ট্যাব: প্রিন্ট বোতাম গ্রিড ===== */
+  .rp-h { font-size:13px; font-weight:700; color:var(--mute); margin:16px 0 8px; letter-spacing:.2px; }
+  .rp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .rp-grid .act { min-height:52px; font-size:15px; padding:10px 12px; }
+  @media (max-width:360px) { .rp-grid { grid-template-columns:1fr; } }
+
+  /* ===== আধুনিক রিপোর্ট ট্যাব (v10) ===== */
+  .rp-tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+  .rp-tile { padding:14px 10px; border-radius:20px; text-align:center; background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--pine-l) 60%,var(--surface)));
+             border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .rp-tile b { display:block; font-size:21px; font-weight:700; line-height:1.2; }
+  .rp-tile span { display:block; font-size:12px; color:var(--mute); margin-top:3px; font-weight:600; }
+  .rp-tile.good b { color:var(--p-t); } .rp-tile.bad { background:linear-gradient(160deg,var(--surface),var(--a-l)); } .rp-tile.bad b { color:var(--a-t); }
+  @media (max-width:520px) { .rp-tiles { grid-template-columns:1fr 1fr; } }
+
+  .tw .mt tbody tr td.pc { font-weight:700; background-image:linear-gradient(90deg,color-mix(in srgb,var(--p) 26%,transparent) var(--w,0%),transparent 0); }
+  .tw .mt tbody tr.low td.pc { background-image:linear-gradient(90deg,color-mix(in srgb,var(--a) 30%,transparent) var(--w,0%),transparent 0); }
+  .mt td.m0 { border-radius:0; }
+
+  #t-mon .card { overflow:hidden; }
+  #t-mon .cls-title { font-size:17px; }
+  .rp-h { display:flex; align-items:center; gap:8px; text-transform:none; }
+  .rp-h::after { content:""; flex:1; height:1px; background:var(--line); }
+  .rp-grid .act.alt { justify-content:flex-start; text-align:left; gap:10px; min-height:58px; border-radius:18px; font-weight:600;
+                      background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--pine-l) 45%,var(--surface))); }
+  .rp-grid .act.alt:hover { border-color:var(--ac2); box-shadow:0 10px 22px -12px var(--glow); }
+  #t-mon .btn2 .act { border-radius:99px; }
+  #t-mon .exp { display:inline-block; margin:6px 0 0; font-weight:600; }
 </style>
 <style id="pageStyle"></style>
 </head>
@@ -817,7 +1062,7 @@
     <div class="tabs-in">
     <button class="tab on" data-t="att" type="button" onclick="showTab('att')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>হাজিরা</span></button>
     <button class="tab" data-t="sum" type="button" onclick="showTab('sum')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>সারাংশ</span></button>
-    <button class="tab" data-t="mon" type="button" onclick="showTab('mon')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>মাসিক</span></button>
+    <button class="tab" data-t="mon" type="button" onclick="showTab('mon')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>রিপোর্ট</span></button>
     <button class="tab" data-t="alr" type="button" onclick="showTab('alr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><span>সতর্কতা</span></button>
     <button class="tab" data-t="reg" id="regTab" type="button" style="display:none" onclick="showTab('reg')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>নিবন্ধন</span><i class="bdg" id="regBdg"></i></button>
     <button class="tab" data-t="pro" id="proTab" type="button" style="display:none" onclick="showTab('pro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>প্রোমোশন</span></button>
@@ -837,7 +1082,7 @@
       <div class="dh-chips">
         <button type="button" class="dchip" onclick="showTab('att')">✅ হাজিরা নিন</button>
         <button type="button" class="dchip" onclick="showTab('sum')">📊 সারাংশ</button>
-        <button type="button" class="dchip" onclick="showTab('mon')">🗓️ মাসিক</button>
+        <button type="button" class="dchip" onclick="showTab('mon')">🗓️ রিপোর্ট</button>
         <button type="button" class="dchip" onclick="showTab('alr')">🔔 সতর্কতা</button>
         <button type="button" class="dchip" id="regChip" style="display:none" onclick="showTab('reg')">🧾 নিবন্ধন</button>
         <button type="button" class="dchip" id="proChip" style="display:none" onclick="showTab('pro')">🎓 প্রোমোশন</button>
@@ -924,7 +1169,7 @@
     <button class="act" id="sPrintBtn" type="button" onclick="printSummary()" disabled>সারাংশ প্রিন্ট করুন</button>
   </section>
 
-  <!-- ৩. মাসিক তারিখভিত্তিক ছক -->
+  <!-- ৩. রিপোর্ট (মাসিক ছক + সব প্রিন্ট) -->
   <section id="t-mon" class="wrap" style="display:none">
     <div class="card">
       <div class="grid">
@@ -947,6 +1192,30 @@
       <button class="act alt" id="expBtn" type="button" onclick="exportReport()" disabled>Sheet-এ রিপোর্ট</button>
     </div>
     <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
+
+    <!-- সব রিপোর্ট প্রিন্ট -->
+    <div class="card" style="margin-top:14px">
+      <div class="cls-title">সব রিপোর্ট প্রিন্ট</div>
+      <label for="rpDate">তারিখ (দৈনিক রিপোর্টের জন্য)</label>
+      <input type="date" id="rpDate">
+      <div class="legend" style="margin-top:10px">শ্রেণি ও মাস ওপরের ঘর থেকে নেওয়া হবে।</div>
+
+      <div class="rp-h">দৈনিক হাজিরা (বাছাই করা শ্রেণি)</div>
+      <div class="rp-grid">
+        <button class="act alt" type="button" onclick="rpDaily('P')">✅ উপস্থিত তালিকা</button>
+        <button class="act alt" type="button" onclick="rpDaily('A')">❌ অনুপস্থিত তালিকা</button>
+        <button class="act alt" type="button" onclick="rpDaily('all')">📋 সব হাজিরা</button>
+        <button class="act alt" type="button" onclick="rpDaily('blank')">📝 খালি তালিকা</button>
+      </div>
+
+      <div class="rp-h">সারাংশ ও সতর্কতা</div>
+      <div class="rp-grid">
+        <button class="act alt" type="button" onclick="rpSummary()">🏫 দৈনিক সারাংশ (সব শ্রেণি)</button>
+        <button class="act alt" type="button" onclick="rpAlerts()">⚠️ সতর্কতা (কম উপস্থিতি)</button>
+        <button class="act alt" type="button" onclick="rpMonth()">🗓️ মাসিক রিপোর্ট</button>
+        <button class="act alt" type="button" onclick="$('rtype').scrollIntoView({behavior:'smooth',block:'center'})">📅 তারিখ রেঞ্জ ↓</button>
+      </div>
+    </div>
 
     <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট -->
     <div class="card" style="margin-top:14px">
@@ -1093,6 +1362,7 @@
     <button class="save" id="saveBtn" type="button" onclick="submitAtt()" disabled>হাজিরা জমা দিন</button>
   </div>
 </div>
+<script>/* জমা বোতামকে শিক্ষার্থী তালিকার ঠিক নিচে সরানো */(function(){var b=document.querySelector(".bar"),l=document.getElementById("list");if(b&&l&&l.parentNode)l.parentNode.insertBefore(b,l.nextSibling);})();</script>
 
 <div class="modal" id="edModal" onclick="if (event.target === this) closeEdit()">
   <div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="edTitle">
@@ -2156,7 +2426,7 @@
         STATUS.forEach(function (s, k) { pills.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' (' + s + ') ' + bn(c.counts[s]))); });
         card.appendChild(pills);
         if (c.absent.length) {
-          card.appendChild(el('div', 'abs', 'অনুপস্থিত: ' + c.absent.map(function (a) { return a.roll + '. ' + a.name; }).join(', ')));
+          card.appendChild(el('div', 'abs', 'অনুপস্থিত: ' + c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')));
         }
       }
       box.appendChild(card);
@@ -2197,7 +2467,18 @@
     var tp = 0, tt = 0;
     rep.rows.forEach(function (r) { tp += r.present; tt += r.total; });
     var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
-    setNote('mnote', 'হাজিরা নেওয়া হয়েছে ' + bn(rep.dates.length) + ' দিন | গড় উপস্থিতি ' + bn(avg) + '%');
+    setNote('mnote', '');
+    var lowN = rep.rows.filter(function (r) { return r.percent !== null && r.percent < cfg.lowPercent; }).length;
+    var tiles = el('div', 'rp-tiles');
+    [['হাজিরার দিন', bn(rep.dates.length), ''], ['শিক্ষার্থী', bn(rep.rows.length), ''],
+     ['গড় উপস্থিতি', bn(avg) + '%', avg < cfg.lowPercent ? ' bad' : ' good'],
+     ['কম উপস্থিতি', bn(lowN) + ' জন', lowN ? ' bad' : ' good']].forEach(function (x) {
+      var d = el('div', 'rp-tile' + x[2]);
+      d.appendChild(el('b', null, x[1]));
+      d.appendChild(el('span', null, x[0]));
+      tiles.appendChild(d);
+    });
+    box.appendChild(tiles);
 
     var wrap = el('div', 'tw');
     var t = el('table', 'mt');
@@ -2226,7 +2507,9 @@
         tr.appendChild(el('td', st ? 'm' + k : '', st ? st : '–'));
       });
       STATUS.forEach(function (s) { tr.appendChild(el('td', null, bn(r.counts[s]))); });
-      tr.appendChild(el('td', 'pc', r.percent === null ? '–' : bn(r.percent) + '%'));
+      var pcTd = el('td', 'pc', r.percent === null ? '–' : bn(r.percent) + '%');
+      if (r.percent !== null) pcTd.style.setProperty('--w', Math.max(0, Math.min(100, r.percent)) + '%');
+      tr.appendChild(pcTd);
       tb.appendChild(tr);
     });
     t.appendChild(tb);
@@ -2347,6 +2630,7 @@
     var t = el('table', 'pt');
     var thead = el('thead');
     var hc = [el('th', null, 'ক্র.'), el('th', null, 'রোল'), el('th', null, 'নাম')];
+    if (onlyCode === 'A') hc.push(el('th', null, 'মোবাইল'));
     if (!onlyCode) hc.push(el('th', null, mode === 'blank' ? 'উপস্থিতি' : 'অবস্থা'));
     hc.push(el('th', null, onlyCode === 'A' ? 'কারণ / মন্তব্য' : 'মন্তব্য'));
     thead.appendChild(prRow(hc));
@@ -2355,6 +2639,7 @@
     var tb = el('tbody');
     list.forEach(function (s, i) {
       var cells = [el('td', null, bn(i + 1)), el('td', null, s.roll), el('td', 'l', s.name)];
+      if (onlyCode === 'A') cells.push(el('td', null, s.phone || '—'));
       if (!onlyCode) {
         var st = state[s.roll];
         cells.push(mode === 'blank'
@@ -2427,7 +2712,7 @@
           cells.push(el('td', null, c.taken ? bn(c.counts[s]) : '–'));
         });
         cells.push(el('td', 'l', c.taken
-          ? c.absent.map(function (a) { return a.roll + '. ' + a.name; }).join(', ')
+          ? c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')
           : 'হাজিরা নেওয়া হয়নি'));
         tb.appendChild(prRow(cells));
       });
@@ -2606,7 +2891,7 @@
   function rngRender(cls, r, dates, rows, blank) {
     var multi = r.from.substr(0, 7) !== r.to.substr(0, 7);
 
-    // প্রতি শিক্ষার্থীর হিসাব (উপস্থিত = P + LT, মোট = হাজিরা নেওয়া দিন — Code.gs-এর মাসিক নিয়মের মতোই)
+    // প্রতি শিক্ষার্থীর হিসাব (উপস্থিত = P, মোট = হাজিরা নেওয়া দিন — Code.gs-এর মাসিক নিয়মের মতোই)
     rows.forEach(function (x) {
       var c = {}, tot = 0;
       STATUS.forEach(function (s) { c[s] = 0; });
@@ -3699,7 +3984,85 @@
   }
 
   // ===== ড্যাশবোর্ড ধাঁচ: শুভেচ্ছা, থিম, রিফ্রেশ =====
-  var PG_TITLES = { att: 'হাজিরা', sum: 'সারাংশ', mon: 'মাসিক রিপোর্ট', alr: 'সতর্কতা', reg: 'নিবন্ধন', pro: 'প্রোমোশন', ff: 'ফরম ফিলাপ' };
+  // ===== রিপোর্ট ট্যাব: সব রিপোর্ট এক জায়গা থেকে প্রিন্ট =====
+  function rpWait(ok, run) {
+    var t0 = Date.now();
+    (function tick() {
+      if (ok()) { run(); return; }
+      if (Date.now() - t0 > 20000) { loading(false); toast('সময় শেষ হয়েছে, আবার চেষ্টা করুন', true); return; }
+      setTimeout(tick, 200);
+    })();
+  }
+  function rpDateVal() { return $('rpDate').value || cfg.today; }
+
+  function rpDaily(mode) {
+    var cls = $('mcls').value;
+    if (!cls) { toast('আগে ওপরে শ্রেণি বাছাই করুন', true); return; }
+    if (dirty && !confirmLeave()) return;
+    var date = rpDateVal();
+    $('cls').value = cls; $('date').value = date;
+    if ($('cls').value !== cls) { toast('শ্রেণিটি হাজিরা তালিকায় পাওয়া যায়নি', true); return; }
+    loadClass();
+    rpWait(function () { return cur.cls === cls && cur.date === date && (students.length || blocked); },
+           function () { printAttendance(mode); });
+  }
+
+  function rpSummary() {
+    var date = rpDateVal();
+    $('sdate').value = date;
+    loadSummary();
+    rpWait(function () { return sumData && sumData.date === date; }, function () { printSummary(); });
+  }
+
+  function rpMonth() {
+    if (!$('mcls').value) { toast('আগে ওপরে শ্রেণি বাছাই করুন', true); return; }
+    loadMonth();
+    rpWait(function () { return monData; }, function () {
+      if (!monData.dates.length) { toast('এই মাসে এই শ্রেণির কোনো হাজিরা নেই', true); return; }
+      printMonth();
+    });
+  }
+
+  function rpAlerts() {
+    var month = $('mmonth').value || cfg.today.substr(0, 7);
+    loading(true, 'সতর্কতা তালিকা তৈরি হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        loading(false);
+        var pa = $('printArea');
+        pa.innerHTML = '';
+        pa.appendChild(prHead('সতর্কতা রিপোর্ট', ['মাস: ' + monthLabel(month), periodLine(cur.period), 'প্রিন্টের তারিখ: ' + fmtFull(cfg.today)]));
+        function table(title, heads, rows) {
+          pa.appendChild(el('h3', null, title));
+          var t = el('table', 'pt'), th = el('thead');
+          th.appendChild(prRow(heads.map(function (h) { return el('th', null, h); })));
+          t.appendChild(th);
+          var tb = el('tbody');
+          if (!rows.length) { var c = el('td', null, 'কেউ নেই'); c.colSpan = heads.length; tb.appendChild(prRow([c])); }
+          rows.forEach(function (r, i) { tb.appendChild(prRow([el('td', null, bn(i + 1))].concat(r.map(function (v, k) { return el('td', k === 2 ? 'l' : null, v); })))); });
+          t.appendChild(tb);
+          pa.appendChild(t);
+        }
+        table('টানা ' + bn(d.minStreak) + ' দিন বা বেশি অনুপস্থিত (' + bn(d.streak.length) + ' জন)',
+          ['ক্রম', 'শ্রেণি', 'রোল', 'নাম', 'টানা (দিন)', 'শুরু', 'সর্বশেষ'],
+          d.streak.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.n), fmtFull(o.since), fmtFull(o.last)]; }));
+        table('উপস্থিতি ' + bn(d.threshold) + '%-এর কম (' + bn(d.low.length) + ' জন)',
+          ['ক্রম', 'শ্রেণি', 'রোল', 'নাম', 'উপস্থিত', 'মোট দিন', '%'],
+          d.low.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.present), bn(o.total), bn(o.percent)]; }));
+        pa.appendChild(prSign());
+        doPrint(false);
+      })
+      .withFailureHandler(fail)
+      .getAlerts(TOKEN, month, cur.period);
+  }
+
+  // রিপোর্ট ট্যাব খুললে তারিখের ঘরে আজকের তারিখ বসবে
+  (function () {
+    var orig = showTab;
+    showTab = function (t) { orig(t); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
+  })();
+
+  var PG_TITLES = { att: 'হাজিরা', sum: 'সারাংশ', mon: 'রিপোর্ট', alr: 'সতর্কতা', reg: 'নিবন্ধন', pro: 'প্রোমোশন', ff: 'ফরম ফিলাপ' };
 
   // ===== বাংলা ও হিজরি তারিখ =====
   var HIJRI_ADJ = 0;   // চাঁদ দেখা অনুযায়ী মিলাতে -1 বা +1 দিন
