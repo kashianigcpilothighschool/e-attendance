@@ -8,6 +8,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#004d38">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/icon-192.png" as="image">
 <link rel="icon" href="/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -655,7 +656,7 @@
   #netBar.off { background:var(--l); }
   @media print { #netBar { display:none !important; } }
 
-  /* ===== ফরম ফিলাপ =====
+  /* ===== ফরম ফিলাপ ===== */
   #t-ff { padding-bottom:150px; }
   .row.ff { padding:12px 14px; }
   .row.ff[data-f="paid"] { box-shadow:inset 4px 0 0 var(--p); }
@@ -1086,6 +1087,260 @@
   .ds-card { position:relative; overflow:hidden; }
   .ds-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,var(--ac1),var(--ac2)); }
   .ds-card.wait::before { background:var(--l); }
+
+  /* ===== ড্যাশবোর্ড v15: skeleton, ত্রুটি, রিং কার্ড, প্রগ্রেস ===== */
+  .ds-skel { display:grid; gap:12px; margin-top:14px; }
+  .ds-skel i { display:block; border-radius:24px; background-size:220% 100%; animation:dsShim 1.3s linear infinite;
+               background-image:linear-gradient(100deg,color-mix(in srgb,var(--ink) 6%,transparent) 30%,color-mix(in srgb,var(--ink) 13%,transparent) 50%,color-mix(in srgb,var(--ink) 6%,transparent) 70%); }
+  .ds-skel .k1 { height:150px; } .ds-skel .k2 { height:78px; } .ds-skel .k3 { height:96px; }
+  @keyframes dsShim { from { background-position:220% 0; } to { background-position:-220% 0; } }
+  .ds-err { margin-top:14px; padding:18px 16px; border-radius:22px; text-align:center; font-weight:600; background:var(--a-l); color:var(--a-t); }
+  .ds-err button { margin-top:12px; padding:10px 22px; border:0; border-radius:99px; font:inherit; font-weight:700; cursor:pointer; color:#fff; background:var(--a); }
+  .ds-ref.spin { animation:dsSpin .8s linear infinite; }
+  @keyframes dsSpin { to { transform:rotate(360deg); } }
+  .ds-bar i { transition:width .7s cubic-bezier(.2,.8,.2,1); }
+  .ds-go { margin-top:12px; width:100%; padding:10px 14px; border:0; border-radius:99px; font:inherit; font-weight:700; font-size:14px; line-height:1.35;
+           cursor:pointer; color:#003d2e; background:#7ff0c7; box-shadow:0 8px 18px -8px rgba(0,0,0,.45); transition:transform .15s; }
+  .ds-go:active { transform:scale(.97); }
+  @media (max-width:360px) { .ds-ov { flex-direction:column; align-items:stretch; } .ds-ring { align-self:center; } }
+
+  /* ===== হাজিরা সিট আধুনিক (v14) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  #t-att > .card:first-child { padding:14px; border-radius:24px; }
+  #t-att .datenav .chipbtn { min-height:38px; padding:7px 14px; font-size:13px; }
+
+  #t-att .hero { position:sticky; top:8px; z-index:5; padding:10px 14px; gap:12px; border-radius:20px;
+    background:color-mix(in srgb, var(--surface) 90%, transparent);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+  #t-att .ring { width:58px; height:58px; filter:none; transition:none; }
+  #t-att .ring::after { inset:6px; }
+  #t-att .ring b { font-size:14px; }
+  #t-att .ring b small { display:none; }
+  #t-att .hcount { grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:6px; }
+  #t-att .hc { flex-direction:column; align-items:flex-start; gap:0; padding:5px 9px; font-size:11px; line-height:1.25; border-radius:12px; position:relative; }
+  #t-att .hc i { position:absolute; top:9px; right:9px; width:8px; height:8px; }
+  #t-att .hc b { font-size:19px; min-width:0; line-height:1.15; }
+
+  #t-att .abs-line { border-radius:99px; padding:8px 16px; font-size:13px; margin:0 0 10px; }
+  #fbar { position:sticky; top:84px; z-index:4; padding:6px 0; }
+  #fbar .chipbtn { min-height:36px; padding:6px 13px; font-size:13px; }
+
+  #list .row { padding:10px 12px; margin-bottom:6px; border-radius:18px; }
+  #list .who { margin-bottom:8px; gap:10px; }
+  #list .roll { width:38px; min-width:38px; height:38px; font-size:15px; border-radius:12px; }
+  #list .name { font-size:16px; font-weight:600; }
+  #list .btns { gap:6px; padding:4px; border-radius:16px; }
+  #list .sb { min-height:48px; border-radius:13px; flex-direction:row; justify-content:center; gap:6px;
+    background:color-mix(in srgb, var(--surface) 90%, transparent); border:1.5px solid var(--line); }
+  #list .sb .sc { font-size:16px; }
+  #list .sb .sl { font-size:12.5px; }
+  #list .sb.on { border-color:transparent; transform:scale(1.02); }
+  #list .sb.on::after { content:"✓"; font-size:14px; font-weight:700; }
+  @media (max-width:380px) { #list .sb .sl { display:none; } }
+
+  @media (min-width:900px) {
+    #list { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    #list .row { margin:0; }
+    #list .empty { grid-column:1 / -1; }
+    #list .row:has(.btns) { display:block; }
+    #list .row:has(.btns) .who { margin-bottom:8px; }
+    #list .row:has(.btns) .btns { width:auto; }
+  }
+
+  .bar { position:sticky !important; bottom:calc(92px + env(safe-area-inset-bottom)) !important; z-index:7 !important; margin:14px 0 0 !important; }
+  @media (min-width:900px) { .bar { bottom:16px !important; } }
+
+  /* ===== সুপার ফাস্ট টিউনিং: বড় তালিকায় শুধু দৃশ্যমান সারি আঁকা হবে ===== */
+  #list .row, #ffBox .row, #regBox .card, #proBox .row { content-visibility:auto; contain-intrinsic-size:auto 118px; animation:none !important; }
+  #list .row:hover { transform:none; }
+  .sb, .row, .tab, .chipbtn, .save, .act { transition-duration:.1s !important; }
+  html { scroll-behavior:auto; }
+  body::before { position:absolute; height:100vh; }
+  body { background-attachment:scroll; }
+  .tabs-in, .bar-in, .modal, .loading, .toast { -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .tabs-in { background:var(--surface); }
+  .loading { background:var(--veil); }
+
+  @media print {
+    .pt tbody tr:nth-child(even) td { background:#f6f6f6 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .pt th { background:#dfe9e5 !important; }
+    .pt td.ab { color:#b00020; }
+    .pr-school { letter-spacing:.3px; }
+  }
+
+  /* ===== স্মার্ট তারিখ ও শ্রেণি বাছাই (v15) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  .dlbl { margin-top:10px; font-size:13.5px; font-weight:600; color:var(--mute); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .dlbl .tg { font-size:12px; padding:2px 10px; border-radius:99px; background:var(--l-l); color:var(--l-t); }
+  .dlbl .tg.ok { background:var(--p-l); color:var(--p-t); }
+  .clschips { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:none; scroll-snap-type:x proximity; }
+  .clschips::-webkit-scrollbar { display:none; }
+  .cc { flex:none; scroll-snap-align:start; display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 14px; border-radius:99px; cursor:pointer;
+        font:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface); border:1.5px solid var(--line); }
+  .cc .st { width:9px; height:9px; border-radius:50%; background:var(--line); flex:none; }
+  .cc .st.ok { background:var(--p); } .cc .st.wait { background:var(--l); }
+  .cc.on { color:#fff; border-color:transparent; background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 8px 16px -8px var(--glow); }
+  :root[data-theme="dark"] .cc.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .cc.on { color:#05201a; } }
+  .cc:active { transform:scale(.96); }
+
+  /* ===== বাটন ও কার্ড সিস্টেম (v16) — মুছে ফেললেই v15 ফিরবে ===== */
+  :root { --rad-s:12px; --rad-m:18px; --rad-l:24px;
+          --el1:0 1px 2px rgba(8,56,47,.07), 0 4px 12px -6px rgba(8,56,47,.18);
+          --el2:0 2px 4px rgba(8,56,47,.08), 0 14px 28px -14px rgba(8,56,47,.32);
+          --edge:inset 0 1px 0 rgba(255,255,255,.28); }
+  :root[data-theme="dark"] { --el1:0 1px 2px rgba(0,0,0,.45); --el2:0 12px 26px -12px rgba(0,0,0,.65); --edge:inset 0 1px 0 rgba(255,255,255,.08); }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --el1:0 1px 2px rgba(0,0,0,.45); --el2:0 12px 26px -12px rgba(0,0,0,.65); --edge:inset 0 1px 0 rgba(255,255,255,.08); } }
+
+  /* --- কার্ড: একই ছাঁচ, হালকা উচ্চতা, ওপরে ফিনফিনে রঙের রেখা --- */
+  .card, .hero, .row, .ds-card, .ds-k, .ds-tile, .rp-tile, .ds-ab, .empty {
+    border-radius:var(--rad-m); border:1px solid color-mix(in srgb, var(--line) 75%, transparent);
+    background:var(--surface); box-shadow:var(--el1); }
+  .card { position:relative; overflow:hidden; border-radius:var(--rad-l); }
+  .card::before { content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg, var(--ac1), var(--ac2)); opacity:.85; }
+  .lg-card::before, #edModal .card::before { display:none; }
+  .hero { background:linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--pine-l) 50%, var(--surface))); }
+  .ds-card, .ds-q { transition:transform .15s, box-shadow .2s, border-color .2s; }
+  .ds-card:hover, .ds-q:hover { transform:translateY(-2px); box-shadow:var(--el2); border-color:color-mix(in srgb, var(--ac2) 45%, var(--line)); }
+  .cls-title { font-size:16.5px; }
+  .cls-title::before { background:linear-gradient(180deg, var(--ac1), var(--ac2)); width:5px; height:18px; }
+  .card > .cls-title { margin-bottom:12px; }
+
+  /* --- মূল বাটন (Primary): গ্রেডিয়েন্ট, ভেতরে আলোর রেখা, চাপলে বসে যায় --- */
+  .act:not(.alt):not(.rej), .save:not(:disabled), .abtn:not(.alt), .ds-call {
+    background:linear-gradient(135deg, var(--ac1), var(--ac2)); color:#fff; border:1px solid rgba(255,255,255,.18);
+    box-shadow:var(--el1), var(--edge), 0 10px 20px -10px var(--glow); }
+  :root[data-theme="dark"] .act:not(.alt):not(.rej), :root[data-theme="dark"] .save:not(:disabled), :root[data-theme="dark"] .abtn:not(.alt) { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .act:not(.alt):not(.rej), :root:not([data-theme="light"]) .save:not(:disabled), :root:not([data-theme="light"]) .abtn:not(.alt) { color:#05201a; } }
+
+  /* --- দ্বিতীয় বাটন (Secondary) --- */
+  .act.alt, .abtn.alt, .btn2 .act.alt, .chipbtn, .ds-ref {
+    background:var(--surface); color:var(--pine); border:1.5px solid color-mix(in srgb, var(--ac2) 35%, var(--line)); box-shadow:var(--el1); }
+  .chipbtn.p { background:var(--p-l); color:var(--p-t); border-color:color-mix(in srgb, var(--p) 30%, transparent); }
+  .chipbtn.a { background:var(--a-l); color:var(--a-t); border-color:color-mix(in srgb, var(--a) 30%, transparent); }
+  .chipbtn.on, .cc.on { background:linear-gradient(135deg, var(--ac1), var(--ac2)); color:#fff; border-color:transparent; box-shadow:var(--el1), var(--edge); }
+  :root[data-theme="dark"] .chipbtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .chipbtn.on { color:#05201a; } }
+
+  /* --- সতর্ক বাটন (Danger) --- */
+  .act.rej { background:linear-gradient(135deg, #d41f35, #f05a6a); color:#fff; border:1px solid rgba(255,255,255,.2);
+    box-shadow:var(--el1), var(--edge), 0 10px 20px -10px rgba(212,31,53,.5); }
+  .logout { background:linear-gradient(135deg, #d41f35, #f05a6a); }
+
+  /* --- সব বাটনের একই আচরণ --- */
+  .act, .chipbtn, .abtn, .save, .hbtn, .logout, .dchip, .pwbtn, .cc, .seg button, .ds-ref {
+    border-radius:99px; font-weight:700; letter-spacing:.15px; cursor:pointer;
+    transition:transform .12s, box-shadow .2s, filter .2s, background .2s; }
+  .act, .save { min-height:50px; }
+  .act:hover:not(:disabled), .save:hover:not(:disabled), .chipbtn:hover, .abtn:hover, .dchip:hover { filter:brightness(1.06); box-shadow:var(--el2); }
+  .act:active:not(:disabled), .save:active:not(:disabled), .chipbtn:active, .abtn:active, .cc:active, .seg button:active { transform:scale(.97); filter:brightness(.97); }
+  .act:disabled, .save:disabled, .chipbtn:disabled { background:color-mix(in srgb, var(--ink) 8%, var(--surface)); color:var(--mute); border-color:var(--line); box-shadow:none; filter:none; }
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid var(--mint); outline-offset:2px; }
+
+  /* --- ড্যাশবোর্ড দ্রুত বাটন ও হিরো বাটন --- */
+  .ds-q { border-radius:var(--rad-l); box-shadow:var(--el1); }
+  .ds-q .qi { border-radius:16px; box-shadow:var(--edge), 0 10px 18px -8px var(--glow); }
+  .dchip { border-radius:99px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.32); box-shadow:inset 0 1px 0 rgba(255,255,255,.25); }
+  .pendb { border-radius:var(--rad-m); box-shadow:var(--el1); }
+
+  /* --- হাজিরা P/A/L বোতাম: সবুজ/লাল/হলুদ রঙে স্পষ্ট ও উঁচু --- */
+  #list .sb { border-radius:14px; font-weight:700; box-shadow:var(--el1); }
+  #list .sb.on { box-shadow:var(--el2), var(--edge); }
+
+  /* --- সেগমেন্ট (প্রোমোশন/ফিলাপ) --- */
+  .seg { border-radius:99px; padding:4px; background:color-mix(in srgb, var(--ink) 6%, transparent); }
+  .seg button { border-radius:99px; min-height:42px; }
+  .seg button.on { box-shadow:var(--el1), var(--edge); }
+
+  /* --- ফর্মের ঘর কার্ডের সাথে মানানসই --- */
+  select, input[type=date], input[type=month], input[type=search], input[type=text], input[type=email], input[type=password] { box-shadow:inset 0 1px 2px rgba(0,0,0,.05); }
+
+  /* ===== তারিখ/শ্রেণি অংশ ছোট ও গোছানো (v17) — মুছে ফেললেই v16 ফিরবে ===== */
+  #t-att > .card:first-child { padding:12px 12px 10px; }
+  #t-att > .card:first-child .grid { gap:8px; }
+  #t-att > .card:first-child label { font-size:12px; margin-bottom:3px; }
+  #t-att > .card:first-child input[type=date], #t-att > .card:first-child select { min-height:42px; padding:6px 10px; font-size:15px; }
+  #t-att > .card:first-child select { padding-right:32px; }
+  #t-att .datenav { gap:6px; margin-top:8px; }
+  #t-att .datenav .chipbtn { min-height:32px; padding:4px 11px; font-size:12.5px; font-weight:600; border-width:1px; box-shadow:none; }
+  #t-att .dlbl { margin-top:8px; font-size:12.5px; }
+  #t-att .clschips { margin-top:8px; gap:6px; }
+  #t-att .cc { min-height:34px; padding:4px 12px; font-size:13px; }
+  #t-att #fbar .chipbtn, #t-att #tools .chipbtn { min-height:34px; padding:4px 12px; font-size:12.5px; }
+
+  /* ===== তারিখ রেঞ্জ প্রিন্ট: সব এক লাইনে (v18) — মুছে ফেললেই v17 ফিরবে ===== */
+  #t-mon .card:has(#rtype) { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 10px; }
+  #t-mon .card:has(#rtype) > .grid { display:contents; }
+  #t-mon .card:has(#rtype) > .cls-title { flex:1 0 100%; margin-bottom:2px; }
+  #t-mon .card:has(#rtype) .grid > div { flex:1 1 130px; min-width:0; margin:0; }
+  #t-mon .card:has(#rtype) .grid > div[style*="display: none"] { display:none; }
+  #t-mon .card:has(#rtype) label { font-size:12px; margin-bottom:3px; }
+  #t-mon .card:has(#rtype) select, #t-mon .card:has(#rtype) input[type=date] { min-height:42px; padding:6px 10px; font-size:14px; }
+  #t-mon .card:has(#rtype) > .note { flex:1 0 100%; margin-top:0; }
+  #t-mon .card:has(#rtype) > button.act { flex:0 0 auto; width:auto; min-width:120px; min-height:42px; margin:0 !important; padding:8px 18px; font-size:14px; }
+  @media (max-width:520px) { #t-mon .card:has(#rtype) .grid > div { flex:1 1 44%; } #t-mon .card:has(#rtype) > button.act { flex:1 0 100%; } }
+
+  /* ===== রিপোর্ট বাটন: ৪টি করে এক লাইনে (v19) — মুছে ফেললেই v18 ফিরবে ===== */
+  #t-mon .rp-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
+  #t-mon .rp-grid .act.alt { min-height:52px; padding:6px 4px; font-size:12.5px; line-height:1.3; font-weight:600;
+    display:flex; align-items:center; justify-content:center; text-align:center; border-radius:16px; word-break:break-word; }
+  @media (max-width:360px) { #t-mon .rp-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); } #t-mon .rp-grid .act.alt { font-size:11px; padding:4px 2px; } }
+
+  /* ===== সব ট্যাবে মাপ গোছানো (v20) — মুছে ফেললেই v19 ফিরবে ===== */
+  .card { padding:14px; margin-bottom:10px; }
+  label { font-size:12px; margin-bottom:3px; }
+  select, input[type=date], input[type=month], input[type=search], input[type=text], input[type=email], input[type=password] { min-height:42px; padding:6px 12px; font-size:15px; }
+  select { padding-right:32px; }
+  .act, .save { min-height:44px; padding:8px 16px; font-size:15px; }
+  .act.alt { font-size:14px; }
+  .bar-in .save { min-height:48px; font-size:16px; }
+  .chipbtn { min-height:34px; padding:4px 13px; font-size:13px; }
+  .tools { gap:6px; margin-bottom:10px; }
+  .btn2 { gap:8px; }
+  .btn2 .act { min-height:44px; }
+  .note { padding:7px 12px; font-size:13px; margin-top:8px; }
+  .empty { padding:22px 14px; }
+
+  /* ড্যাশবোর্ড */
+  .dhero { padding:16px 16px 14px; }
+  .dh-t { font-size:20px; }
+  .ds-quick { grid-template-columns:repeat(auto-fit, minmax(72px, 1fr)); gap:8px; margin-bottom:12px; }
+  .ds-q { padding:10px 4px; gap:4px; border-radius:18px; }
+  .ds-q .qi { width:40px; height:40px; font-size:21px; border-radius:13px; }
+  .ds-q .qt { font-size:12px; }
+  .ds-sec { margin:14px 2px 8px; font-size:14px; }
+  .ds-card { padding:11px 12px; }
+  .ds-cn { font-size:15px; }
+  .ds-k { padding:9px 10px; } .ds-k .ki { width:34px; height:34px; font-size:17px; } .ds-k b { font-size:17px; }
+  .ds-ov { padding:14px; } .ds-ring { width:100px; height:100px; }
+
+  /* রিপোর্ট / সতর্কতা / নিবন্ধন */
+  .rp-tiles { gap:8px; } .rp-tile { padding:10px 6px; border-radius:16px; } .rp-tile b { font-size:18px; }
+  .rp-h { margin:12px 0 6px; }
+  #t-alr .row, #t-reg .card { padding:12px; }
+  .reg-ph { width:60px; height:74px; }
+  .abtn { min-height:34px; padding:5px 13px; font-size:13px; line-height:22px; }
+  .act.rej, #t-reg .btn2 .act { min-height:42px; }
+
+  /* প্রোমোশন / ফিলাপ */
+  .pro-step { margin-bottom:8px; } .pro-step i { width:28px; height:28px; }
+  .pro-set { gap:8px; }
+  .seg button { min-height:36px; font-size:13px; }
+  .row.pro, .row.ff { padding:10px 12px; }
+  .pro-new input { min-height:40px; font-size:16px; }
+  .pf-box { padding:10px 12px; }
+  .ff-bar .act, .pro-bar .act { min-height:44px; padding:8px 16px; }
+
+  /* হেডার */
+  .hbtn, .logout { min-height:32px; padding:4px 12px; font-size:13px; }
+
+  /* ===== তারিখ, শ্রেণি ও বাটন এক লাইনে (v21) — মুছে ফেললেই v20 ফিরবে ===== */
+  #t-att .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  #t-att .dline::-webkit-scrollbar { display:none; }
+  #t-att .dline > .grid, #t-att .dline > .datenav { display:contents; }
+  #t-att .dline .grid > div { flex:0 0 auto; margin:0; }
+  #t-att .dline input[type=date] { width:140px; }
+  #t-att .dline select#cls { width:150px; }
+  #t-att .dline .chipbtn { flex:0 0 auto; white-space:nowrap; margin:0; }
 </style>
 <style id="pageStyle"></style>
 </head>
@@ -1189,10 +1444,12 @@
         <a class="dchip" href="https://script.google.com/macros/s/AKfycbyvlOMpiqRFE5xJTxG56sKiYamGwNN5XlDmYfWXEwy4KrX049oM4bgfv3ljUTaX6sX7/exec" target="_blank" rel="noopener">✏️ সম্পাদনা</a>
       </div>
     </div>
+    <div class="ds-skel" id="dsSkel" style="display:none" aria-busy="true" aria-label="লোড হচ্ছে"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>
+    <div class="ds-err" id="dsErr" style="display:none" role="alert"><div>ড্যাশবোর্ডের তথ্য আনা যায়নি। নেট সংযোগ দেখে আবার চেষ্টা করুন।</div><button type="button" onclick="loadDash()">আবার চেষ্টা করুন</button></div>
     <div id="dashSum" style="display:none">
       <div class="ds-quick" id="dsQuick"></div>
-      <div class="ds-head"><b>📊 আজকের সারাংশ</b><span id="dsInfo"></span>
-        <button type="button" class="ds-ref" onclick="loadDash()" aria-label="সারাংশ নতুন করুন">↻</button></div>
+      <div class="ds-head"><b>📊 আজকের সারাংশ</b><span id="dsInfo" aria-live="polite"></span>
+        <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="সারাংশ নতুন করুন">↻</button></div>
       <div class="ds-hol" id="dsHol" style="display:none"></div>
       <div id="dsTot" style="display:none"></div>
       <div class="ds-kpi" id="dsKpi"></div>
@@ -1216,6 +1473,7 @@
   <div id="t-home"></div>
   <section id="t-att" class="wrap" style="display:none">
     <div class="card">
+      <div class="dline">
       <div class="grid">
         <div>
           <label for="date">তারিখ</label>
@@ -1233,7 +1491,11 @@
         <button type="button" class="chipbtn" onclick="stepDate(0)">আজ</button>
         <button type="button" class="chipbtn" onclick="stepDate(1)">পরের দিন ›</button>
         <button type="button" class="chipbtn" onclick="stepClass(1)">পরের শ্রেণি ›</button>
+        <button type="button" class="chipbtn p" id="nextPend" onclick="nextPending()">বাকি শ্রেণি ⏭</button>
       </div>
+      </div>
+      <div class="dlbl" id="dateLbl"></div>
+      <div class="clschips" id="clsChips" role="group" aria-label="শ্রেণি বাছাই"></div>
       <div class="note" id="note"></div>
     </div>
 
@@ -1996,6 +2258,7 @@
   }
 
   function showLogin() {
+    dashData = null; dashAlr = null; dashAgg = null; dashBusy = false; dashFail = false; dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
     $('app').style.display = 'none';
     $('denied').style.display = 'none';
     $('login').style.display = 'block';
@@ -2162,12 +2425,24 @@
   // ===== আগাম লোড: আজকের হাজিরার তথ্য আগেই ফোনে রাখা, যাতে খুললেই তাৎক্ষণিক =====
   function warmCache() {
     if (!cfg || !cfg.classes || navigator.onLine === false) return;
-    var list = cfg.classes.slice(0, 10), date = cfg.today, period = cfg.defaultPeriod;
+    var T = TOKEN, date = cfg.today, period = cfg.defaultPeriod, month = date.substr(0, 7), jobs = [];
+    function J(f) { jobs.push(f); }
+    // অফলাইনে সব ট্যাব চলার জন্য আগেই ফোনে রাখা (ধাপে ধাপে, নেট ধীর হলেও ঝামেলা নেই)
+    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getDaySummary(T, date, period); });
+    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getAlerts(T, month, period); });
+    cfg.classes.slice(0, 20).forEach(function (c) {
+      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getClassData(T, date, c, period); });
+      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getClassStudents(T, c); });
+      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getMonthReport(T, month, c, period); });
+      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getPromotionPreview(T, c); });
+    });
+    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getFormInit(T); });
+    if (cfg.canConfirm) J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getPending(T, 'pending'); });
     (function step(i) {
-      if (i >= list.length || navigator.onLine === false) return;
+      if (i >= jobs.length || navigator.onLine === false || T !== TOKEN) return;
       var called = false;
-      function nxt() { if (called) return; called = true; setTimeout(function () { step(i + 1); }, 300); }
-      google.script.run.withSuccessHandler(nxt).withFailureHandler(nxt).getClassData(TOKEN, date, list[i], period);
+      function nxt() { if (called) return; called = true; setTimeout(function () { step(i + 1); }, 250); }
+      try { jobs[i](nxt); } catch (e) { nxt(); }
     })(0);
   }
 
@@ -4050,6 +4325,77 @@
     doPrint(false);
   }
 
+
+  // ===== স্মার্ট তারিখ ও শ্রেণি বাছাই =====
+  function lastClsGet() { try { return localStorage.getItem('att_last_cls') || ''; } catch (e) { return ''; } }
+  function lastClsSet(v) { try { if (v) localStorage.setItem('att_last_cls', v); } catch (e) {} }
+  function takenMap() {
+    var m = null;
+    if (dashData && cfg && $('date').value === cfg.today) { m = {}; dashData.classes.forEach(function (c) { m[c.cls] = !!c.taken; }); }
+    return m;
+  }
+  function syncChips() {
+    var box = $('clsChips'); if (!box || !cfg) return;
+    var tm = takenMap(), now = $('cls').value, opts = [].slice.call($('cls').options).filter(function (o) { return o.value; });
+    box.innerHTML = '';
+    opts.forEach(function (o) {
+      var b = el('button', 'cc' + (o.value === now ? ' on' : '')); b.type = 'button';
+      if (tm && tm[o.value] !== undefined) b.appendChild(el('i', 'st ' + (tm[o.value] ? 'ok' : 'wait')));
+      b.appendChild(document.createTextNode('শ্রেণি ' + clsPlain(o.value)));
+      b.onclick = function () {
+        if (o.value === $('cls').value) return;
+        if (!confirmLeave()) return;
+        $('cls').value = o.value; loadClass();
+      };
+      box.appendChild(b);
+      if (o.value === now && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
+    });
+    box.style.display = opts.length > 1 ? 'flex' : 'none';
+    var d = $('date').value, lb = $('dateLbl'); lb.innerHTML = '';
+    if (d) {
+      lb.appendChild(document.createTextNode(fmtLong(d)));
+      var wd = new Date(d + 'T00:00:00Z').getUTCDay();
+      if (d === cfg.today) lb.appendChild(el('span', 'tg ok', 'আজ'));
+      else if (d > cfg.today) lb.appendChild(el('span', 'tg', 'ভবিষ্যতের তারিখ'));
+      if (wd === 5 || wd === 6) lb.appendChild(el('span', 'tg', 'সাপ্তাহিক ছুটি?'));
+    }
+    var np = $('nextPend'); if (np) np.style.display = tm ? '' : 'none';
+  }
+  // আজকের তারিখে হাজিরা বাকি এমন পরের শ্রেণিতে যান
+  function nextPending() {
+    var tm = takenMap();
+    if (!tm) { toast('বাকি শ্রেণি শুধু আজকের তারিখে দেখা যায়', true); return; }
+    var opts = [].slice.call($('cls').options).filter(function (o) { return o.value && tm[o.value] === false; });
+    if (!opts.length) { toast('সব শ্রেণির হাজিরা নেওয়া হয়েছে ✅', false); return; }
+    var now = $('cls').value, nx = null;
+    for (var i = 0; i < opts.length; i++) { if (opts[i].value !== now) { nx = opts[i]; if (opts[i].value > now) break; } }
+    if (!nx) { toast('এটিই একমাত্র বাকি শ্রেণি', false); return; }
+    if (!confirmLeave()) return;
+    $('cls').value = nx.value; loadClass();
+  }
+  (function () {
+    var _lc = loadClass;
+    loadClass = function () { _lc(); lastClsSet($('cls').value); syncChips(); };
+    var _rd = renderDash;
+    renderDash = function (d) {
+      _rd(d); syncChips();
+      // প্রথমবার খুললে: শেষবারের শ্রেণি, না থাকলে প্রথম বাকি শ্রেণি আগে থেকেই বাছাই
+      if (!$('cls').value && !window._autoCls) {
+        window._autoCls = 1;
+        var opts = [].slice.call($('cls').options).filter(function (o) { return o.value; }), pick = '';
+        var l = lastClsGet(); opts.forEach(function (o) { if (o.value === l) pick = l; });
+        if (!pick) { var w = d.classes.filter(function (c) { return !c.taken; })[0]; if (w) pick = w.cls; }
+        if (pick) { $('cls').value = pick; if (curTab === 'att') loadClass(); else syncChips(); }
+      }
+    };
+    var _oc = onAttChange;
+    onAttChange = function () { _oc(); syncChips(); };
+    var _st = showTab;
+    showTab = function (t) { _st(t); if (t === 'att') { if ($('cls').value && cur.cls !== $('cls').value) loadClass(); else syncChips(); } };
+    var _io = initOk;
+    initOk = function (d) { _io(d); if (cfg) syncChips(); };
+  })();
+
   // ===== ৪. সতর্কতা =====
   function loadAlerts() {
     var month = $('amonth').value;
@@ -4213,16 +4559,104 @@
   }
 
   // ===== ড্যাশবোর্ডে আজকের সারাংশ (কার্ড) =====
-  var dashData = null, dashReq = 0;
+  var dashData = null, dashReq = 0, dashBusy = false, dashFail = false, dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
+  // ===== ড্যাশবোর্ড v15: skeleton, স্বয়ংক্রিয় রিফ্রেশ, animation (ক্যাশ shim-এ আগে থেকেই আছে) =====
   function loadDash() {
     if (!cfg || !TOKEN) return;
     var id = ++dashReq;
+    dashBusy = true; dashFail = false;
+    dsSync();
+    loadDashAlr();
     google.script.run
-      .withSuccessHandler(function (d) { if (id !== dashReq) return; dashData = d; renderDash(d); })
-      .withFailureHandler(function () { /* নীরবে বাদ: মূল কাজে বাধা নয় */ })
+      .withSuccessHandler(function (d) {
+        if (id !== dashReq) return;
+        dashBusy = false; dashFail = false; dashData = d; renderDash(d);
+      })
+      .withFailureHandler(function () {
+        if (id !== dashReq) return;
+        dashBusy = false; dashFail = true;
+        if (dashData) $('dsInfo').textContent = '⚠️ সংযোগ সমস্যা — আগের তথ্য দেখাচ্ছে';
+        dsSync();
+      })
       .getDaySummary(TOKEN, cfg.today, cur.period);
   }
-  function dsSync() { document.body.classList.toggle('on-home', curTab === 'home'); var b = $('dashSum'); if (b) b.style.display = (curTab === 'home' && dashData) ? 'block' : 'none'; }
+  function dsSync() {
+    var home = curTab === 'home';
+    document.body.classList.toggle('on-home', home);
+    var b = $('dashSum'); if (b) b.style.display = (home && dashData) ? 'block' : 'none';
+    var sk = $('dsSkel'); if (sk) sk.style.display = (home && !dashData && dashBusy && !dashFail) ? 'grid' : 'none';
+    var er = $('dsErr'); if (er) er.style.display = (home && !dashData && dashFail) ? 'block' : 'none';
+    var rf = $('dsRef'); if (rf) rf.classList.toggle('spin', dashBusy);
+  }
+
+  // অ্যাপে ফিরলে ও প্রতি ৫ মিনিটে নিজে থেকে নতুন তথ্য
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && curTab === 'home') loadDash(); });
+  setInterval(function () { if (!document.hidden && curTab === 'home') loadDash(); }, 5 * 60 * 1000);
+
+  // সংখ্যা/রিং ধীরে ভরার animation (reduced-motion চালু থাকলে সরাসরি বসে)
+  var DS_REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function dsTween(from, to, ms, cb) {
+    if (DS_REDUCE || from === to || !window.requestAnimationFrame) { cb(to); return; }
+    var t0 = null;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+      cb(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  // হাজিরা বাকি শ্রেণি আগে, তারপর বাকিগুলো (আগের ক্রম বজায় রেখে)
+  function dsSorted(list) {
+    return list.map(function (c, i) { return { c: c, i: i }; })
+      .sort(function (a, b) { return ((a.c.taken ? 1 : 0) - (b.c.taken ? 1 : 0)) || (a.i - b.i); })
+      .map(function (x) { return x.c; });
+  }
+  // পুরো স্কুলের সামগ্রিক রিং কার্ড
+  function dsOverview(d, cnt, tot, done, pct, nCls, nDone) {
+    var box = $('dsTot'); box.innerHTML = '';
+    if (!nCls) { box.style.display = 'none'; return; }
+    box.style.display = 'block'; box.style.marginBottom = '14px';
+    var ov = el('div', 'ds-ov');
+    var ring = el('div', 'ds-ring'); ring.setAttribute('role', 'img');
+    ring.setAttribute('aria-label', done ? 'আজকের উপস্থিতি ' + bn(pct) + ' শতাংশ' : 'আজ এখনো হাজিরা নেওয়া হয়নি');
+    var rb = el('b', null, done ? bn(pct) + '%' : '—');
+    ring.appendChild(rb); ring.appendChild(el('span', null, done ? 'উপস্থিত' : 'হাজিরা শুরু হয়নি'));
+    ring.style.setProperty('--pc', done ? dashLast.pct : 0);
+    var r = el('div', 'ds-ovr');
+    r.appendChild(el('div', 'ds-ovt', 'পুরো স্কুল · মোট ' + bn(tot) + ' জন'));
+    var nums = [];
+    STATUS.forEach(function (x, k) {
+      var row = el('div', 'ds-ovrow s' + k);
+      row.appendChild(el('i'));
+      row.appendChild(el('span', null, cfg.labels[x] || x));
+      var b = el('b', null, bn(dashLast.cnt[x] || 0));
+      row.appendChild(b); r.appendChild(row);
+      nums.push([b, dashLast.cnt[x] || 0, cnt[x] || 0]);
+    });
+    var pr = el('div', 'ds-prog');
+    pr.appendChild(el('div', 'ds-pt', bn(nDone) + '/' + bn(nCls) + ' শ্রেণির হাজিরা নেওয়া হয়েছে'));
+    var bar = el('div', 'ds-bar'), fi = el('i');
+    fi.style.width = (dashLast.prog || 0) + '%';
+    bar.appendChild(fi); pr.appendChild(bar); r.appendChild(pr);
+    var pend = null;
+    d.classes.some(function (c) { if (!c.taken) { pend = c; return true; } return false; });
+    if (pend) {
+      var go = el('button', 'ds-go', 'বাকি: ' + clsPlain(pend.cls) + ' — হাজিরা নিন ›');
+      go.type = 'button';
+      go.onclick = function () { dashPick(pend.cls); };
+      r.appendChild(go);
+    }
+    ov.appendChild(ring); ov.appendChild(r); box.appendChild(ov);
+
+    var prog = nDone * 100 / nCls;
+    if (done) dsTween(dashLast.pct, pct, 800, function (v) { ring.style.setProperty('--pc', v); rb.textContent = bn(Math.round(v * 10) / 10) + '%'; });
+    nums.forEach(function (n) { dsTween(n[1], n[2], 700, function (v) { n[0].textContent = bn(Math.round(v)); }); });
+    if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(function () { fi.style.width = prog + '%'; }); });
+    else fi.style.width = prog + '%';
+    dashLast.pct = done ? pct : 0; dashLast.prog = prog;
+    dashLast.cnt = {}; STATUS.forEach(function (x) { dashLast.cnt[x] = cnt[x] || 0; });
+  }
   function dashPick(cls) {
     if (dirty && !confirmLeave()) return;
     showTab('att');
@@ -4244,7 +4678,8 @@
     var done = STATUS.reduce(function (a, x) { return a + cnt[x]; }, 0);
     var pct = done ? Math.round(cnt[P] * 1000 / done) / 10 : 0;
     var nCls = d.classes.length, nDone = nCls - pend;
-    $('dsInfo').textContent = '';
+    var nowT = new Date();
+    $('dsInfo').textContent = 'হালনাগাদ ' + bn(('0' + nowT.getHours()).slice(-2) + ':' + ('0' + nowT.getMinutes()).slice(-2));
     var hol = $('dsHol');
     hol.style.display = d.holiday ? 'block' : 'none';
     hol.textContent = d.holiday ? '🌴 আজ ছুটির দিন — ' + d.holiday : '';
@@ -4262,11 +4697,11 @@
       q.appendChild(b);
     });
 
-    $('dsTot').innerHTML = '';
+    dsOverview(d, cnt, tot, done, pct, nCls, nDone);
 
     // শ্রেণি কার্ড
     var g = $('dsGrid'); g.innerHTML = '';
-    d.classes.forEach(function (c) {
+    dsSorted(d.classes).forEach(function (c) {
       var card = el('button', 'ds-card' + (c.taken ? '' : ' wait')); card.type = 'button';
       card.onclick = function () { dashPick(c.cls); };
       var l = el('div', 'ds-l');
@@ -4288,6 +4723,14 @@
         if (pc < cfg.lowPercent) mini.className += ' low';
       }
       card.appendChild(l); card.appendChild(mini);
+      mini.setAttribute('aria-hidden', 'true');
+      card.setAttribute('aria-label', clsPlain(c.cls) + (c.taken ? ': উপস্থিতি ' + bn(pc) + ' শতাংশ' : ': হাজিরা বাকি'));
+      if (c.taken) {
+        (function (m, key, to) {
+          dsTween(dashLast.mini[key] || 0, to, 700, function (v) { m.style.setProperty('--pc', v); });
+          dashLast.mini[key] = to;
+        })(mini, c.cls, pc);
+      }
       g.appendChild(card);
     });
 
@@ -4306,7 +4749,6 @@
     if (absList.length > 20) ab.appendChild(el('div', 'ds-more', '… আরও ' + bn(absList.length - 20) + ' জন (রিপোর্ট ট্যাব থেকে সম্পূর্ণ তালিকা)'));
     dashAgg = { nDone: nDone, nCls: nCls, rate: done ? Math.round(cnt[cfg.absentStatus] * 1000 / done) / 10 : null };
     renderKpi();
-    loadDashAlr();
     dsSync();
   }
 
@@ -4359,7 +4801,7 @@
   // রিপোর্ট ট্যাব খুললে তারিখের ঘরে আজকের তারিখ বসবে
   (function () {
     var orig = showTab;
-    showTab = function (t) { orig(t); dsSync(); if (t === 'home' && dashData) loadDash(); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
+    showTab = function (t) { orig(t); dsSync(); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
   })();
 
   var PG_TITLES = { home: 'ড্যাশবোর্ড', att: 'হাজিরা', sum: 'সারাংশ', mon: 'রিপোর্ট', alr: 'সতর্কতা', reg: 'নিবন্ধন', pro: 'প্রোমোশন', ff: 'ফরম ফিলাপ' };
