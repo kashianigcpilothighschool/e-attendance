@@ -1104,6 +1104,97 @@
   .ds-go:active { transform:scale(.97); }
   @media (max-width:360px) { .ds-ov { flex-direction:column; align-items:stretch; } .ds-ring { align-self:center; } }
 
+  /* ===== কার্ড v16: সব ট্যাবের কার্ড ===== */
+  /* ক্রমান্বয়ে (stagger) প্রবেশ — --i বসানো কার্ডে */
+  .row[style*="--i"], .card[style*="--i"] { animation-delay:calc(var(--i) * 24ms); }
+
+  /* ফিলাপ: দ্রুত ফি এন্ট্রি + ফি প্রগ্রেস */
+  .ff-qk { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .ff-qk .q-in { flex:1; min-width:0; display:flex; align-items:center; gap:6px; margin:0; padding:0 10px; min-height:42px;
+                 border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:text; }
+  .ff-qk .q-in:focus-within { border-color:var(--ac2); box-shadow:0 0 0 3px color-mix(in srgb,var(--ac2) 25%,transparent); }
+  .ff-qk .q-in span { color:var(--mute); font-weight:700; }
+  .ff-qk .q-in input { flex:1; min-width:0; width:100%; margin:0; padding:6px 0; min-height:0; border:0; outline:0; box-shadow:none; background:transparent; font-size:16px; font-weight:600; }
+  .ff-qk .q-full { flex:none; min-height:42px; padding:0 14px; border:0; border-radius:12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+                   color:#fff; background:linear-gradient(135deg,var(--ac1),var(--ac2)); }
+  .ff-qk .q-full:disabled { opacity:.4; cursor:default; }
+  .ff-qk .q-full:active:not(:disabled) { transform:scale(.96); }
+  .ff-fee { height:5px; border-radius:99px; background:color-mix(in srgb,var(--ink) 9%,transparent); margin-top:8px; overflow:hidden; }
+  .ff-fee i { display:block; height:100%; width:0; border-radius:99px; background:var(--p); transition:width .45s cubic-bezier(.2,.8,.2,1); }
+  .row.ff[data-f="part"] .ff-fee i { background:var(--l); }
+  .row.ff[data-f="due"] .ff-fee i { background:var(--a); }
+  button.ff-caret { background:none; border:0; padding:0; min-width:40px; min-height:40px; display:grid; place-items:center; cursor:pointer; border-radius:12px; }
+  button.ff-caret:focus-visible { outline:3px solid var(--mint); outline-offset:1px; }
+
+  /* নিবন্ধন: বাছাই-করা কার্ড, ছবি ছাড়া অক্ষর-অবতার, চওড়া পর্দায় দুই-কলাম তথ্য */
+  .card.sel { border-color:var(--ac2); box-shadow:0 0 0 2px color-mix(in srgb,var(--ac2) 45%,transparent), var(--soft); }
+  .reg-top { cursor:pointer; }
+  .reg-ph.noimg { display:grid; place-items:center; font-size:32px; font-weight:700; color:var(--p-t);
+                  background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--ac2) 35%,var(--p-l))); }
+  .reg-dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); column-gap:24px; }
+
+  /* সতর্কতা কার্ড */
+  .row.al { padding:14px; }
+  .al-top { display:flex; align-items:center; gap:12px; }
+  .al-bd { flex:none; min-width:52px; height:52px; padding:0 8px; border-radius:16px; display:grid; place-content:center; text-align:center;
+           font-weight:700; font-size:17px; line-height:1.1; background:color-mix(in srgb,var(--surface) 82%,transparent); color:var(--a-t); }
+  .al-bd small { display:block; font-size:10.5px; font-weight:600; }
+  .row.al[data-s="2"] .al-bd { color:var(--l-t); }
+  .al-in { flex:1; min-width:0; }
+  .al-in .name { font-weight:700; }
+  .al-bar { height:6px; border-radius:99px; background:color-mix(in srgb,var(--ink) 10%,transparent); margin:10px 0 2px; overflow:hidden; }
+  .al-bar i { display:block; height:100%; border-radius:99px; background:var(--l); }
+  .row.al .acts { margin-top:10px; flex-wrap:wrap; }
+  .abtn.wa { background:#128c7e; color:#fff; border-color:transparent; }
+
+  /* ===== v17: রিপোর্ট গোছানো + ড্যাশবোর্ডে মাসিক সারাংশ ও নামহীন তালিকা ===== */
+  #t-mon .pro-step { margin:20px 2px 10px; }
+  #t-mon > .pro-step:first-child { margin-top:2px; }
+  #t-mon .rp-grid.three { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  #t-mon .card > .rp-h:first-child { margin-top:2px; }
+  details.rp-det > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:9px; font-size:17px; font-weight:700; }
+  details.rp-det > summary::-webkit-details-marker { display:none; }
+  details.rp-det > summary::after { content:"▾"; margin-left:auto; color:var(--mute); transition:transform .15s; }
+  details.rp-det[open] > summary { margin-bottom:12px; }
+  details.rp-det[open] > summary::after { transform:rotate(180deg); }
+
+  .ds-prt { flex:none; height:38px; padding:0 14px; border-radius:99px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+            font:inherit; font-size:13px; font-weight:700; box-shadow:var(--soft); cursor:pointer; }
+  .ds-prt:active { transform:scale(.96); }
+  .ds-mon { margin-top:14px; padding:14px; border-radius:24px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--soft); }
+  .ds-mon-h { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .ds-mon-h b { font-size:16px; }
+  .ds-mon-h span { flex:1; font-size:12.5px; color:var(--mute); font-weight:600; }
+  .ds-mon-h .ds-ref { width:34px; height:34px; font-size:16px; }
+  .ds-mon .rp-tiles { margin-bottom:10px; }
+  .ds-mon-note { font-size:13px; color:var(--mute); padding:6px 2px; line-height:1.6; }
+  .ds-mon-note.bad { color:var(--a-t); font-weight:600; }
+  .ds-mrow { display:flex; align-items:center; gap:10px; width:100%; padding:8px 6px; border:0; background:none; font:inherit; color:inherit;
+             text-align:left; cursor:pointer; border-radius:12px; }
+  .ds-mrow:hover { background:color-mix(in srgb,var(--ink) 5%,transparent); }
+  .ds-mrow .mn { flex:none; width:92px; font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ds-mrow .mb { flex:1; height:8px; border-radius:99px; background:color-mix(in srgb,var(--ink) 9%,transparent); overflow:hidden; }
+  .ds-mrow .mb i { display:block; height:100%; border-radius:99px; background:var(--p); transition:width .6s cubic-bezier(.2,.8,.2,1); }
+  .ds-mrow.low .mb i { background:var(--a); }
+  .ds-mrow .mv { flex:none; min-width:46px; text-align:right; font-size:13px; font-weight:700; }
+  .ds-mrow .mw { flex:none; min-width:40px; font-size:11.5px; color:var(--a-t); font-weight:700; }
+  .ds-cg { display:flex; flex-wrap:wrap; gap:8px; }
+  .ds-cgc { display:inline-flex; align-items:center; gap:8px; padding:7px 8px 7px 14px; border:1px solid var(--line); border-radius:99px; background:var(--surface);
+            font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; box-shadow:var(--soft); }
+  .ds-cgc:active { transform:scale(.97); }
+  .ds-cgc b { min-width:24px; height:24px; padding:0 7px; border-radius:99px; display:inline-grid; place-items:center; font-size:12.5px; background:var(--a-l); color:var(--a-t); }
+  .ds-cgc.w b { background:var(--l-l); color:var(--l-t); }
+
+  /* ===== v18: হেডারের Session ড্রপডাউন — গাঢ় ও হালকা দুই হেডারেই পড়া যায় ===== */
+  #sess .sess-sel { display:inline-block; width:auto; min-width:0; height:auto; min-height:0; margin:0 0 0 4px; padding:2px 8px;
+                    font:inherit; font-size:13px; font-weight:700; cursor:pointer; border-radius:10px;
+                    background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.45); }
+  #sess .sess-sel option { background:var(--surface); color:var(--ink); }   /* খোলা তালিকা সব থিমে পরিষ্কার */
+  @media (min-width:900px) {
+    body.appmode #sess { background:transparent; padding:0; color:var(--mute); }
+    body.appmode #sess .sess-sel { background:var(--bg); color:var(--ink); border:1px solid var(--line); }
+  }
+
   /* ===== হাজিরা সিট আধুনিক (v14) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
   #t-att > .card:first-child { padding:14px; border-radius:24px; }
   #t-att .datenav .chipbtn { min-height:38px; padding:7px 14px; font-size:13px; }
@@ -1449,10 +1540,12 @@
     <div id="dashSum" style="display:none">
       <div class="ds-quick" id="dsQuick"></div>
       <div class="ds-head"><b>📊 আজকের সারাংশ</b><span id="dsInfo" aria-live="polite"></span>
+        <button type="button" class="ds-prt" onclick="rpSummary(cfg.today)" aria-label="আজকের সারাংশ প্রিন্ট করুন">🖨️ প্রিন্ট</button>
         <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="সারাংশ নতুন করুন">↻</button></div>
       <div class="ds-hol" id="dsHol" style="display:none"></div>
       <div id="dsTot" style="display:none"></div>
       <div class="ds-kpi" id="dsKpi"></div>
+      <div id="dsMon"></div>
       <div class="ds-sec">শ্রেণি অনুযায়ী</div>
       <div class="ds-grid" id="dsGrid"></div>
       <div class="ds-sec" id="dsAbsH" style="display:none"></div>
@@ -1544,8 +1637,9 @@
     <button class="act" id="sPrintBtn" type="button" onclick="printSummary()" disabled>সারাংশ প্রিন্ট করুন</button>
   </section>
 
-  <!-- ৩. রিপোর্ট (মাসিক ছক + সব প্রিন্ট) -->
+  <!-- ৩. রিপোর্ট (মাসিক ছক + প্রিন্ট) — সারাংশ এখন ড্যাশবোর্ডে -->
   <section id="t-mon" class="wrap" style="display:none">
+    <div class="pro-step"><i>১</i><div><b>মাসিক ছক</b><small>মাস ও শ্রেণি বাছাই করলে ছক দেখা যাবে</small></div></div>
     <div class="card">
       <div class="grid">
         <div>
@@ -1568,14 +1662,12 @@
     </div>
     <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
 
-    <!-- সব রিপোর্ট প্রিন্ট -->
-    <div class="card" style="margin-top:14px">
-      <div class="cls-title">সব রিপোর্ট প্রিন্ট</div>
-      <label for="rpDate">তারিখ (দৈনিক রিপোর্টের জন্য)</label>
+    <div class="pro-step"><i>২</i><div><b>প্রিন্ট</b><small>দৈনিক তালিকা ও অন্যান্য রিপোর্ট</small></div></div>
+    <div class="card">
+      <label for="rpDate">তারিখ (দৈনিক তালিকার জন্য)</label>
       <input type="date" id="rpDate">
-      <div class="legend" style="margin-top:10px">শ্রেণি ও মাস ওপরের ঘর থেকে নেওয়া হবে।</div>
 
-      <div class="rp-h">দৈনিক হাজিরা (বাছাই করা শ্রেণি)</div>
+      <div class="rp-h">দৈনিক হাজিরা — ওপরে বাছাই করা শ্রেণির</div>
       <div class="rp-grid">
         <button class="act alt" type="button" onclick="rpDaily('P')">✅ উপস্থিত তালিকা</button>
         <button class="act alt" type="button" onclick="rpDaily('A')">❌ অনুপস্থিত তালিকা</button>
@@ -1583,18 +1675,17 @@
         <button class="act alt" type="button" onclick="rpDaily('blank')">📝 খালি তালিকা</button>
       </div>
 
-      <div class="rp-h">সারাংশ ও সতর্কতা</div>
-      <div class="rp-grid">
-        <button class="act alt" type="button" onclick="rpSummary()">🏫 দৈনিক সারাংশ (সব শ্রেণি)</button>
+      <div class="rp-h">অন্যান্য</div>
+      <div class="rp-grid three">
         <button class="act alt" type="button" onclick="rpAlerts()">⚠️ সতর্কতা (কম উপস্থিতি)</button>
         <button class="act alt" type="button" onclick="rpMonth()">🗓️ মাসিক রিপোর্ট</button>
-        <button class="act alt" type="button" onclick="$('rtype').scrollIntoView({behavior:'smooth',block:'center'})">📅 তারিখ রেঞ্জ ↓</button>
+        <button class="act alt" type="button" onclick="rpOpenRange()">📅 তারিখ রেঞ্জ ↓</button>
       </div>
     </div>
 
-    <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট -->
-    <div class="card" style="margin-top:14px">
-      <div class="cls-title">তারিখ রেঞ্জ অনুযায়ী প্রিন্ট</div>
+    <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট (ভাঁজ করা থাকে) -->
+    <details class="card rp-det" id="rpRange" style="margin-top:14px">
+      <summary class="cls-title">৩ · তারিখ রেঞ্জ অনুযায়ী প্রিন্ট</summary>
       <div class="grid">
         <div>
           <label for="rtype">ধরন</label>
@@ -1626,7 +1717,7 @@
       </div>
       <div class="note" id="rrnote"></div>
       <button class="act" type="button" style="margin-top:12px" onclick="printRange()">রেঞ্জ অনুযায়ী প্রিন্ট করুন</button>
-    </div>
+    </details>
   </section>
 
   <!-- ৪. সতর্কতা -->
@@ -2258,7 +2349,7 @@
   }
 
   function showLogin() {
-    dashData = null; dashAlr = null; dashAgg = null; dashBusy = false; dashFail = false; dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
+    dashData = null; dashAlr = null; dashAgg = null; dashMon = null; monReq++; dashBusy = false; dashFail = false; dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
     $('app').style.display = 'none';
     $('denied').style.display = 'none';
     $('login').style.display = 'block';
@@ -2332,9 +2423,9 @@
     box.textContent = '';
     var lb = document.createElement('span'); lb.textContent = 'Session '; box.appendChild(lb);
     var sel = document.createElement('select'); sel.id = 'sessSel'; sel.setAttribute('aria-label', 'সেশন বাছাই করুন');
-    sel.style.cssText = 'display:inline-block;width:auto;min-width:0;height:auto;min-height:0;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:10px;padding:1px 6px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;margin:0 0 0 4px';
+    sel.className = 'sess-sel';
     d.sessions.forEach(function (x) {
-      var o = document.createElement('option'); o.value = x; o.textContent = x; o.style.color = '#101c1a';
+      var o = document.createElement('option'); o.value = x; o.textContent = x;
       if (String(x) === String(d.session)) o.selected = true; sel.appendChild(o);
     });
     sel.onchange = function () {
@@ -2567,8 +2658,8 @@
       return;
     }
 
-    students.forEach(function (s) {
-      var row = el('div', 'row');
+    students.forEach(function (s, ix) {
+      var row = stg(el('div', 'row'), ix);
       row.setAttribute('data-s', String(STATUS.indexOf(state[s.roll])));
 
       var who = el('div', 'who');
@@ -2578,11 +2669,15 @@
 
       var btns = el('div', 'btns');
       btns.style.gridTemplateColumns = 'repeat(' + STATUS.length + ',1fr)';
+      btns.setAttribute('role', 'group');
+      btns.setAttribute('aria-label', s.name + ' — হাজিরা');
       STATUS.forEach(function (st, k) {
         var b = el('button', 'sb s' + k + (state[s.roll] === st ? ' on' : ''));
         b.appendChild(el('span', 'sc', st));
         b.appendChild(el('span', 'sl', cfg.labels[st]));
         b.type = 'button';
+        b.setAttribute('aria-pressed', state[s.roll] === st ? 'true' : 'false');
+        b.setAttribute('aria-label', s.name + ' — ' + cfg.labels[st]);
         b.onclick = function () {
           state[s.roll] = st;
           dirty = true;
@@ -2590,7 +2685,7 @@
           try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
           row.setAttribute('data-s', String(k));
           var all = btns.children;
-          for (var i = 0; i < all.length; i++) all[i].classList.toggle('on', i === k);
+          for (var i = 0; i < all.length; i++) { all[i].classList.toggle('on', i === k); all[i].setAttribute('aria-pressed', i === k ? 'true' : 'false'); }
           updateBar();
         };
         btns.appendChild(b);
@@ -2878,23 +2973,8 @@
       box.appendChild(el('div', 'empty', 'এই মাসে এই শ্রেণির কোনো হাজিরা নেই'));
       return;
     }
-    var tp = 0, tt = 0;
-    rep.rows.forEach(function (r) { tp += r.present; tt += r.total; });
-    var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
+    var mt = monTotals(rep);          // শুধু ছকের নিচের "সর্বমোট" সারির জন্য
     setNote('mnote', '');
-    var lowN = rep.rows.filter(function (r) { return r.percent !== null && r.percent < cfg.lowPercent; }).length;
-    var tiles = el('div', 'rp-tiles');
-    var mt = monTotals(rep);
-    [['কর্মদিবস', bn(rep.dates.length), ''], ['শিক্ষার্থী', bn(rep.rows.length), ''],
-     ['মোট উপস্থিত', bn(mt.c[STATUS[0]]), ' good'], ['মোট অনুপস্থিত', bn(mt.c[cfg.absentStatus] || 0), mt.c[cfg.absentStatus] ? ' bad' : ''],
-     ['গড় উপস্থিতি', bn(avg) + '%', avg < cfg.lowPercent ? ' bad' : ' good'],
-     ['কম উপস্থিতি', bn(lowN) + ' জন', lowN ? ' bad' : ' good']].forEach(function (x) {
-      var d = el('div', 'rp-tile' + x[2]);
-      d.appendChild(el('b', null, x[1]));
-      d.appendChild(el('span', null, x[0]));
-      tiles.appendChild(d);
-    });
-    box.appendChild(tiles);
 
     var wrap = el('div', 'tw');
     var t = el('table', 'mt');
@@ -3515,7 +3595,7 @@
 
     d.students.forEach(function (s, idx) {
       var st = proState[s.roll] = { on: canUp, action: canUp ? 'up' : 'same', newRoll: '' };
-      var row = el('div', 'row pro');
+      var row = stg(el('div', 'row pro'), idx);
       var segBtns = {};
 
       function paint() {
@@ -3524,7 +3604,7 @@
       }
       function setAct(a) {
         st.action = a;
-        for (var k in segBtns) segBtns[k].classList.toggle('on', k === a);
+        for (var k in segBtns) { segBtns[k].classList.toggle('on', k === a); segBtns[k].setAttribute('aria-pressed', k === a ? 'true' : 'false'); }
         paint();
       }
       function setOn(on) { st.on = on; cb.checked = on; paint(); }
@@ -3566,6 +3646,7 @@
       inp.type = 'text'; inp.value = ''; inp.autocomplete = 'off';
       inp.placeholder = '—';
       inp.setAttribute('inputmode', 'numeric');
+      inp.setAttribute('enterkeyhint', 'next');
       inp.setAttribute('aria-label', 'নতুন রোল — ' + s.name);
       inp.oninput = function () { st.newRoll = inp.value; proCheckDup(); proPreview(); };
       inp.onkeydown = function (ev) {                 // Enter চাপলে পরের জনের ঘরে যাবে
@@ -3988,7 +4069,7 @@
       ffStatsUpdate();
       return;
     }
-    ffData.students.forEach(function (s) { box.appendChild(ffCard(s)); });
+    ffData.students.forEach(function (s, ix) { box.appendChild(stg(ffCard(s), ix)); });
     ffFbar();
     ffApplyFilter();
     ffStatsUpdate();
@@ -4056,6 +4137,55 @@
     if (sub.length) nm.appendChild(el('div', 'ff-sub', sub.join(' · ')));
     var meta = el('div', 'ff-meta');
     nm.appendChild(meta);
+
+    // দ্রুত ফি এন্ট্রি: কার্ড না খুলেই "জমা" লেখা বা "পূর্ণ ফি" চাপা
+    var qk = el('div', 'ff-qk');
+    qk.onclick = function (ev) { ev.stopPropagation(); };
+    var qlb = el('label', 'q-in');
+    qlb.appendChild(el('span', null, '৳'));
+    var qIn = document.createElement('input');
+    qIn.type = 'text'; qIn.autocomplete = 'off'; qIn.placeholder = 'জমা';
+    qIn.setAttribute('inputmode', 'decimal');
+    qIn.setAttribute('enterkeyhint', 'next');
+    qIn.setAttribute('aria-label', 'ফি জমা — ' + (s.nameBn || s.nameEn));
+    qlb.appendChild(qIn);
+    var qFull = el('button', 'q-full', 'পূর্ণ ফি');
+    qFull.type = 'button';
+    qk.appendChild(qlb); qk.appendChild(qFull);
+    nm.appendChild(qk);
+    var qBar = el('div', 'ff-fee'), qFill = el('i');
+    qBar.appendChild(qFill); nm.appendChild(qBar);
+    var autoDate = false;
+    function qApply(v) {
+      var r = ffRec[key], ee = ffEls[key];
+      r.paid = v;
+      var n = ffNum(v);
+      if (n > 0 && !r.paidDate) {
+        r.paidDate = cfg.today; autoDate = true;
+        if (ee && ee.ins && ee.ins.paidDate) ee.ins.paidDate.value = r.paidDate;
+      } else if (n <= 0 && autoDate && r.paidDate === cfg.today) {
+        r.paidDate = ''; autoDate = false;
+        if (ee && ee.ins && ee.ins.paidDate) ee.ins.paidDate.value = '';
+      }
+      if (ee && ee.ins && ee.ins.paid) ee.ins.paid.value = v;
+      ffTouch(key);
+    }
+    qIn.oninput = function () { qApply(qIn.value.trim() === '' ? '0' : qIn.value); };
+    qFull.onclick = function () { qApply(ffRec[key].fee); };
+    qIn.onkeydown = function (ev) {                 // Enter চাপলে পরের (দৃশ্যমান) জনের "জমা" ঘরে যাবে
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      var list = ffData ? ffData.students : [], i0 = -1;
+      list.forEach(function (x, k) { if (x.key === key) i0 = k; });
+      for (var j = i0 + 1; j < list.length; j++) {
+        var nx = ffEls[list[j].key];
+        if (nx && nx.qpaid && nx.card.style.display !== 'none') {
+          nx.qpaid.focus(); nx.qpaid.select();
+          if (nx.card.scrollIntoView) nx.card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          return;
+        }
+      }
+    };
     head.appendChild(nm);
     var ck4 = null;
     if (ffIsHigh()) {
@@ -4065,6 +4195,7 @@
           cb.checked = false;                       // বিষয় না লেখা পর্যন্ত টিক বসবে না
           if (!body) { body = ffBody(s); card.appendChild(body); }
           card.classList.add('open');
+          caret.setAttribute('aria-expanded', 'true');
           if (ee && ee.ins && ee.ins.fourth) ee.ins.fourth.focus();
         } else {
           r.fourth = '';
@@ -4074,14 +4205,19 @@
       });
       head.appendChild(ck4.box);
     }
-    head.appendChild(el('div', 'ff-caret', '▾'));
+    var caret = el('button', 'ff-caret', '▾');
+    caret.type = 'button';
+    caret.setAttribute('aria-expanded', 'false');
+    caret.setAttribute('aria-label', 'বিস্তারিত খুলুন বা বন্ধ করুন — ' + (s.nameBn || s.nameEn));
+    head.appendChild(caret);
     card.appendChild(head);
     var body = null;
     head.onclick = function () {                 // ভারী ঘরগুলো প্রথম খোলার সময় তৈরি হয়
       if (!body) { body = ffBody(s); card.appendChild(body); }
       card.classList.toggle('open');
+      caret.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
     };
-    ffEls[key] = { card: card, meta: meta, ckF: ckF.cb, ck4: ck4 ? ck4.cb : null, text: (s.roll + ' ' + (s.nameBn || '') + ' ' + (s.nameEn || '')).toLowerCase() };
+    ffEls[key] = { card: card, meta: meta, qpaid: qIn, qfull: qFull, qfill: qFill, ckF: ckF.cb, ck4: ck4 ? ck4.cb : null, text: (s.roll + ' ' + (s.nameBn || '') + ' ' + (s.nameEn || '')).toLowerCase() };
     ffMeta(key);
     return card;
   }
@@ -4118,6 +4254,7 @@
         inp.type = opt.type || 'text';
         inp.autocomplete = 'off';
         if (opt.num) inp.setAttribute('inputmode', 'decimal');
+        if (opt.int) inp.setAttribute('inputmode', 'numeric');
         if (opt.list) inp.setAttribute('list', opt.list);
       }
       inp.value = r[f];
@@ -4133,7 +4270,7 @@
       body.appendChild(g);
     }
 
-    pair(field('regNo', 'রেজিস্ট্রেশন নম্বর', { num: true }), field('boardRoll', 'বোর্ড রোল', { num: true }));
+    pair(field('regNo', 'রেজিস্ট্রেশন নম্বর', { int: true }), field('boardRoll', 'বোর্ড রোল', { int: true }));
     var stOpts = ffCfg.statuses.map(function (x) { return [x, ffCfg.labels[x]]; });
     if (ffIsHigh()) pair(field('fourth', '৪র্থ বিষয়', { list: 'ffFourth' }), field('status', 'ফরম অবস্থা', { select: stOpts }));
     else pair(field('status', 'ফরম অবস্থা', { select: stOpts }), el('div'));
@@ -4175,6 +4312,12 @@
     else chip('off', 'ফি নির্ধারিত নয়');
     chip(r.status === 'pending' ? 'todo' : 'up', ffCfg.labels[r.status] || r.status);
     if (ffDirty[key]) chip('same', '● অসংরক্ষিত');
+    if (e.qpaid) {                                   // দ্রুত-এন্ট্রি ঘর ও ফি-প্রগ্রেস মেলানো
+      if (document.activeElement !== e.qpaid) e.qpaid.value = ffNum(r.paid) > 0 ? r.paid : '';
+      var fee = ffNum(r.fee), pd = ffNum(r.paid);
+      e.qfull.disabled = fee <= 0;
+      e.qfill.style.width = (fee > 0 ? Math.min(100, pd * 100 / fee) : (pd > 0 ? 100 : 0)) + '%';
+    }
   }
 
   function ffStatsUpdate() {
@@ -4219,11 +4362,31 @@
     ffData.students.forEach(function (s) { byKey[s.key] = s; });
     for (var i = 0; i < keys.length; i++) {
       var r0 = ffRec[keys[i]];
+      if (ffNum(r0.fee) < 0 || ffNum(r0.paid) < 0) {
+        toast('রোল ' + byKey[keys[i]].roll + ': টাকার অঙ্ক ঋণাত্মক হতে পারে না', true);
+        return;
+      }
+      if (ffNum(r0.paid) > 0 && !r0.paidDate) {             // জমা আছে কিন্তু তারিখ নেই → আজকের তারিখ
+        r0.paidDate = cfg.today;
+        var e0 = ffEls[keys[i]];
+        if (e0 && e0.ins && e0.ins.paidDate) e0.ins.paidDate.value = r0.paidDate;
+      }
       if (ffNum(r0.fee) > 0 && ffNum(r0.paid) > ffNum(r0.fee)) {
         toast('রোল ' + byKey[keys[i]].roll + ': জমা নির্ধারিত ফির চেয়ে বেশি', true);
         return;
       }
     }
+    var rcCnt = {};                                           // একই রসিদ নম্বর একাধিকজনে থাকলে নিশ্চিত করা
+    ffData.students.forEach(function (s0) {
+      var rc = String((ffRec[s0.key] || {}).receipt || '').trim().toLowerCase();
+      if (rc) rcCnt[rc] = (rcCnt[rc] || 0) + 1;
+    });
+    var dupRc = '';
+    keys.forEach(function (k0) {
+      var rc = String(ffRec[k0].receipt || '').trim().toLowerCase();
+      if (!dupRc && rc && rcCnt[rc] > 1) dupRc = String(ffRec[k0].receipt).trim();
+    });
+    if (dupRc && !confirm('রসিদ নম্বর "' + dupRc + '" একাধিক জনের জন্য আছে (ভাইবোন হলে ঠিক আছে)। তবুও সংরক্ষণ করবেন?')) return;
     var cls = ffData.cls, type = ffData.type || ffType, size = 25, pos = 0, ok = 0, syncOk = 0, syncBad = '', qdone = false, both = !!$('ffBoth').checked;
     $('ffSaveBtn').disabled = true;
 
@@ -4419,12 +4582,12 @@
     box.innerHTML = '';
 
     box.appendChild(el('h3', null, 'টানা ' + bn(d.minStreak) + ' দিন বা বেশি অনুপস্থিত (' + bn(d.streak.length) + ' জন)'));
-    if (!d.streak.length) box.appendChild(el('div', 'empty', 'কেউ নেই'));
-    d.streak.forEach(function (o) { box.appendChild(alertCard(o, 'abs')); });
+    if (!d.streak.length) box.appendChild(el('div', 'empty', '🎉 কেউ নেই'));
+    d.streak.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'abs'), i)); });
 
     box.appendChild(el('h3', null, 'উপস্থিতি ' + bn(d.threshold) + '%-এর কম (' + bn(d.low.length) + ' জন)'));
-    if (!d.low.length) box.appendChild(el('div', 'empty', 'কেউ নেই'));
-    d.low.forEach(function (o) { box.appendChild(alertCard(o, 'low')); });
+    if (!d.low.length) box.appendChild(el('div', 'empty', '🎉 কেউ নেই'));
+    d.low.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'low'), i)); });
   }
 
   function buildMsg(kind, o) {
@@ -4438,26 +4601,63 @@
     return out.replace(/\s*—\s*$/, '');
   }
 
+  // মোবাইল নম্বর → WhatsApp-এর আন্তর্জাতিক রূপ (বাংলাদেশি 01XXXXXXXXX হলে), নইলে ফাঁকা
+  function waNumber(p) {
+    var d = edBn2en(String(p || '')).replace(/[^\d]/g, '');
+    if (/^01\d{9}$/.test(d)) return '88' + d;
+    if (/^8801\d{9}$/.test(d)) return d;
+    return '';
+  }
+
   function alertCard(o, kind) {
-    var card = el('div', 'row');
+    var card = el('div', 'row al');
     card.setAttribute('data-s', kind === 'abs' ? '1' : '2');
-    card.appendChild(el('div', 'name', 'শ্রেণি ' + clsPlain(o.cls) + ' · রোল ' + o.roll + ' · ' + o.name));
+
+    var top = el('div', 'al-top');
+    var bd = el('div', 'al-bd');
+    bd.setAttribute('aria-hidden', 'true');
+    if (kind === 'abs') { bd.appendChild(document.createTextNode(bn(o.n))); bd.appendChild(el('small', null, 'দিন')); }
+    else { var pc = parseFloat(o.percent); bd.appendChild(document.createTextNode(isNaN(pc) ? '–' : bn(Math.round(pc)) + '%')); }
+    top.appendChild(bd);
+    var inf = el('div', 'al-in');
+    inf.appendChild(el('div', 'name', o.name));
+    inf.appendChild(el('div', 'detail', 'শ্রেণি ' + clsPlain(o.cls) + ' · রোল ' + o.roll));
+    top.appendChild(inf);
+    card.appendChild(top);
+
     var detail = kind === 'abs'
       ? 'টানা ' + bn(o.n) + ' দিন অনুপস্থিত (' + fmtDM(o.since) + ' থেকে; সর্বশেষ হাজিরা ' + fmtDM(o.last) + ')'
       : 'উপস্থিতি ' + bn(o.percent) + '% (' + bn(o.present) + '/' + bn(o.total) + ' দিন)';
-    card.appendChild(el('div', 'detail', detail));
+    var dt = el('div', 'detail', detail);
+    dt.style.marginTop = '8px';
+    card.appendChild(dt);
+    if (kind !== 'abs' && !isNaN(parseFloat(o.percent))) {
+      var bar = el('div', 'al-bar'), fi = el('i');
+      fi.style.width = Math.max(0, Math.min(100, parseFloat(o.percent))) + '%';
+      bar.appendChild(fi); card.appendChild(bar);
+    }
 
     var msg = buildMsg(kind, o);
     var acts = el('div', 'acts');
     if (o.phone) {
-      var a = el('a', 'abtn', 'SMS পাঠান');
+      var a = el('a', 'abtn', '✉️ SMS');
       a.href = 'sms:' + o.phone + '?body=' + encodeURIComponent(msg);
       acts.appendChild(a);
+      var wn = waNumber(o.phone);
+      if (wn) {
+        var w = el('a', 'abtn wa', 'WhatsApp');
+        w.href = 'https://wa.me/' + wn + '?text=' + encodeURIComponent(msg);
+        w.target = '_blank'; w.rel = 'noopener';
+        acts.appendChild(w);
+      }
+      var tl = el('a', 'abtn alt', '📞 কল');
+      tl.href = 'tel:' + o.phone;
+      acts.appendChild(tl);
       acts.appendChild(el('span', 'ph', o.phone));
     } else {
       acts.appendChild(el('span', 'ph', 'মোবাইল নম্বর নেই'));
     }
-    var cp = el('button', 'abtn alt', 'বার্তা কপি');
+    var cp = el('button', 'abtn alt', '📋 বার্তা কপি');
     cp.type = 'button';
     cp.onclick = function () { copyText(msg); };
     acts.appendChild(cp);
@@ -4509,11 +4709,17 @@
            function () { printAttendance(mode); });
   }
 
-  function rpSummary() {
-    var date = rpDateVal();
+  function rpSummary(dt) {
+    var date = dt || rpDateVal();
     $('sdate').value = date;
     loadSummary();
     rpWait(function () { return sumData && sumData.date === date; }, function () { printSummary(); });
+  }
+
+  // "তারিখ রেঞ্জ" ভাঁজ খুলে সেখানে নিয়ে যায়
+  function rpOpenRange() {
+    var dt = $('rpRange'); if (dt) dt.open = true;
+    var t = $('rtype'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function rpMonth() {
@@ -4592,6 +4798,9 @@
   // অ্যাপে ফিরলে ও প্রতি ৫ মিনিটে নিজে থেকে নতুন তথ্য
   document.addEventListener('visibilitychange', function () { if (!document.hidden && curTab === 'home') loadDash(); });
   setInterval(function () { if (!document.hidden && curTab === 'home') loadDash(); }, 5 * 60 * 1000);
+
+  // কার্ডকে ক্রমান্বয়ে (≤১০টি) আসার জন্য সূচক বসায়
+  function stg(n, i) { n.style.setProperty('--i', Math.min(i, 10)); return n; }
 
   // সংখ্যা/রিং ধীরে ভরার animation (reduced-motion চালু থাকলে সরাসরি বসে)
   var DS_REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -4672,7 +4881,7 @@
       tot += c.total;
       if (c.taken) {
         STATUS.forEach(function (x) { cnt[x] += c.counts[x] || 0; });
-        c.absent.forEach(function (a) { absList.push({ cls: c.cls, roll: a.roll, name: a.name, phone: a.phone }); });
+        if (c.absent.length) absList.push({ cls: c.cls, n: c.absent.length });     // শুধু সংখ্যা — নাম রাখা হয় না
       } else pend++;
     });
     var done = STATUS.reduce(function (a, x) { return a + cnt[x]; }, 0);
@@ -4734,22 +4943,16 @@
       g.appendChild(card);
     });
 
-    // আজকের অনুপস্থিত
+    // আজকের অনুপস্থিত — নাম ছাড়া, শুধু শ্রেণিভিত্তিক সংখ্যা (নামসহ তালিকা হাজিরা ট্যাবে)
     var ah = $('dsAbsH'), ab = $('dsAbs'); ab.innerHTML = '';
-    ah.style.display = absList.length ? 'block' : 'none';
-    ah.textContent = 'আজকের অনুপস্থিত (' + bn(absList.length) + ' জন)';
-    absList.slice(0, 20).forEach(function (a) {
-      var it = el('div', 'ds-ab');
-      it.appendChild(el('span', 'ds-ar', a.roll));
-      var m = el('div', 'ds-am'); m.appendChild(el('b', null, a.name)); m.appendChild(el('small', null, clsPlain(a.cls)));
-      it.appendChild(m);
-      if (a.phone) { var c = el('a', 'ds-call', '📞 ' + a.phone); c.href = 'tel:' + a.phone; it.appendChild(c); }
-      ab.appendChild(it);
-    });
-    if (absList.length > 20) ab.appendChild(el('div', 'ds-more', '… আরও ' + bn(absList.length - 20) + ' জন (রিপোর্ট ট্যাব থেকে সম্পূর্ণ তালিকা)'));
+    var absTot = absList.reduce(function (s, x) { return s + x.n; }, 0);
+    ah.style.display = absTot ? 'block' : 'none';
+    ah.textContent = 'আজকের অনুপস্থিত (' + bn(absTot) + ' জন)';
+    if (absTot) dsChips(ab, absList, function (o) { dashPick(o.cls); }, '');
     dashAgg = { nDone: nDone, nCls: nCls, rate: done ? Math.round(cnt[cfg.absentStatus] * 1000 / done) / 10 : null };
     renderKpi();
     dsSync();
+    loadDashMonth(false);
   }
 
   // ===== ড্যাশবোর্ডের বাড়তি তথ্য: KPI + সতর্কতা তালিকা =====
@@ -4779,23 +4982,132 @@
   function renderDashAlr() {
     var box = $('dsAlr'); box.innerHTML = '';
     if (!dashAlr) return;
-    function sect(title, items, build) {
+    function sect(title, items, mod) {                 // নাম নয়, শ্রেণিভিত্তিক সংখ্যা
       if (!items.length) return;
       box.appendChild(el('div', 'ds-sec', title + ' (' + bn(items.length) + ' জন)'));
+      var by = {};
+      items.forEach(function (o) { by[o.cls] = (by[o.cls] || 0) + 1; });
+      var list = Object.keys(by).map(function (k) { return { cls: k, n: by[k] }; });
       var w = el('div', 'ds-abs');
-      items.slice(0, 5).forEach(function (o) {
-        var it = el('div', 'ds-ab ' + build.cls);
-        it.appendChild(el('span', 'ds-ar', build.badge(o)));
-        var m = el('div', 'ds-am'); m.appendChild(el('b', null, o.name)); m.appendChild(el('small', null, clsPlain(o.cls) + ' · রোল ' + o.roll + ' · ' + build.note(o)));
-        it.appendChild(m);
-        if (o.phone) { var a = el('a', 'ds-call', '📞'); a.href = 'tel:' + o.phone; a.setAttribute('aria-label', 'ফোন করুন'); it.appendChild(a); }
-        w.appendChild(it);
-      });
-      if (items.length > 5) w.appendChild(el('div', 'ds-more', '… আরও ' + bn(items.length - 5) + ' জন — সম্পূর্ণ তালিকা "সতর্কতা" ট্যাবে'));
+      dsChips(w, list, function () { showTab('alr'); }, mod);
       box.appendChild(w);
     }
-    sect('টানা অনুপস্থিত', dashAlr.streak, { cls: '', badge: function (o) { return bn(o.n); }, note: function (o) { return 'টানা ' + bn(o.n) + ' দিন'; } });
-    sect('কম উপস্থিতি (এ মাস)', dashAlr.low, { cls: 'w', badge: function (o) { return bn(Math.round(o.percent)) + '%'; }, note: function (o) { return bn(o.present) + '/' + bn(o.total) + ' দিন উপস্থিত'; } });
+    sect('টানা অনুপস্থিত', dashAlr.streak, '');
+    sect('কম উপস্থিতি (এ মাস)', dashAlr.low, 'w');
+    if (dashAlr.streak.length || dashAlr.low.length) box.appendChild(el('div', 'ds-more', 'নামসহ তালিকা "সতর্কতা" ট্যাবে'));
+  }
+
+  // শ্রেণিভিত্তিক সংখ্যার চিপ (ট্যাপ করলে সংশ্লিষ্ট ট্যাবে যায়)
+  function dsChips(box, items, onTap, mod) {
+    var wrap = el('div', 'ds-cg');
+    items.slice().sort(function (a, b) { return b.n - a.n; }).forEach(function (o) {
+      var b = el('button', 'ds-cgc' + (mod ? ' ' + mod : '')); b.type = 'button';
+      b.appendChild(el('span', null, clsPlain(o.cls)));
+      b.appendChild(el('b', null, bn(o.n)));
+      b.setAttribute('aria-label', clsPlain(o.cls) + ': ' + bn(o.n) + ' জন');
+      b.onclick = function () { onTap(o); };
+      wrap.appendChild(b);
+    });
+    box.appendChild(wrap);
+  }
+
+  // ===== ড্যাশবোর্ডে মাসিক সারাংশ (পুরো স্কুল, নাম ছাড়া) =====
+  // শ্রেণিগুলোর মাসিক ছক ২টি করে একসাথে এনে যোগ করা হয়; একই মাস/পিরিয়ডে একবারই, ↻ চাপলে আবার
+  var dashMon = null, monReq = 0;
+  function dsMonCalc(cls, rep) {
+    var tp = 0, tt = 0, low = 0, c = {};
+    STATUS.forEach(function (s) { c[s] = 0; });
+    rep.rows.forEach(function (r) {
+      tp += r.present; tt += r.total;
+      STATUS.forEach(function (s) { c[s] += r.counts[s] || 0; });
+      if (r.percent !== null && r.percent < cfg.lowPercent) low++;
+    });
+    return { cls: cls, days: rep.dates.length, stu: rep.rows.length, c: c, tp: tp, tt: tt, low: low,
+             avg: tt ? Math.round(tp * 1000 / tt) / 10 : null };
+  }
+  function loadDashMonth(force) {
+    if (!cfg || !TOKEN || !cfg.classes || !cfg.classes.length) return;
+    var key = cfg.today.substr(0, 7) + '|' + (cur.period || '');
+    if (!force && dashMon && dashMon.key === key) { renderDashMonth(); return; }
+    var id = ++monReq, month = cfg.today.substr(0, 7), list = cfg.classes.slice(), next = 0;
+    dashMon = { key: key, busy: true, rows: [], total: list.length, fin: 0, fails: 0 };
+    renderDashMonth();
+    function pump() {
+      if (id !== monReq || next >= list.length) return;
+      var cls = list[next++];
+      google.script.run
+        .withSuccessHandler(function (rep) { if (id !== monReq) return; dashMon.rows.push(dsMonCalc(cls, rep)); step(); })
+        .withFailureHandler(function () { if (id !== monReq) return; dashMon.fails++; step(); })
+        .getMonthReport(TOKEN, month, cls, cur.period);
+    }
+    function step() {
+      dashMon.fin++;
+      if (dashMon.fin >= list.length) dashMon.busy = false;
+      renderDashMonth();
+      pump();
+    }
+    pump(); pump();
+  }
+  function renderDashMonth() {
+    var box = $('dsMon'); if (!box) return;
+    box.innerHTML = '';
+    if (!dashMon) return;
+    var m = dashMon, card = el('div', 'ds-mon');
+    var h = el('div', 'ds-mon-h');
+    h.appendChild(el('b', null, '🗓️ ' + monthLabel(cfg.today.substr(0, 7)) + ' মাসের সারাংশ'));
+    h.appendChild(el('span', null, m.busy ? 'লোড হচ্ছে ' + bn(m.fin) + '/' + bn(m.total) : ''));
+    var rf = el('button', 'ds-ref' + (m.busy ? ' spin' : ''), '↻');
+    rf.type = 'button'; rf.setAttribute('aria-label', 'মাসিক সারাংশ নতুন করুন');
+    rf.onclick = function () { loadDashMonth(true); };
+    h.appendChild(rf);
+    card.appendChild(h);
+
+    var order = {};
+    cfg.classes.forEach(function (c, i) { order[c] = i; });
+    var rows = m.rows.slice().sort(function (a, b) { return (order[a.cls] || 0) - (order[b.cls] || 0); });
+    var withData = rows.filter(function (r) { return r.days > 0; });
+
+    if (!rows.length) {
+      card.appendChild(el('div', 'ds-mon-note' + (!m.busy ? ' bad' : ''),
+        m.busy ? 'শ্রেণি অনুযায়ী তথ্য আনা হচ্ছে…' : 'মাসিক তথ্য আনা যায়নি। ↻ চেপে আবার চেষ্টা করুন।'));
+      box.appendChild(card);
+      return;
+    }
+
+    var days = 0, stu = 0, pres = 0, abs = 0, tp = 0, tt = 0, low = 0;
+    rows.forEach(function (r) {
+      if (r.days > days) days = r.days;
+      stu += r.stu; pres += r.c[STATUS[0]] || 0; abs += r.c[cfg.absentStatus] || 0; tp += r.tp; tt += r.tt; low += r.low;
+    });
+    var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
+    var tiles = el('div', 'rp-tiles');
+    [['কর্মদিবস', bn(days), ''], ['শিক্ষার্থী', bn(stu), ''],
+     ['মোট উপস্থিত', bn(pres), ' good'], ['মোট অনুপস্থিত', bn(abs), abs ? ' bad' : ''],
+     ['গড় উপস্থিতি', bn(avg) + '%', avg < cfg.lowPercent ? ' bad' : ' good'],
+     ['কম উপস্থিতি', bn(low) + ' জন', low ? ' bad' : ' good']].forEach(function (x) {
+      var d = el('div', 'rp-tile' + x[2]);
+      d.appendChild(el('b', null, x[1]));
+      d.appendChild(el('span', null, x[0]));
+      tiles.appendChild(d);
+    });
+    card.appendChild(tiles);
+
+    withData.forEach(function (r) {
+      var isLow = r.avg !== null && r.avg < cfg.lowPercent;
+      var b = el('button', 'ds-mrow' + (isLow ? ' low' : '')); b.type = 'button';
+      b.appendChild(el('span', 'mn', clsPlain(r.cls)));
+      var bar = el('span', 'mb'), fi = el('i');
+      fi.style.width = Math.max(0, Math.min(100, r.avg || 0)) + '%';
+      bar.appendChild(fi); b.appendChild(bar);
+      b.appendChild(el('span', 'mv', r.avg === null ? '–' : bn(r.avg) + '%'));
+      b.appendChild(el('span', 'mw', r.low ? '⚠️ ' + bn(r.low) : ''));
+      b.setAttribute('aria-label', clsPlain(r.cls) + ': গড় উপস্থিতি ' + (r.avg === null ? 'নেই' : bn(r.avg) + ' শতাংশ') + (r.low ? ', কম উপস্থিতি ' + bn(r.low) + ' জন' : ''));
+      b.onclick = function () { $('mmonth').value = cfg.today.substr(0, 7); $('mcls').value = r.cls; showTab('mon'); loadMonth(); };
+      card.appendChild(b);
+    });
+    if (!withData.length && !m.busy) card.appendChild(el('div', 'ds-mon-note', 'এই মাসে এখনো কোনো শ্রেণির হাজিরা নেই'));
+    if (!m.busy && m.fails) card.appendChild(el('div', 'ds-mon-note bad', '⚠️ ' + bn(m.fails) + 'টি শ্রেণির তথ্য আনা যায়নি — ↻ চেপে আবার চেষ্টা করুন'));
+    box.appendChild(card);
   }
 
   // রিপোর্ট ট্যাব খুললে তারিখের ঘরে আজকের তারিখ বসবে
@@ -5170,6 +5482,8 @@
       var cbs = document.querySelectorAll('#regBox .reg-card-cb');
       for (var k = 0; k < cbs.length; k++) {
         cbs[k].checked = all.checked;
+        var cc = cbs[k].closest ? cbs[k].closest('.card') : null;
+        if (cc) cc.classList.toggle('sel', all.checked);
         if (all.checked) regSel[regItems[k].id] = regItems[k];
       }
       updateBulk();
@@ -5190,8 +5504,8 @@
     box.appendChild(bulk);
     updateBulk();
 
-    d.items.forEach(function (o) {
-      var card = el('div', 'card');
+    d.items.forEach(function (o, ix) {
+      var card = stg(el('div', 'card'), ix);
 
       var top = el('div', 'reg-top');
       var cb = document.createElement('input');
@@ -5199,8 +5513,10 @@
       cb.setAttribute('aria-label', 'বাছাই করুন');
       cb.onchange = function () {
         if (cb.checked) regSel[o.id] = o; else delete regSel[o.id];
+        card.classList.toggle('sel', cb.checked);
         updateBulk();
       };
+      top.onclick = function (ev) { if (ev.target === cb) return; cb.checked = !cb.checked; cb.onchange(); };   // ছবি/নামে ট্যাপ = বাছাই
       top.appendChild(cb);
       var ph = el('div', 'reg-ph');
       if (o.photo && o.photo.indexOf('data:image/') === 0) {
@@ -5208,7 +5524,9 @@
         im.src = o.photo; im.alt = '';
         ph.appendChild(im);
       } else {
-        ph.textContent = 'ছবি নেই';
+        ph.className += ' noimg';
+        ph.textContent = Array.from(String(o.nameBn || o.nameEn || '?').trim())[0] || '?';
+        ph.setAttribute('aria-label', 'ছবি নেই');
       }
       top.appendChild(ph);
 
@@ -5274,7 +5592,9 @@
         im.src = o.photo; im.alt = '';
         ph.appendChild(im);
       } else {
-        ph.textContent = 'ছবি নেই';
+        ph.className += ' noimg';
+        ph.textContent = Array.from(String(o.nameBn || o.nameEn || '?').trim())[0] || '?';
+        ph.setAttribute('aria-label', 'ছবি নেই');
       }
       top.appendChild(ph);
       var inf = el('div', 'reg-inf');
