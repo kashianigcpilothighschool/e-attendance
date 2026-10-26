@@ -1195,6 +1195,20 @@
     body.appmode #sess .sess-sel { background:var(--bg); color:var(--ink); border:1px solid var(--line); }
   }
 
+  /* ===== আগের দিনের তুলনা ও জন্মদিন কার্ড ===== */
+  .ds-cmp { margin-top:12px; padding:12px 14px; border-radius:20px; background:var(--surface); border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .ds-cmp-m { font-size:15px; font-weight:600; }
+  .ds-cmp-m b { font-size:20px; margin-right:4px; }
+  .ds-cmp-m.up b { color:var(--p-t); } .ds-cmp-m.down b { color:var(--a-t); } .ds-cmp-m.same b { color:var(--l-t); }
+  .ds-cmp-t { margin-top:4px; font-size:12.5px; color:var(--mute); font-weight:600; line-height:1.6; }
+  .ds-bd { margin-top:12px; padding:12px 14px; border-radius:20px; border:1px solid color-mix(in srgb,var(--l) 30%,transparent);
+           background:linear-gradient(160deg,var(--l-l),var(--surface)); box-shadow:var(--soft); }
+  .ds-bd-h { font-size:15px; font-weight:700; color:var(--l-t); margin-bottom:8px; }
+  .ds-bd-l { display:flex; flex-wrap:wrap; gap:8px; }
+  .ds-bd-c { padding:8px 12px; border-radius:14px; background:var(--surface); border:1px solid var(--line); }
+  .ds-bd-c b { display:block; font-size:14.5px; }
+  .ds-bd-c small { display:block; font-size:12px; color:var(--mute); font-weight:600; }
+
   /* ===== হাজিরা সিট আধুনিক (v14) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
   #t-att > .card:first-child { padding:14px; border-radius:24px; }
   #t-att .datenav .chipbtn { min-height:38px; padding:7px 14px; font-size:13px; }
@@ -1544,7 +1558,9 @@
         <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="সারাংশ নতুন করুন">↻</button></div>
       <div class="ds-hol" id="dsHol" style="display:none"></div>
       <div id="dsTot" style="display:none"></div>
+      <div id="dsCmp"></div>
       <div class="ds-kpi" id="dsKpi"></div>
+      <div id="dsBday"></div>
       <div id="dsMon"></div>
       <div class="ds-sec">শ্রেণি অনুযায়ী</div>
       <div class="ds-grid" id="dsGrid"></div>
@@ -2350,6 +2366,7 @@
 
   function showLogin() {
     dashData = null; dashAlr = null; dashAgg = null; dashMon = null; monReq++; dashBusy = false; dashFail = false; dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
+    dashPrev = null; dashToday = null; prevReq++;
     $('app').style.display = 'none';
     $('denied').style.display = 'none';
     $('login').style.display = 'block';
@@ -4952,7 +4969,87 @@
     dashAgg = { nDone: nDone, nCls: nCls, rate: done ? Math.round(cnt[cfg.absentStatus] * 1000 / done) / 10 : null };
     renderKpi();
     dsSync();
+    dashToday = { pct: pct, done: done, abs: cnt[cfg.absentStatus] || 0 };
+    renderCmp();
+    renderBday(d);
+    loadDashPrev();
     loadDashMonth(false);
+  }
+
+  // ===== ড্যাশবোর্ড: আগের কর্মদিবসের সাথে তুলনা ও আজকের জন্মদিন =====
+  var dashPrev = null, dashToday = null, prevReq = 0;
+
+  // আজ থেকে পিছিয়ে (সর্বোচ্চ ৭ দিন) প্রথম যে দিনে হাজিরা নেওয়া হয়েছে সেটি খোঁজে; ছুটির দিন বাদ
+  function loadDashPrev() {
+    if (!cfg || !TOKEN) return;
+    var id = ++prevReq, k = 1;
+    (function step() {
+      if (id !== prevReq) return;
+      if (k > 7) { dashPrev = { none: true }; renderCmp(); return; }
+      var date = rngAddDays(cfg.today, -k), seen = 0;
+      google.script.run
+        .withSuccessHandler(function (s) {
+          if (id !== prevReq) return;
+          seen++;
+          var P = STATUS[0], cnt = {}, done = 0;
+          STATUS.forEach(function (x) { cnt[x] = 0; });
+          if (!s.holiday) s.classes.forEach(function (c) {
+            if (c.taken) STATUS.forEach(function (x) { cnt[x] += c.counts[x] || 0; });
+          });
+          STATUS.forEach(function (x) { done += cnt[x]; });
+          if (done > 0) {
+            dashPrev = { date: date, back: k, pct: Math.round(cnt[P] * 1000 / done) / 10, abs: cnt[cfg.absentStatus] || 0 };
+            renderCmp();
+            return;
+          }
+          if (seen === 1) { k++; step(); }     // এই দিনে হাজিরা নেই বা ছুটি — আরও আগের দিনে যাও
+        })
+        .withFailureHandler(function () { if (id === prevReq) { dashPrev = { none: true }; renderCmp(); } })
+        .getDaySummary(TOKEN, date, cur.period);
+    })();
+  }
+
+  function renderCmp() {
+    var box = $('dsCmp'); if (!box) return;
+    box.innerHTML = '';
+    var p = dashPrev, t = dashToday;
+    if (!p || p.none || !t) return;
+    var lbl = p.back === 1 ? 'গতকাল' : 'আগের কর্মদিবস (' + fmtDM(p.date) + ')';
+    var card = el('div', 'ds-cmp');
+    if (!t.done) {                       // আজ এখনো হাজিরা শুরু হয়নি
+      card.appendChild(el('div', 'ds-cmp-t', lbl + ' উপস্থিতি ছিল ' + bn(p.pct) + '%, অনুপস্থিত ' + bn(p.abs) + ' জন'));
+      box.appendChild(card);
+      return;
+    }
+    var dp = Math.round((t.pct - p.pct) * 10) / 10, da = t.abs - p.abs;
+    var cls = dp > 0 ? 'up' : (dp < 0 ? 'down' : 'same');
+    var arrow = dp > 0 ? '▲ +' : (dp < 0 ? '▼ −' : '＝ ');
+    var main = el('div', 'ds-cmp-m ' + cls);
+    main.appendChild(el('b', null, arrow + bn(Math.abs(dp)) + '%'));
+    main.appendChild(el('span', null, ' ' + (p.back === 1 ? 'গতকালের' : 'আগের কর্মদিবসের (' + fmtDM(p.date) + ')') + ' চেয়ে ' + (dp > 0 ? 'বেশি' : (dp < 0 ? 'কম' : 'একই'))));
+    card.appendChild(main);
+    card.appendChild(el('div', 'ds-cmp-t',
+      lbl + ': উপস্থিতি ' + bn(p.pct) + '% · অনুপস্থিত ' + bn(p.abs) + ' জন   →   আজ: ' + bn(t.pct) + '% · অনুপস্থিত ' + bn(t.abs) + ' জন' +
+      (da ? ' (' + (da > 0 ? '+' : '−') + bn(Math.abs(da)) + ' জন)' : '')));
+    box.appendChild(card);
+  }
+
+  function renderBday(d) {
+    var box = $('dsBday'); if (!box) return;
+    box.innerHTML = '';
+    var list = (d && d.birthdays) || [];
+    if (!list.length) return;
+    var card = el('div', 'ds-bd');
+    card.appendChild(el('div', 'ds-bd-h', '🎂 আজকের জন্মদিন (' + bn(list.length) + ' জন)'));
+    var wrap = el('div', 'ds-bd-l');
+    list.forEach(function (b) {
+      var c = el('div', 'ds-bd-c');
+      c.appendChild(el('b', null, b.name));
+      c.appendChild(el('small', null, 'শ্রেণি ' + clsPlain(b.cls) + ' · রোল ' + b.roll + ' · ' + bn(b.age) + ' বছর'));
+      wrap.appendChild(c);
+    });
+    card.appendChild(wrap);
+    box.appendChild(card);
   }
 
   // ===== ড্যাশবোর্ডের বাড়তি তথ্য: KPI + সতর্কতা তালিকা =====
