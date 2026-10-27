@@ -1446,6 +1446,48 @@
   #t-att .dline input[type=date] { width:140px; }
   #t-att .dline select#cls { width:150px; }
   #t-att .dline .chipbtn { flex:0 0 auto; white-space:nowrap; margin:0; }
+  /* ===== শিক্ষার্থী তালিকা লুকানো/দেখানো ===== */
+  #list .gate, #list .listbar { grid-column:1 / -1; }
+  #list .gate .detail { margin:2px 0 12px; }
+  #list .listbar { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px;
+                   padding:8px 12px; border-radius:16px; background:var(--pine-l); color:var(--pine); font-size:13px; font-weight:600; }
+  #list .listbar .lb-a { display:flex; gap:6px; }
+  /* সব বোতাম এক লাইনে (পাশে স্ক্রল করা যায়) */
+  #t-att .toolline { display:flex; flex-wrap:nowrap; align-items:center; gap:6px; margin-top:10px; padding:2px 2px 4px;
+                     overflow-x:auto; scrollbar-width:none; }
+  #t-att .toolline::-webkit-scrollbar { display:none; }
+  #t-att .toolline > .actrow, #t-att .toolline > .datenav { display:contents; }
+  #t-att .toolline button { flex:0 0 auto; white-space:nowrap; }
+  #t-att .toolline .chipbtn { min-height:40px; padding:6px 12px; }
+  #t-mon .rprow { display:flex; flex-wrap:nowrap; gap:8px; margin-top:12px; overflow-x:auto; scrollbar-width:none; }
+  #t-mon .rprow::-webkit-scrollbar { display:none; }
+  #t-mon .rprow button { flex:0 0 auto; width:auto; min-height:46px; padding:8px 14px; font-size:15px; white-space:nowrap; border-radius:99px; }
+  #t-mon .rprow .save { flex:1 1 auto; font-size:16px; }
+  #t-mon .rprow #rpViewBtn.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; border-color:transparent; }
+  :root[data-theme="dark"] #t-mon .rprow #rpViewBtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-mon .rprow #rpViewBtn.on { color:#05201a; } }
+  /* তারিখ ও শ্রেণির পরে: 👁 / ✏️ / জমা বোতাম */
+  #t-att .dline { display:block; overflow:visible; }
+  #t-att .dline > .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #t-att .dline .grid > div { margin:0; min-width:0; }
+  #t-att .dline input[type=date], #t-att .dline select#cls { width:100%; }
+  #t-att .actrow { display:flex; gap:8px; margin-top:10px; }
+  #t-att .actrow button { flex:0 0 auto; width:auto; min-height:44px; padding:8px 14px; font-size:15px; white-space:nowrap; border-radius:99px; }
+  #t-att .actrow .save { flex:0 0 auto; font-size:16px; }
+  #t-att .actrow #viewBtn.on, #t-att .actrow #editBtn.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; border-color:transparent; }
+  :root[data-theme="dark"] #t-att .actrow #viewBtn.on, :root[data-theme="dark"] #t-att .actrow #editBtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-att .actrow #viewBtn.on, :root:not([data-theme="light"]) #t-att .actrow #editBtn.on { color:#05201a; } }
+  #list .gate { padding:16px; }
+  #list .gate-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  #list .gate-top .cls-title { margin-bottom:0 !important; }
+  #list .gate-top .pchip { margin:0; flex:none; }
+  #list .gate-chips { margin:0 0 10px; }
+  #list .gate .abs-line { margin:0 0 12px; }
+  #list .gate .act { width:100%; }
+  #list .gate .btn2 { margin-bottom:0; }
+  #list .gate .gate-next { margin-top:10px; }
+  #list.ro .btns { pointer-events:none; opacity:.9; }
+  #list.ro + .bar { display:none !important; }
 </style>
 <style id="pageStyle"></style>
 </head>
@@ -1595,6 +1637,13 @@
           </select>
         </div>
       </div>
+      </div>
+      <div class="toolline">
+      <div class="actrow" id="actRow">
+        <button type="button" class="act alt" id="viewBtn" onclick="toggleView()" aria-pressed="false" disabled>👁 দেখুন</button>
+        <button type="button" class="act alt" id="editBtn" onclick="editMode()" style="display:none" disabled>✏️ পরিবর্তন</button>
+        <button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>জমা দিন</button>
+      </div>
       <div class="datenav">
         <button type="button" class="chipbtn" onclick="stepDate(-1)">‹ আগের দিন</button>
         <button type="button" class="chipbtn" onclick="stepDate(0)">আজ</button>
@@ -1655,52 +1704,53 @@
 
   <!-- ৩. রিপোর্ট (মাসিক ছক + প্রিন্ট) — সারাংশ এখন ড্যাশবোর্ডে -->
   <section id="t-mon" class="wrap" style="display:none">
-    <div class="pro-step"><i>১</i><div><b>মাসিক ছক</b><small>মাস ও শ্রেণি বাছাই করলে ছক দেখা যাবে</small></div></div>
     <div class="card">
+      <div class="cls-title">রিপোর্ট</div>
       <div class="grid">
         <div>
           <label for="mmonth">মাস</label>
-          <input type="month" id="mmonth" onchange="loadMonth()">
+          <input type="month" id="mmonth" onchange="onMonSel()">
         </div>
         <div>
           <label for="mcls">শ্রেণি</label>
-          <select id="mcls" onchange="loadMonth()">
+          <select id="mcls" onchange="onMonSel()">
             <option value="">-- বাছাই করুন --</option>
           </select>
         </div>
       </div>
+      <div class="grid" style="margin-top:8px">
+        <div>
+          <label for="rpDate">তারিখ (দৈনিক তালিকার জন্য)</label>
+          <input type="date" id="rpDate">
+        </div>
+        <div>
+          <label for="rpFeature">কী প্রিন্ট করবেন</label>
+          <select id="rpFeature" onchange="onRpFeature()">
+            <option value="monthly">🗓️ মাসিক রিপোর্ট (ছক)</option>
+            <option value="daily-all">📋 দৈনিক — সব হাজিরা</option>
+            <option value="daily-P">✅ দৈনিক — উপস্থিত তালিকা</option>
+            <option value="daily-A">❌ দৈনিক — অনুপস্থিত তালিকা</option>
+            <option value="daily-blank">📝 দৈনিক — খালি তালিকা</option>
+            <option value="summary">📊 দিনের সারাংশ (সব শ্রেণি)</option>
+            <option value="alerts">⚠️ সতর্কতা (কম উপস্থিতি)</option>
+            <option value="range">📅 তারিখ রেঞ্জ অনুযায়ী</option>
+          </select>
+        </div>
+      </div>
+      <div class="rprow">
+        <button type="button" class="act alt" id="rpViewBtn" onclick="toggleMonView()" aria-pressed="false">👁 দেখুন</button>
+        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()">🖨️ প্রিন্ট</button>
+        <button type="button" class="act alt" id="expBtn" onclick="exportReport()" disabled title="Sheet-এ রিপোর্ট">📤 Sheet</button>
+      </div>
       <div class="note" id="mnote"></div>
-    </div>
-    <div id="monBox"><div class="empty">শ্রেণি বাছাই করুন</div></div>
-    <div class="btn2">
-      <button class="act" id="pBtn" type="button" onclick="printMonth()" disabled>মাসিক প্রিন্ট</button>
-      <button class="act alt" id="expBtn" type="button" onclick="exportReport()" disabled>Sheet-এ রিপোর্ট</button>
-    </div>
-    <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
-
-    <div class="pro-step"><i>২</i><div><b>প্রিন্ট</b><small>দৈনিক তালিকা ও অন্যান্য রিপোর্ট</small></div></div>
-    <div class="card">
-      <label for="rpDate">তারিখ (দৈনিক তালিকার জন্য)</label>
-      <input type="date" id="rpDate">
-
-      <div class="rp-h">দৈনিক হাজিরা — ওপরে বাছাই করা শ্রেণির</div>
-      <div class="rp-grid">
-        <button class="act alt" type="button" onclick="rpDaily('P')">✅ উপস্থিত তালিকা</button>
-        <button class="act alt" type="button" onclick="rpDaily('A')">❌ অনুপস্থিত তালিকা</button>
-        <button class="act alt" type="button" onclick="rpDaily('all')">📋 সব হাজিরা</button>
-        <button class="act alt" type="button" onclick="rpDaily('blank')">📝 খালি তালিকা</button>
-      </div>
-
-      <div class="rp-h">অন্যান্য</div>
-      <div class="rp-grid three">
-        <button class="act alt" type="button" onclick="rpAlerts()">⚠️ সতর্কতা (কম উপস্থিতি)</button>
-        <button class="act alt" type="button" onclick="rpMonth()">🗓️ মাসিক রিপোর্ট</button>
-        <button class="act alt" type="button" onclick="rpOpenRange()">📅 তারিখ রেঞ্জ ↓</button>
-      </div>
+      <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
     </div>
 
-    <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট (ভাঁজ করা থাকে) -->
-    <details class="card rp-det" id="rpRange" style="margin-top:14px">
+    <!-- 👁 চাপলে মাসিক ছক (শিক্ষার্থীসহ) দেখা যায়; ডিফল্টে লুকানো -->
+    <div id="monBox"></div>
+
+    <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট (শুধু "তারিখ রেঞ্জ" বাছলে দেখা যায়) -->
+    <details class="card rp-det" id="rpRange" style="margin-top:14px;display:none">
       <summary class="cls-title">৩ · তারিখ রেঞ্জ অনুযায়ী প্রিন্ট</summary>
       <div class="grid">
         <div>
@@ -1837,14 +1887,7 @@
   </section>
 </div>
 
-<div class="bar">
-  <div class="bar-in">
-    <div class="meter" id="meter"></div>
-    <div class="sum" id="sum">—</div>
-    <button class="save" id="saveBtn" type="button" onclick="submitAtt()" disabled>হাজিরা জমা দিন</button>
-  </div>
-</div>
-<script>/* জমা বোতামকে শিক্ষার্থী তালিকার ঠিক নিচে সরানো */(function(){var b=document.querySelector(".bar"),l=document.getElementById("list");if(b&&l&&l.parentNode)l.parentNode.insertBefore(b,l.nextSibling);})();</script>
+<div style="display:none"><div id="meter"></div><div id="sum"></div></div>
 
 <div class="modal" id="edModal" onclick="if (event.target === this) closeEdit()">
   <div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="edTitle">
@@ -2217,10 +2260,12 @@
   var attStale = false;
   var attFilter = '';
   var attTaken = false;
+  var listOpen = false, listMode = 'edit';   // শিক্ষার্থী তালিকা ডিফল্টে লুকানো; mode: edit | view
   var curTab = 'home';
   var cur = { date: '', cls: '', period: '' };
   var rq = { att: 0, sum: 0, mon: 0, alr: 0, reg: 0 };
   var monData = null;
+  var monOpen = false;   // রিপোর্টে শিক্ষার্থী ছক ডিফল্টে লুকানো
   var sumData = null;
 
   // ===== লগইন সেশন =====
@@ -2235,6 +2280,21 @@
     if (cls) e.className = cls;
     if (text !== undefined && text !== null) e.textContent = text;
     return e;
+  }
+
+  function rollNum(r) {
+    var n = parseFloat(String(r === undefined || r === null ? '' : r).replace(/[০-৯]/g, function (d) { return '০১২৩৪৫৬৭৮৯'.indexOf(d); }).replace(/[^\d.]/g, ''));
+    return isNaN(n) ? Infinity : n;
+  }
+  function cmpRoll(a, b) {
+    var x = rollNum(a), y = rollNum(b);
+    if (x !== y) return x - y;
+    a = String(a); b = String(b);
+    return a < b ? -1 : (a > b ? 1 : 0);
+  }
+  function sortByRoll(list, key) {
+    if (list && list.sort) list.sort(function (p, q) { return cmpRoll(key ? p[key] : p, key ? q[key] : q); });
+    return list;
   }
 
   function bn(x) {
@@ -2346,7 +2406,7 @@
   function fail(e) {
     if (e && String(e.message || e).indexOf('SESSION_EXPIRED') !== -1) { sessionExpired(); return; }
     loading(false);
-    $('saveBtn').disabled = !(students.length && !blocked);
+    $('saveBtn').disabled = !(students.length && !blocked && listOpen && listMode === 'edit');
     toast('ত্রুটি: ' + friendlyErr(e), true);
   }
 
@@ -2571,7 +2631,7 @@
     if (t === 'att') { if (attStale) loadClass(); }
     else if (t === 'home') loadDash();
     else if (t === 'sum') loadSummary();
-    else if (t === 'mon') loadMonth();
+    else if (t === 'mon') monInit();
     else if (t === 'reg') loadPending();
     else if (t === 'pro') { /* বাছাইয়ের পর লোড হবে */ }
     else if (t === 'ff') ffOpen();
@@ -2582,7 +2642,7 @@
     if (curTab === 'home') loadDash();
     else if (curTab === 'att') { loadClass(); loadDash(); }
     else if (curTab === 'sum') loadSummary();
-    else if (curTab === 'mon') loadMonth();
+    else if (curTab === 'mon') monRefresh();
     else if (curTab === 'reg') loadPending();
     else if (curTab === 'pro') loadPromo();
     else if (curTab === 'ff') { if (!ffLeaveOk()) return; if (ffCfg) loadFf(); else ffOpen(); }
@@ -2615,7 +2675,7 @@
   function loadClass() {
     var cls = $('cls').value, date = $('date').value;
     cur.date = date; cur.cls = cls;
-    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attTaken = false;
+    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attTaken = false; listOpen = false; listMode = 'edit';
     $('q').value = '';
     setNote('note', '');
     renderList();
@@ -2626,7 +2686,7 @@
       .withSuccessHandler(function (d) {
         if (id !== rq.att) return;
         blocked = !!d.blocked;
-        students = blocked ? [] : d.students;
+        students = blocked ? [] : sortByRoll(d.students.slice(), 'roll');
         state = {};
         students.forEach(function (s) { state[s.roll] = d.saved[s.roll] || cfg.defaultStatus; });
         attTaken = Object.keys(d.saved).length > 0;
@@ -2642,7 +2702,7 @@
             if (dr[s.roll] && STATUS.indexOf(dr[s.roll]) !== -1 && dr[s.roll] !== state[s.roll]) { state[s.roll] = dr[s.roll]; back++; }
           });
           if (back) {
-            dirty = true;
+            dirty = true; listOpen = true;
             setNote('note', bn(back) + ' জনের অসংরক্ষিত পরিবর্তন খসড়া থেকে ফিরিয়ে আনা হয়েছে — যাচাই করে জমা দিন।');
           } else { clearDraft(); }
         }
@@ -2657,8 +2717,9 @@
     var box = $('list');
     box.innerHTML = '';
     rowEls = [];
-    $('tools').style.display = students.length ? 'flex' : 'none';
-    $('searchCard').style.display = students.length > 8 ? 'block' : 'none';
+    box.classList.toggle('ro', !!(students.length && listOpen && listMode === 'view'));
+    $('tools').style.display = (students.length && listOpen) ? 'flex' : 'none';
+    $('searchCard').style.display = (students.length > 8 && listOpen) ? 'block' : 'none';
 
     if (!students.length) {
       if (cfg && !cfg.classes.length) {
@@ -2674,6 +2735,9 @@
       updateBar();
       return;
     }
+
+    if (!listOpen) { renderGate(box); updateBar(); return; }
+    box.appendChild(listBar());
 
     students.forEach(function (s, ix) {
       var row = stg(el('div', 'row'), ix);
@@ -2753,6 +2817,90 @@
     loadClass();
   }
 
+  // ===== শিক্ষার্থী তালিকা: ডিফল্টে লুকানো, বোতামে দেখা যায় =====
+  function renderGate(box) {
+    var g = el('div', 'card gate');
+    var top = el('div', 'gate-top');
+    top.appendChild(el('div', 'cls-title', 'শ্রেণি ' + clsPlain(cur.cls)));
+    top.appendChild(el('span', 'pchip ' + (attTaken ? 'up' : 'same'), attTaken ? '✅ জমা আছে' : '⏳ হাজিরা বাকি'));
+    g.appendChild(top);
+    g.appendChild(el('div', 'detail', 'তারিখ: ' + fmtFull(cur.date) + ' · মোট ' + bn(students.length) + ' জন'));
+
+    if (attTaken) {                       // জমা থাকলে সংখ্যা ও অনুপস্থিতের রোল
+      var c = {}, n = students.length;
+      STATUS.forEach(function (s) { c[s] = 0; });
+      students.forEach(function (s) { if (c[state[s.roll]] !== undefined) c[state[s.roll]]++; });
+      var here = c[STATUS[0]] + (STATUS[3] ? c[STATUS[3]] : 0);
+      var chips = el('div', 'gate-chips');
+      chips.appendChild(el('span', 'pill s0', 'উপস্থিতি ' + bn(n ? Math.round(here * 1000 / n) / 10 : 0) + '%'));
+      STATUS.forEach(function (s, k) { if (c[s]) chips.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' ' + bn(c[s]))); });
+      g.appendChild(chips);
+      var abs = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; }).map(function (s) { return s.roll; });
+      if (abs.length) g.appendChild(el('div', 'abs-line', 'অনুপস্থিত রোল: ' + abs.join(', ')));
+    }
+    g.appendChild(el('div', 'detail', attTaken
+      ? 'তালিকা দেখতে ওপরের 👁 চাপুন, সংশোধন করতে ✏️ পরিবর্তন চাপুন।'
+      : 'শিক্ষার্থী তালিকা খুলে হাজিরা নিতে ওপরের 👁 চাপুন।'));
+
+    var tm = takenMap();                  // আজকের তারিখে অন্য বাকি শ্রেণি থাকলে দ্রুত যাওয়ার বোতাম
+    if (tm) {
+      var left = Object.keys(tm).filter(function (k) { return tm[k] === false && k !== cur.cls; }).length;
+      if (left) {
+        var nx = el('button', 'act alt gate-next', '⏭ পরের বাকি শ্রেণি (' + bn(left) + 'টি বাকি)'); nx.type = 'button';
+        nx.onclick = nextPending;
+        g.appendChild(nx);
+      }
+    }
+    box.appendChild(g);
+  }
+
+  function listBar() {                    // শুধু অবস্থার লেখা; লুকানোর বোতাম নেই (👁 দিয়েই হয়)
+    return el('div', 'listbar', listMode === 'view'
+      ? '👁 শুধু দেখা হচ্ছে — সংশোধন করতে ওপরের ✏️ পরিবর্তন চাপুন'
+      : (attTaken ? '✏️ হাজিরা সংশোধন হচ্ছে' : 'হাজিরা নেওয়া হচ্ছে'));
+  }
+
+  // 👁 এক ক্লিকে দেখায়, আবার ক্লিকে লুকায়
+  function toggleView() {
+    if (!students.length || blocked) { toast('আগে শ্রেণি বাছাই করুন', true); return; }
+    if (listOpen) { closeList(); return; }
+    openList(attTaken ? 'view' : 'edit');
+  }
+
+  function editMode() {
+    if (!students.length || blocked) return;
+    if (listOpen && listMode === 'edit') return;
+    openList('edit');
+  }
+
+  function syncActRow() {
+    var v = $('viewBtn'), e = $('editBtn');
+    if (!v || !e) return;
+    var has = students.length > 0 && !blocked;
+    v.disabled = !has; e.disabled = !has;
+    v.classList.toggle('on', listOpen);
+    v.setAttribute('aria-pressed', listOpen ? 'true' : 'false');
+    v.textContent = listOpen ? '👁 লুকান' : '👁 দেখুন';
+    e.style.display = attTaken ? '' : 'none';           // পরিবর্তন শুধু জমা থাকা শ্রেণিতে
+    e.classList.toggle('on', listOpen && listMode === 'edit');
+  }
+
+  function openList(mode) {
+    listOpen = true; listMode = mode || 'edit';
+    $('q').value = ''; attFilter = '';
+    renderList();
+    var bx = $('list'); if (bx && bx.scrollIntoView) { try { bx.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+  }
+
+  function closeList() {
+    if (dirty) {
+      if (!confirm('সংরক্ষণ না করা পরিবর্তন মুছে যাবে। তালিকা লুকাবেন?')) return;
+      dirty = false; clearDraft(); loadClass(); return;
+    }
+    listOpen = false; listMode = 'edit';
+    renderList();
+  }
+
   function applySearch() {
     var q = $('q').value.trim().toLowerCase();
     rowEls.forEach(function (r) {
@@ -2773,6 +2921,7 @@
   }
 
   function updateBar() {
+    syncActRow();
     var meter = $('meter');
     var hero = $('hero');
     meter.innerHTML = '';
@@ -2781,6 +2930,15 @@
       $('fbar').style.display = 'none';
       $('absLine').textContent = '';
       $('sum').textContent = '—';
+      $('saveBtn').disabled = true;
+      return;
+    }
+    if (!listOpen) {          // তালিকা লুকানো — সংখ্যা গেট কার্ডেই দেখানো হয়
+      hero.style.display = 'none';
+      $('fbar').style.display = 'none';
+      $('absLine').textContent = '';
+      $('sum').textContent = '—';
+      $('saveBtn').textContent = attTaken ? '✔ জমা আছে' : 'জমা দিন';
       $('saveBtn').disabled = true;
       return;
     }
@@ -2810,10 +2968,8 @@
 
     $('sum').textContent = 'মোট ' + bn(students.length) + ' জন | ' +
       STATUS.map(function (s) { return s + ' ' + bn(c[s]); }).join(' | ') + (dirty ? ' | ● অসংরক্ষিত' : '');
-    $('saveBtn').textContent = dirty
-      ? (attTaken ? 'সংশোধন জমা দিন' : 'হাজিরা জমা দিন')
-      : (attTaken ? '✔ জমা আছে — আবার জমা দিন' : 'হাজিরা জমা দিন');
-    $('saveBtn').disabled = false;
+    $('saveBtn').textContent = dirty ? (attTaken ? 'সংশোধন জমা' : 'জমা দিন') : (attTaken ? '✔ জমা আছে' : 'জমা দিন');
+    $('saveBtn').disabled = (listMode === 'view');
 
     // অনুপস্থিতদের রোল একনজরে
     var absRolls = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; })
@@ -2833,6 +2989,7 @@
     mk('সব (' + bn(students.length) + ')', '');
     STATUS.forEach(function (st) { if (c[st]) mk(st + ' ' + cfg.labels[st] + ' (' + bn(c[st]) + ')', st); });
     if (attFilter && !c[attFilter]) { attFilter = ''; applySearch(); }
+    if (!listOpen) fb.style.display = 'none';
   }
 
   function submitAtt() {
@@ -2855,11 +3012,14 @@
     google.script.run
       .withSuccessHandler(function (res) {
         loading(false);
+        listOpen = false; listMode = 'edit';   // জমার পর তালিকা অটো লুকানো
         dirty = false;
         attTaken = true;
         clearDraft();
+        attFilter = ''; $('q').value = '';
+        renderList();
+        window.scrollTo(0, 0);
         updateBar();
-        $('saveBtn').disabled = false;
         loadDash();
         setNote('note', 'এই তারিখের হাজিরা জমা আছে। সংশোধন করলে আবার জমা দিন।');
         var parts = STATUS.map(function (s) { return s + ' ' + bn(res.counts[s]); }).join(', ');
@@ -2951,27 +3111,61 @@
   }
 
   // ===== ৩. মাসিক তারিখভিত্তিক ছক =====
-  function loadMonth() {
+  function loadMonth(cb) {
     var month = $('mmonth').value, cls = $('mcls').value;
     var box = $('monBox');
     monData = null;
-    $('pBtn').disabled = true;
-    $('expBtn').disabled = true;
     $('expLink').style.display = 'none';
     setNote('mnote', '');
     box.innerHTML = '';
-    if (!cls || !month) { box.appendChild(el('div', 'empty', 'শ্রেণি ও মাস বাছাই করুন')); return; }
+    if (!cls || !month) { if (monOpen) box.appendChild(el('div', 'empty', 'শ্রেণি ও মাস বাছাই করুন')); monSync(); return; }
     var id = ++rq.mon;
-    loading(true, 'ছক তৈরি হচ্ছে...');
+    loading(true, 'রিপোর্টের তথ্য আনা হচ্ছে...');
     google.script.run
       .withSuccessHandler(function (rep) {
         if (id !== rq.mon) return;
+        sortByRoll(rep.rows, 'roll');
         monData = rep;
-        renderMonth(rep);
+        if (monOpen) renderMonth(rep);          // লুকানো থাকলে ছক আঁকা হয় না
+        monSync();
         loading(false);
+        if (typeof cb === 'function') cb(rep);
       })
       .withFailureHandler(function (e) { if (id === rq.mon) fail(e); })
       .getMonthReport(TOKEN, month, cls, cur.period);
+  }
+
+  // ===== রিপোর্ট ট্যাব: 👁 ছক দেখা/লুকানো, ফিচার বেছে প্রিন্ট =====
+  function monSync() {
+    var v = $('rpViewBtn'); if (!v) return;
+    v.classList.toggle('on', monOpen);
+    v.setAttribute('aria-pressed', monOpen ? 'true' : 'false');
+    v.textContent = monOpen ? '👁 লুকান' : '👁 দেখুন';
+    $('expBtn').disabled = !($('mcls').value && $('mmonth').value);
+  }
+  function toggleMonView() {
+    if (monOpen) { monOpen = false; $('monBox').innerHTML = ''; monSync(); return; }
+    if (!$('mcls').value || !$('mmonth').value) { toast('আগে মাস ও শ্রেণি বাছাই করুন', true); return; }
+    monOpen = true; monSync(); loadMonth();
+  }
+  function onMonSel() {
+    monData = null; $('monBox').innerHTML = ''; $('expLink').style.display = 'none'; setNote('mnote', '');
+    monSync();
+    if (monOpen) loadMonth();
+  }
+  function onRpFeature() {
+    var f = $('rpFeature').value, r = $('rpRange');
+    if (r) { r.style.display = f === 'range' ? '' : 'none'; if (f === 'range') r.open = true; }
+  }
+  function monInit() { monSync(); onRpFeature(); if (monOpen && !monData) loadMonth(); }
+  function monRefresh() { monData = null; if (monOpen) loadMonth(); else { $('monBox').innerHTML = ''; monSync(); } }
+  function rpPrint() {
+    var f = $('rpFeature').value;
+    if (f === 'monthly') rpMonth();
+    else if (f.indexOf('daily-') === 0) rpDaily(f.substr(6));
+    else if (f === 'summary') rpSummary();
+    else if (f === 'alerts') rpAlerts();
+    else if (f === 'range') printRange();
   }
 
   // মাসিক রিপোর্টের শিরোনাম ও সর্বমোট
@@ -3037,12 +3231,13 @@
     wrap.appendChild(t);
     box.appendChild(wrap);
     box.appendChild(el('div', 'legend', STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(' · ')));
-    $('pBtn').disabled = false;
-    $('expBtn').disabled = false;
   }
 
   function exportReport() {
-    if (!monData) return;
+    if (!monData) {
+      loadMonth(function () { if (monData && monData.dates.length) exportReport(); else toast('এই মাসে এই শ্রেণির কোনো হাজিরা নেই', true); });
+      return;
+    }
     $('expBtn').disabled = true;
     loading(true, 'Sheet-এ লেখা হচ্ছে...');
     google.script.run
@@ -3377,7 +3572,7 @@
           if (!list || !list.length) { toast('এই শ্রেণির শিক্ষার্থী তালিকা পাওয়া যায়নি', true); return; }
           var dates = [];
           for (var i = 0; i < n; i++) dates.push(rngAddDays(r.from, i));
-          var rows = list.map(function (s) { return { roll: s.roll, name: s.name, cells: {} }; });
+          var rows = sortByRoll(list.map(function (s) { return { roll: s.roll, name: s.name, cells: {} }; }), 'roll');
           rngRender(cls, r, dates, rows, true);
         })
         .withFailureHandler(fail)
@@ -3393,7 +3588,7 @@
       loading(false);
       var dates = Object.keys(dset).sort();
       if (!dates.length) { toast('এই রেঞ্জে কোনো হাজিরা নেওয়া হয়নি', true); return; }
-      rngRender(cls, r, dates, order.map(function (k) { return map[k]; }), false);
+      rngRender(cls, r, dates, sortByRoll(order.map(function (k) { return map[k]; }), 'roll'), false);
     }
 
     function next() {
@@ -3571,6 +3766,7 @@
   }
 
   function renderPromo(d) {
+    sortByRoll(d.students, 'roll');
     proData = d;
     var box = $('proBox');
     box.innerHTML = '';
@@ -4058,6 +4254,7 @@
       .withSuccessHandler(function (d) {
         loading(false);
         if ($('ffCls').value !== cls || ffType !== type) return;
+        sortByRoll(d.students, 'roll');
         ffData = d;
         setNote('ffNote', d.exam + ' — সেশন ' + bn(d.session || ''));
         d.students.forEach(function (s) {
@@ -4740,7 +4937,7 @@
   }
 
   function rpMonth() {
-    if (!$('mcls').value) { toast('আগে ওপরে শ্রেণি বাছাই করুন', true); return; }
+    if (!$('mcls').value || !$('mmonth').value) { toast('আগে মাস ও শ্রেণি বাছাই করুন', true); return; }
     loadMonth();
     rpWait(function () { return monData; }, function () {
       if (!monData.dates.length) { toast('এই মাসে এই শ্রেণির কোনো হাজিরা নেই', true); return; }
@@ -4982,6 +5179,7 @@
   // আজ থেকে পিছিয়ে (সর্বোচ্চ ৭ দিন) প্রথম যে দিনে হাজিরা নেওয়া হয়েছে সেটি খোঁজে; ছুটির দিন বাদ
   function loadDashPrev() {
     if (!cfg || !TOKEN) return;
+    if (dashPrev && dashPrev.forDay === cfg.today && !dashPrev.none) return;   // আজকের জন্য আগেই বের করা আছে
     var id = ++prevReq, k = 1;
     (function step() {
       if (id !== prevReq) return;
@@ -4998,7 +5196,7 @@
           });
           STATUS.forEach(function (x) { done += cnt[x]; });
           if (done > 0) {
-            dashPrev = { date: date, back: k, pct: Math.round(cnt[P] * 1000 / done) / 10, abs: cnt[cfg.absentStatus] || 0 };
+            dashPrev = { forDay: cfg.today, date: date, back: k, pct: Math.round(cnt[P] * 1000 / done) / 10, abs: cnt[cfg.absentStatus] || 0 };
             renderCmp();
             return;
           }
@@ -5199,7 +5397,7 @@
       b.appendChild(el('span', 'mv', r.avg === null ? '–' : bn(r.avg) + '%'));
       b.appendChild(el('span', 'mw', r.low ? '⚠️ ' + bn(r.low) : ''));
       b.setAttribute('aria-label', clsPlain(r.cls) + ': গড় উপস্থিতি ' + (r.avg === null ? 'নেই' : bn(r.avg) + ' শতাংশ') + (r.low ? ', কম উপস্থিতি ' + bn(r.low) + ' জন' : ''));
-      b.onclick = function () { $('mmonth').value = cfg.today.substr(0, 7); $('mcls').value = r.cls; showTab('mon'); loadMonth(); };
+      b.onclick = function () { $('mmonth').value = cfg.today.substr(0, 7); $('mcls').value = r.cls; monData = null; monOpen = true; showTab('mon'); };
       card.appendChild(b);
     });
     if (!withData.length && !m.busy) card.appendChild(el('div', 'ds-mon-note', 'এই মাসে এখনো কোনো শ্রেণির হাজিরা নেই'));
