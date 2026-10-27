@@ -427,10 +427,12 @@
     html, body { background:#fff !important; padding:0 !important; margin:0 !important; }
     body > *:not(#printArea) { display:none !important; }
     #printArea { display:block; color:#000; background:#fff; font-size:12px; font-family:"Hind Siliguri","Noto Sans Bengali","Kalpurush",system-ui,sans-serif; }
-    .pr-head { text-align:center; margin-bottom:10px; }
-    .pr-school { font-size:19px; font-weight:700; }
-    .pr-title { font-size:15px; font-weight:600; margin-top:3px; }
-    .pr-meta { font-size:12px; margin-top:2px; }
+    .pr-head { text-align:center; margin-bottom:12px; padding-bottom:8px; border-bottom:3px double #000; }
+    .pr-school { font-size:21px; font-weight:700; letter-spacing:.3px; }
+    .pr-title { display:inline-block; font-size:15px; font-weight:700; margin-top:6px; padding:3px 22px; border:1.5px solid #000; border-radius:4px; }
+    .pr-meta { font-size:12px; margin-top:4px; }
+    .pr-foot { margin-top:14px; padding-top:5px; border-top:1px solid #000; font-size:10.5px; text-align:center; color:#333; }
+    .pr-sign small { display:block; font-size:10.5px; font-weight:400; color:#333; }
     table.pt { border-collapse:collapse; width:100%; font-size:12px; }
     .pt th, .pt td { border:1px solid #000; padding:4px 5px; text-align:center; }
     .pt td.l { text-align:left; }
@@ -1243,9 +1245,10 @@
   @media (max-width:380px) { #list .sb .sl { display:none; } }
 
   @media (min-width:900px) {
-    #list { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    #list .row { margin:0; }
-    #list .empty { grid-column:1 / -1; }
+    /* দুই কলাম, কিন্তু ক্রম ওপর থেকে নিচে: বামে ১..মাঝ, ডানে মাঝ+১..শেষ */
+    #list { display:block; column-count:2; column-gap:8px; }
+    #list .row { margin:0 0 8px; break-inside:avoid; -webkit-column-break-inside:avoid; }
+    #list .empty, #list .gate, #list .listbar { column-span:all; }
     #list .row:has(.btns) { display:block; }
     #list .row:has(.btns) .who { margin-bottom:8px; }
     #list .row:has(.btns) .btns { width:auto; }
@@ -1488,6 +1491,62 @@
   #list .gate .gate-next { margin-top:10px; }
   #list.ro .btns { pointer-events:none; opacity:.9; }
   #list.ro + .bar { display:none !important; }
+  #saveBar:not(.show) { display:none !important; }
+  /* ছোট জমা বোতাম */
+  #saveBar .bar-in { display:flex; justify-content:center; max-width:none; margin:0; }
+  #saveBar .save, #saveBar .bar-in .save { width:auto; min-width:0; min-height:36px; padding:4px 18px; font-size:14px; gap:6px; box-shadow:0 8px 16px -8px var(--glow), 0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
+  #saveBar .bar-in .save::before { width:16px; height:16px; }
+  @media (min-width:900px) { #saveBar .bar-in { justify-content:flex-end; } }
+  /* রিপোর্টের প্রিন্ট বোতাম ছোট */
+  #t-mon .rprow #rpPrintBtn { flex:0 0 auto; min-height:38px; padding:4px 16px; font-size:13px; }
+  /* রিপোর্ট ট্যাব থেকে "Sheet" বোতাম ও লিংক সরানো */
+  #expBtn, #expLink { display:none !important; }
+  /* লগইন: শিক্ষক / অফিস বাছাই */
+  .lg-mode { display:flex; gap:6px; padding:4px; margin:2px 0 12px; border-radius:99px; background:var(--pine-l); border:1px solid var(--line); }
+  .lg-mode button { flex:1; min-height:38px; border:0; border-radius:99px; background:transparent; color:var(--mute); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  .lg-mode button.on { background:var(--surface); color:var(--pine); box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  body.office-only #dash, body.office-only #pendBanner { display:none !important; }
+  /* রিপোর্ট: শ্রেণি, মাস, তারিখ, ধরন ও ভিউ এক লাইনে */
+  #t-mon .rpline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  #t-mon .rpline::-webkit-scrollbar { display:none; }
+  #t-mon .rpline > .grid { display:contents; }
+  #t-mon .rpline .grid > div { flex:1 1 0; min-width:120px; margin:0; }
+  #t-mon .rpline .grid > div:nth-child(2) { min-width:130px; }
+  #t-mon .rpline .rprow { flex:0 0 auto; display:flex; gap:6px; margin:0; overflow:visible; }
+  #t-mon .rpline .rprow button { min-height:42px; padding:6px 12px; font-size:14px; white-space:nowrap; }
+  #t-mon .rpline .rprow #rpPrintBtn { min-height:42px; font-size:13px; }
+  /* অফিসিয়াল মাসিক প্রতিবেদনের হেডার */
+  .rp-off { margin:12px 0; padding:16px 14px 12px; border-radius:var(--rad-l, 22px); text-align:center; background:var(--surface);
+            border:1px solid var(--line); border-top:4px solid var(--ac1); box-shadow:var(--el1, var(--soft)); }
+  .rp-off-s { font-size:19px; font-weight:700; letter-spacing:.2px; }
+  .rp-off-t { display:inline-block; margin-top:6px; padding:3px 18px; font-size:14px; font-weight:700; color:var(--pine); border:1.5px solid color-mix(in srgb, var(--ac2) 55%, var(--line)); border-radius:99px; background:var(--pine-l); }
+  .rp-off-m { margin:8px 0 12px; font-size:13.5px; font-weight:600; color:var(--mute); }
+  .rp-off .rp-tiles { margin-bottom:0; }
+  .tw .mt th { white-space:normal; line-height:1.25; }
+  @media (min-width:900px) { #saveBar .bar-in { margin:0 0 0 auto; } }
+  /* ===== তারিখ, শ্রেণি ও 👁/✏️ বোতাম এক লাইনে ===== */
+  #t-att .card .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  #t-att .card .dline::-webkit-scrollbar { display:none; }
+  #t-att .card .dline > .grid { display:contents; }
+  #t-att .card .dline .grid > div { flex:1 1 0; min-width:112px; margin:0; }
+  #t-att .card .dline .actrow { flex:0 0 auto; display:flex; gap:6px; margin:0; }
+  #t-att .card .dline .actrow button { min-height:42px; padding:6px 12px; font-size:14px; white-space:nowrap; }
+  @media (max-width:420px) { #t-att .card .dline { gap:6px; } #t-att .card .dline .actrow button { padding:6px 9px; font-size:13px; } }
+  /* ===== হাজিরার তারিখ-শ্রেণি কার্ড: ছোট ও আকর্ষণীয় ===== */
+  #t-att > .card:first-child { position:relative; padding:10px 10px 9px !important; margin-bottom:8px; border-radius:18px; overflow:hidden;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--pine-l) 70%, var(--surface)) 0%, var(--surface) 70%);
+    border:1px solid color-mix(in srgb, var(--ac2) 28%, var(--line)); box-shadow:0 8px 22px -14px var(--glow), 0 1px 2px rgba(0,0,0,.05); }
+  #t-att > .card:first-child::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--ac2), var(--ac1)); }
+  #t-att .card .dline { padding-left:4px; gap:7px; }
+  #t-att .card .dline label { display:block; margin:0 0 3px 2px; font-size:11px; font-weight:700; letter-spacing:.2px; color:var(--pine); }
+  #t-att .card .dline label[for="date"]::before { content:"📅 "; }
+  #t-att .card .dline label[for="cls"]::before { content:"🏫 "; }
+  #t-att .card .dline input, #t-att .card .dline select { min-height:38px; height:38px; padding:0 10px; font-size:14px; font-weight:600; border-radius:12px;
+    background-color:var(--surface); border:1.5px solid color-mix(in srgb, var(--ac2) 30%, var(--line)); box-shadow:0 1px 0 rgba(255,255,255,.6) inset; }
+  #t-att .card .dline input:focus, #t-att .card .dline select:focus { border-color:var(--ac2); box-shadow:0 0 0 3px color-mix(in srgb, var(--ac2) 22%, transparent); outline:0; }
+  #t-att .card .dline .actrow button { min-height:38px; height:38px; padding:0 12px; font-size:13px; font-weight:700; border-radius:99px; }
+  #t-att .card .toolline { margin-top:7px; padding-left:4px; }
+  #t-att .card .datenav .chipbtn { min-height:28px; padding:2px 11px; font-size:12px; border-radius:99px; }
 </style>
 <style id="pageStyle"></style>
 </head>
@@ -1534,11 +1593,15 @@
   </div>
   <form class="card lg-card" onsubmit="doLogin(); return false;" autocomplete="on">
     <div class="cls-title">লগইন করুন</div>
-    <div class="lg-gap">
+    <div class="lg-mode" role="tablist">
+      <button type="button" id="lgmT" class="on" onclick="setLoginMode('teacher')">👤 শিক্ষক</button>
+      <button type="button" id="lgmO" onclick="setLoginMode('office')">🏢 অফিস</button>
+    </div>
+    <div class="lg-gap" id="lgUserBox">
       <label for="lgUser">ইমেইল</label>
       <div class="fld">
         <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/></svg>
-        <input type="email" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="আপনার ইমেইল">
+        <input type="text" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ইমেইল বা ইউজারনেম">
       </div>
     </div>
     <div class="lg-gap">
@@ -1637,13 +1700,12 @@
           </select>
         </div>
       </div>
-      </div>
-      <div class="toolline">
       <div class="actrow" id="actRow">
         <button type="button" class="act alt" id="viewBtn" onclick="toggleView()" aria-pressed="false" disabled>👁 দেখুন</button>
         <button type="button" class="act alt" id="editBtn" onclick="editMode()" style="display:none" disabled>✏️ পরিবর্তন</button>
-        <button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>জমা দিন</button>
       </div>
+      </div>
+      <div class="toolline">
       <div class="datenav">
         <button type="button" class="chipbtn" onclick="stepDate(-1)">‹ আগের দিন</button>
         <button type="button" class="chipbtn" onclick="stepDate(0)">আজ</button>
@@ -1679,6 +1741,8 @@
     </div>
 
     <div id="list"><div class="empty">শ্রেণি বাছাই করুন</div></div>
+    <!-- জমা বোতাম: শুধু হাজিরা শুরু করলে বা পরিবর্তন চাপলে, সিটের নিচে ভাসমান স্টাইলিশ বোতাম -->
+    <div class="bar" id="saveBar"><div class="bar-in"><button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>জমা দিন</button></div></div>
   </section>
 
   <!-- ২. তারিখ অনুযায়ী সারাংশ -->
@@ -1706,26 +1770,28 @@
   <section id="t-mon" class="wrap" style="display:none">
     <div class="card">
       <div class="cls-title">রিপোর্ট</div>
+      <div class="rpline">
       <div class="grid">
-        <div>
-          <label for="mmonth">মাস</label>
-          <input type="month" id="mmonth" onchange="onMonSel()">
-        </div>
         <div>
           <label for="mcls">শ্রেণি</label>
           <select id="mcls" onchange="onMonSel()">
             <option value="">-- বাছাই করুন --</option>
           </select>
         </div>
-      </div>
-      <div class="grid" style="margin-top:8px">
         <div>
-          <label for="rpDate">তারিখ (দৈনিক তালিকার জন্য)</label>
+          <label for="mmonth">মাস</label>
+          <input type="month" id="mmonth" onchange="onMonSel()">
+        </div>
+      </div>
+      <div class="grid">
+        <div style="display:none">
+          <label for="rpDate">তারিখ</label>
           <input type="date" id="rpDate">
         </div>
         <div>
-          <label for="rpFeature">কী প্রিন্ট করবেন</label>
+          <label for="rpFeature">ধরন</label>
           <select id="rpFeature" onchange="onRpFeature()">
+            <option value="">-- প্রিন্টের ধরন বাছাই করুন --</option>
             <option value="monthly">🗓️ মাসিক রিপোর্ট (ছক)</option>
             <option value="daily-all">📋 দৈনিক — সব হাজিরা</option>
             <option value="daily-P">✅ দৈনিক — উপস্থিত তালিকা</option>
@@ -1739,8 +1805,9 @@
       </div>
       <div class="rprow">
         <button type="button" class="act alt" id="rpViewBtn" onclick="toggleMonView()" aria-pressed="false">👁 দেখুন</button>
-        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()">🖨️ প্রিন্ট</button>
+        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()" style="display:none">🖨️ প্রিন্ট</button>
         <button type="button" class="act alt" id="expBtn" onclick="exportReport()" disabled title="Sheet-এ রিপোর্ট">📤 Sheet</button>
+      </div>
       </div>
       <div class="note" id="mnote"></div>
       <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
@@ -2439,9 +2506,20 @@
     setTimeout(function () { $('lgUser').focus(); }, 50);
   }
 
+  var LG_OFFICE = false;
+  function setLoginMode(m) {
+    LG_OFFICE = (m === 'office');
+    $('lgmT').classList.toggle('on', !LG_OFFICE);
+    $('lgmO').classList.toggle('on', LG_OFFICE);
+    $('lgUserBox').style.display = LG_OFFICE ? 'none' : '';
+    $('lgPass').placeholder = LG_OFFICE ? 'অফিসের পাসওয়ার্ড' : 'পাসওয়ার্ড';
+    setNote('lgNote', '');
+    try { (LG_OFFICE ? $('lgPass') : $('lgUser')).focus(); } catch (e) {}
+  }
+
   function doLogin() {
-    var u = $('lgUser').value.trim(), p = $('lgPass').value;
-    if (!u || !p) { setNote('lgNote', 'ইমেইল ও পাসওয়ার্ড দিন।', true); return; }
+    var u = LG_OFFICE ? 'office' : $('lgUser').value.trim(), p = $('lgPass').value;
+    if (!u || !p) { setNote('lgNote', LG_OFFICE ? 'অফিসের পাসওয়ার্ড দিন।' : 'ইমেইল ও পাসওয়ার্ড দিন।', true); return; }
     $('lgBtn').disabled = true;
     setNote('lgNote', '');
     loading(true, 'যাচাই হচ্ছে...');
@@ -2922,6 +3000,8 @@
 
   function updateBar() {
     syncActRow();
+    var sbar = $('saveBar');   // জমা বোতাম: P/A বাছাই করে কিছু বদলালে তবেই দেখা যায়
+    if (sbar) sbar.classList.toggle('show', !!(students.length && listOpen && listMode === 'edit' && dirty));
     var meter = $('meter');
     var hero = $('hero');
     meter.innerHTML = '';
@@ -3155,12 +3235,14 @@
   }
   function onRpFeature() {
     var f = $('rpFeature').value, r = $('rpRange');
+    var pb = $('rpPrintBtn'); if (pb) pb.style.display = f ? '' : 'none';   // প্রিন্ট বোতাম: আইটেম বাছাইয়ের পরেই
     if (r) { r.style.display = f === 'range' ? '' : 'none'; if (f === 'range') r.open = true; }
   }
   function monInit() { monSync(); onRpFeature(); if (monOpen && !monData) loadMonth(); }
   function monRefresh() { monData = null; if (monOpen) loadMonth(); else { $('monBox').innerHTML = ''; monSync(); } }
   function rpPrint() {
     var f = $('rpFeature').value;
+    if (!f) { toast('আগে প্রিন্টের ধরন বাছাই করুন', true); return; }
     if (f === 'monthly') rpMonth();
     else if (f.indexOf('daily-') === 0) rpDaily(f.substr(6));
     else if (f === 'summary') rpSummary();
@@ -3184,8 +3266,26 @@
       box.appendChild(el('div', 'empty', 'এই মাসে এই শ্রেণির কোনো হাজিরা নেই'));
       return;
     }
-    var mt = monTotals(rep);          // শুধু ছকের নিচের "সর্বমোট" সারির জন্য
+    var mt = monTotals(rep);          // ছকের নিচের "সর্বমোট" সারি ও সারাংশ টাইলের জন্য
     setNote('mnote', '');
+
+    var low = rep.rows.filter(function (r) { return r.percent !== null && r.percent < cfg.lowPercent; }).length;
+    var off = el('div', 'rp-off');
+    off.appendChild(el('div', 'rp-off-s', cfg.school || cfg.title));
+    off.appendChild(el('div', 'rp-off-t', 'মাসিক হাজিরা প্রতিবেদন'));
+    off.appendChild(el('div', 'rp-off-m', 'শ্রেণি: ' + clsPlain(rep.cls) + '  |  মাস: ' + monthLabel(rep.month) + (cfg.session ? '  |  সেশন: ' + bn(cfg.session) : '')));
+    var tl = el('div', 'rp-tiles');
+    [['কর্মদিবস', bn(rep.dates.length), ''], ['শিক্ষার্থী', bn(rep.rows.length) + ' জন', ''],
+     ['মোট উপস্থিত', bn(mt.c[STATUS[0]]), ' good'], ['মোট অনুপস্থিত', bn(mt.c[cfg.absentStatus] || 0), (mt.c[cfg.absentStatus] ? ' bad' : '')],
+     ['গড় উপস্থিতি', bn(mt.avg) + '%', mt.avg < cfg.lowPercent ? ' bad' : ' good'],
+     ['কম উপস্থিতি', bn(low) + ' জন', low ? ' bad' : ' good']].forEach(function (x) {
+      var d = el('div', 'rp-tile' + x[2]);
+      d.appendChild(el('b', null, x[1]));
+      d.appendChild(el('span', null, x[0]));
+      tl.appendChild(d);
+    });
+    off.appendChild(tl);
+    box.appendChild(off);
 
     var wrap = el('div', 'tw');
     var t = el('table', 'mt');
@@ -3285,10 +3385,16 @@
   }
 
   function prSign() {
+    var w = el('div');
     var s = el('div', 'pr-sign');
-    s.appendChild(el('div', null, 'শ্রেণি শিক্ষক'));
-    s.appendChild(el('div', null, 'প্রধান শিক্ষক'));
-    return s;
+    [['প্রস্তুতকারক', cfg.teacher || ''], ['শ্রেণি শিক্ষক', ''], ['প্রধান শিক্ষক', '']].forEach(function (x) {
+      var d = el('div', null, x[0]);
+      if (x[1]) d.appendChild(el('small', null, x[1]));
+      s.appendChild(d);
+    });
+    w.appendChild(s);
+    w.appendChild(el('div', 'pr-foot', (cfg.school || cfg.title || '') + (cfg.session ? '  ·  সেশন ' + bn(cfg.session) : '') + '  ·  প্রিন্টের তারিখ: ' + fmtFull(cfg.today)));
+    return w;
   }
 
   function prRow(cells) {
@@ -4771,6 +4877,27 @@
     showTab = function (t) { _st(t); if (t === 'att') { if ($('cls').value && cur.cls !== $('cls').value) loadClass(); else syncChips(); } };
     var _io = initOk;
     initOk = function (d) { _io(d); if (cfg) syncChips(); };
+  })();
+
+  // ===== অফিস মোড: নির্দিষ্ট ইমেইলের ইউজার শুধু রিপোর্ট ট্যাব দেখবে =====
+  // সার্ভার getInitData-তে officeOnly: true পাঠালে চালু হয় (সার্ভারেও আলাদা পারমিশন চেক থাকতে হবে)
+  (function () {
+    var _show = showTab, _io2 = initOk, _ld = loadDash, _wc = warmCache;
+    function isOffice() { return !!(cfg && cfg.officeOnly); }
+    showTab = function (t) { _show(isOffice() ? 'mon' : t); };
+    loadDash = function () { if (isOffice()) return; _ld(); };
+    warmCache = function () { if (isOffice()) return; _wc(); };
+    initOk = function (d) {
+      _io2(d);
+      if (d && d.officeOnly && !d.denied && !d.needLogin) {
+        document.body.classList.add('office-only');
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) tabs[i].style.display = tabs[i].getAttribute('data-t') === 'mon' ? '' : 'none';
+        $('periodBar').style.display = 'none';
+        $('pendBanner').style.display = 'none';
+        showTab('mon');
+      }
+    };
   })();
 
   // ===== ৪. সতর্কতা =====
