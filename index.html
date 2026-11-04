@@ -1,5 +1,5 @@
 <!DOCTYPE html> 
-<html lang="bn">
+<html lang="en">
 <head>
 <base target="_top">
 <script>try { var _t = localStorage.getItem('att_theme'); if (_t) document.documentElement.setAttribute('data-theme', _t); } catch (e) {}</script>
@@ -7,18 +7,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#004d38">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/icon-192.png" as="image">
-<link rel="icon" href="/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="icon-192.png" as="image">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="স্মার্ট স্কুল">
+<meta name="apple-mobile-web-app-title" content="Smart School">
 <link rel="preconnect" href="https://xemvwhqqpbxsdkqcscrg.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<title>শিক্ষার্থী হাজিরা</title>
+<title>Student Attendance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root {
     color-scheme: light dark;
@@ -422,7 +423,7 @@
   }
   @media (prefers-reduced-motion:reduce) { .flag { animation:none; } }
 
-  /* ===== প্রিন্ট ===== */
+  /* ===== print ===== */
   @media print {
     html, body { background:#fff !important; padding:0 !important; margin:0 !important; }
     body > *:not(#printArea) { display:none !important; }
@@ -961,7 +962,7 @@
   .legend { background:color-mix(in srgb,var(--ink) 4%,transparent); border-radius:14px; padding:8px 12px; margin:0 0 12px; }
   ::selection { background:var(--glow); }
 
-  /* ===== রিপোর্ট ট্যাব: প্রিন্ট বোতাম গ্রিড ===== */
+  /* ===== রিপোর্ট ট্যাব: print বোতাম গ্রিড ===== */
   .rp-h { font-size:13px; font-weight:700; color:var(--mute); margin:16px 0 8px; letter-spacing:.2px; }
   .rp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .rp-grid .act { min-height:52px; font-size:15px; padding:10px 12px; }
@@ -1275,7 +1276,7 @@
     .pr-school { letter-spacing:.3px; }
   }
 
-  /* ===== স্মার্ট তারিখ ও শ্রেণি বাছাই (v15) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  /* ===== স্মার্ট তারিখ ও Select class (v15) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
   .dlbl { margin-top:10px; font-size:13.5px; font-weight:600; color:var(--mute); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .dlbl .tg { font-size:12px; padding:2px 10px; border-radius:99px; background:var(--l-l); color:var(--l-t); }
   .dlbl .tg.ok { background:var(--p-l); color:var(--p-t); }
@@ -1362,7 +1363,7 @@
   /* --- ফর্মের ঘর কার্ডের সাথে মানানসই --- */
   select, input[type=date], input[type=month], input[type=search], input[type=text], input[type=email], input[type=password] { box-shadow:inset 0 1px 2px rgba(0,0,0,.05); }
 
-  /* ===== তারিখ/শ্রেণি অংশ ছোট ও গোছানো (v17) — মুছে ফেললেই v16 ফিরবে ===== */
+  /* ===== তারিখ/class অংশ ছোট ও গোছানো (v17) — মুছে ফেললেই v16 ফিরবে ===== */
   #t-att > .card:first-child { padding:12px 12px 10px; }
   #t-att > .card:first-child .grid { gap:8px; }
   #t-att > .card:first-child label { font-size:12px; margin-bottom:3px; }
@@ -1375,7 +1376,7 @@
   #t-att .cc { min-height:34px; padding:4px 12px; font-size:13px; }
   #t-att #fbar .chipbtn, #t-att #tools .chipbtn { min-height:34px; padding:4px 12px; font-size:12.5px; }
 
-  /* ===== তারিখ রেঞ্জ প্রিন্ট: সব এক লাইনে (v18) — মুছে ফেললেই v17 ফিরবে ===== */
+  /* ===== তারিখ রেঞ্জ print: সব এক লাইনে (v18) — মুছে ফেললেই v17 ফিরবে ===== */
   #t-mon .card:has(#rtype) { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 10px; }
   #t-mon .card:has(#rtype) > .grid { display:contents; }
   #t-mon .card:has(#rtype) > .cls-title { flex:1 0 100%; margin-bottom:2px; }
@@ -1441,7 +1442,7 @@
   /* হেডার */
   .hbtn, .logout { min-height:32px; padding:4px 12px; font-size:13px; }
 
-  /* ===== তারিখ, শ্রেণি ও বাটন এক লাইনে (v21) — মুছে ফেললেই v20 ফিরবে ===== */
+  /* ===== তারিখ, class ও বাটন এক লাইনে (v21) — মুছে ফেললেই v20 ফিরবে ===== */
   #t-att .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
   #t-att .dline::-webkit-scrollbar { display:none; }
   #t-att .dline > .grid, #t-att .dline > .datenav { display:contents; }
@@ -1469,7 +1470,7 @@
   #t-mon .rprow #rpViewBtn.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; border-color:transparent; }
   :root[data-theme="dark"] #t-mon .rprow #rpViewBtn.on { color:#05201a; }
   @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-mon .rprow #rpViewBtn.on { color:#05201a; } }
-  /* তারিখ ও শ্রেণির পরে: 👁 / ✏️ / জমা বোতাম */
+  /* তারিখ ও class পরে: 👁 / ✏️ / জমা বোতাম */
   #t-att .dline { display:block; overflow:visible; }
   #t-att .dline > .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   #t-att .dline .grid > div { margin:0; min-width:0; }
@@ -1497,7 +1498,7 @@
   #saveBar .save, #saveBar .bar-in .save { width:auto; min-width:0; min-height:36px; padding:4px 18px; font-size:14px; gap:6px; box-shadow:0 8px 16px -8px var(--glow), 0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
   #saveBar .bar-in .save::before { width:16px; height:16px; }
   @media (min-width:900px) { #saveBar .bar-in { justify-content:flex-end; } }
-  /* রিপোর্টের প্রিন্ট বোতাম ছোট */
+  /* রিপোর্টের print বোতাম ছোট */
   #t-mon .rprow #rpPrintBtn { flex:0 0 auto; min-height:38px; padding:4px 16px; font-size:13px; }
   /* রিপোর্ট ট্যাব থেকে "Sheet" বোতাম ও লিংক সরানো */
   #expBtn, #expLink { display:none !important; }
@@ -1506,7 +1507,7 @@
   .lg-mode button { flex:1; min-height:38px; border:0; border-radius:99px; background:transparent; color:var(--mute); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
   .lg-mode button.on { background:var(--surface); color:var(--pine); box-shadow:0 2px 8px rgba(0,0,0,.12); }
   body.office-only #dash, body.office-only #pendBanner { display:none !important; }
-  /* রিপোর্ট: শ্রেণি, মাস, তারিখ, ধরন ও ভিউ এক লাইনে */
+  /* রিপোর্ট: class, মাস, তারিখ, ধরন ও ভিউ এক লাইনে */
   #t-mon .rpline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
   #t-mon .rpline::-webkit-scrollbar { display:none; }
   #t-mon .rpline > .grid { display:contents; }
@@ -1524,7 +1525,7 @@
   .rp-off .rp-tiles { margin-bottom:0; }
   .tw .mt th { white-space:normal; line-height:1.25; }
   @media (min-width:900px) { #saveBar .bar-in { margin:0 0 0 auto; } }
-  /* ===== তারিখ, শ্রেণি ও 👁/✏️ বোতাম এক লাইনে ===== */
+  /* ===== তারিখ, class ও 👁/✏️ বোতাম এক লাইনে ===== */
   #t-att .card .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
   #t-att .card .dline::-webkit-scrollbar { display:none; }
   #t-att .card .dline > .grid { display:contents; }
@@ -1532,7 +1533,7 @@
   #t-att .card .dline .actrow { flex:0 0 auto; display:flex; gap:6px; margin:0; }
   #t-att .card .dline .actrow button { min-height:42px; padding:6px 12px; font-size:14px; white-space:nowrap; }
   @media (max-width:420px) { #t-att .card .dline { gap:6px; } #t-att .card .dline .actrow button { padding:6px 9px; font-size:13px; } }
-  /* ===== হাজিরার তারিখ-শ্রেণি কার্ড: ছোট ও আকর্ষণীয় ===== */
+  /* ===== হাজিরার তারিখ-class কার্ড: ছোট ও আকর্ষণীয় ===== */
   #t-att > .card:first-child { position:relative; padding:10px 10px 9px !important; margin-bottom:8px; border-radius:18px; overflow:hidden;
     background:linear-gradient(135deg, color-mix(in srgb, var(--pine-l) 70%, var(--surface)) 0%, var(--surface) 70%);
     border:1px solid color-mix(in srgb, var(--ac2) 28%, var(--line)); box-shadow:0 8px 22px -14px var(--glow), 0 1px 2px rgba(0,0,0,.05); }
@@ -1547,17 +1548,167 @@
   #t-att .card .dline .actrow button { min-height:38px; height:38px; padding:0 12px; font-size:13px; font-weight:700; border-radius:99px; }
   #t-att .card .toolline { margin-top:7px; padding-left:4px; }
   #t-att .card .datenav .chipbtn { min-height:28px; padding:2px 11px; font-size:12px; border-radius:99px; }
+
+  /* ===== print পেজ সেটাপ (v-print) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  @media print {
+    /* ব্যাকগ্রাউন্ড পতাকা (body::before) printে আসত — বন্ধ */
+    body::before, body::after { display:none !important; content:none !important; }
+    html, body { width:auto !important; height:auto !important; min-height:0 !important; overflow:visible !important;
+                 background:#fff !important; background-image:none !important; }
+    #printArea { display:block !important; width:100%; }
+    .pr-head, .pr-sign, .pr-note, .pr-foot { break-inside:avoid; page-break-inside:avoid; }
+    .pr-head { break-after:avoid; page-break-after:avoid; }
+    #printArea h3 { margin:14px 0 6px; font-size:14px; color:#000; break-after:avoid; page-break-after:avoid; }
+    .pt tr { break-inside:avoid; page-break-inside:avoid; }
+    .pt thead { display:table-header-group; }
+    .pt th { white-space:normal; }
+    .pt.att td.l { white-space:nowrap; }
+    .pt.att th, .pt.att td { padding:3px 2px; }
+    .pt.att td:first-child { white-space:nowrap; }
+    .pt.dense { font-size:9px; }
+    .pt.xdense { font-size:7px; }
+    .pt.xdense th, .pt.xdense td { padding:2px 0.5px; }
+    .pt.dense th.dt { writing-mode:vertical-rl; text-orientation:mixed; padding:3px 1px; white-space:nowrap; }
+    .pr-sign { margin-top:40px; }
+  }
+
+  /* ===== আধুনিক UI (v-modern) — এই পুরো ব্লক মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  :root {
+    --r-card:18px; --r-ctl:12px;
+    --sh-1:0 1px 2px rgba(10,40,32,.05), 0 6px 20px -10px rgba(10,40,32,.14);
+    --sh-2:0 2px 4px rgba(10,40,32,.06), 0 14px 32px -14px rgba(10,40,32,.22);
+    --ring:0 0 0 3px color-mix(in srgb, var(--pine) 24%, transparent);
+  }
+  body { font-feature-settings:"kern"; -webkit-font-smoothing:antialiased; }
+  body { background:var(--bg) !important; }
+  body::before { opacity:.035 !important; }
+  :root[data-theme="dark"] body::before { opacity:.06 !important; }
+
+  /* হেডার: ছোট, পরিষ্কার; লাল ধার ও জোরালো Logout বাদ */
+  body:not(.appmode) header { border-bottom:0 !important; border-radius:0 0 26px 26px !important; padding-bottom:30px !important; }
+  body:not(.appmode) header { box-shadow:0 12px 26px -16px rgba(0,50,38,.55) !important;
+    background:radial-gradient(circle at 90% -20%, rgba(95,224,180,.45), transparent 50%), linear-gradient(160deg, #007a58 0%, var(--pine-d) 72%) !important; }
+  body:not(.appmode) header #title { font-size:22px !important; letter-spacing:-.2px !important; }
+  body:not(.appmode) header small { background:rgba(255,255,255,.12) !important; border-radius:99px; }
+  body:not(.appmode) .hbtn, body:not(.appmode) .logout { min-height:34px !important; border-radius:10px !important; font-weight:600 !important;
+    background:rgba(255,255,255,.12) !important; color:#fff !important; border:1px solid rgba(255,255,255,.22) !important;
+    box-shadow:none !important; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  body:not(.appmode) .hbtn:hover, body:not(.appmode) .logout:hover { background:rgba(255,255,255,.2) !important; }
+  body:not(.appmode) .logout { background:rgba(255,255,255,.92) !important; color:#a4162a !important; border-color:transparent !important; }
+  body:not(.appmode) header .today { background:rgba(255,255,255,.1) !important; border:1px solid rgba(255,255,255,.16) !important; border-radius:14px !important; }
+  /* ডেস্কটপ (সাইডবার) হেডার: হালকা, পরিষ্কার */
+  body.appmode .hbtn, body.appmode .logout { min-height:36px; border-radius:10px !important; }
+  body.appmode .logout { background:var(--a-l) !important; color:var(--a-t) !important; border:1px solid transparent !important; box-shadow:none !important; }
+
+  /* কার্ড ও সারি */
+  .card { border-radius:var(--r-card) !important; border:1px solid var(--line) !important; box-shadow:var(--sh-1) !important; background:var(--surface) !important; }
+  .row { border-radius:14px !important; border:1px solid var(--line) !important; box-shadow:none !important; }
+  .row[data-s="0"], .row:not([data-s]) { background:var(--surface); }
+  h3 { font-size:15px !important; letter-spacing:.1px; }
+  label { font-size:12.5px !important; font-weight:600; color:var(--mute); }
+
+  /* ইনপুট */
+  input[type=date], input[type=text], input[type=search], input[type=number], input[type=password], input[type=month], select, textarea {
+    min-height:44px; border-radius:var(--r-ctl) !important; border:1.5px solid var(--line) !important; background:var(--surface) !important;
+    transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { border-color:var(--pine) !important; box-shadow:var(--ring) !important; outline:0 !important; }
+
+  /* বাটন */
+  .act { border-radius:var(--r-ctl) !important; font-weight:700; min-height:44px; box-shadow:0 6px 14px -8px color-mix(in srgb, var(--pine) 70%, transparent);
+    transition:transform .12s, box-shadow .15s, filter .15s; }
+  .act:hover { filter:brightness(1.05); }
+  .act:active { transform:scale(.98); }
+  .act.alt { box-shadow:none !important; border:1px solid color-mix(in srgb, var(--pine) 20%, transparent); }
+  .chipbtn { border-radius:99px !important; font-weight:600; transition:background .15s, transform .12s; }
+  .chipbtn:active { transform:scale(.96); }
+
+  /* ট্যাব বার */
+  body:not(.appmode) .tabs-in { border-radius:22px !important; border:1px solid var(--line) !important; box-shadow:var(--sh-2) !important; }
+  .tab { border-radius:16px !important; font-weight:600; transition:background .15s, color .15s; }
+  body:not(.appmode) .tab.on { background:var(--pine) !important; color:var(--on-pine) !important; box-shadow:0 6px 14px -8px var(--pine); }
+
+  /* Attendance বাটন, পিল, মিটার */
+  .btns { border-radius:12px !important; }
+  .sb { border-radius:9px !important; font-weight:700; }
+  .pill { font-weight:600 !important; }
+  .meter { height:6px !important; border-radius:99px !important; }
+  .bar-in { border-radius:20px !important; border:1px solid var(--line); box-shadow:var(--sh-2) !important; }
+
+  /* মোডাল ও টোস্ট */
+  .modal, .modal-in, .sheet { border-radius:22px !important; }
+  .toast { border-radius:14px !important; box-shadow:var(--sh-2) !important; }
+
+  /* হেডারের session বাছাই (select) — সাধারণ ইনপুট স্টাইল থেকে আলাদা */
+  #sess .sess-sel { min-height:0 !important; height:auto !important; padding:2px 8px !important; border-radius:10px !important; box-shadow:none !important; }
+  body:not(.appmode) #sess .sess-sel { background:rgba(255,255,255,.16) !important; color:#fff !important; border:1px solid rgba(255,255,255,.35) !important; }
+  body.appmode #sess .sess-sel { background:var(--bg) !important; color:var(--ink) !important; border:1px solid var(--line) !important; }
+  #sess .sess-sel option { background:var(--surface); color:var(--ink); }
+
+  /* মোবাইল: তারিখ/class/বাটন সারি যেন উপচে না পড়ে */
+  @media (max-width:560px) {
+    #t-att .card .dline { display:block !important; }
+    #t-att .card .dline .grid { display:grid !important; grid-template-columns:1fr !important; gap:10px !important; }
+    #t-att .card .dline .actrow { display:grid !important; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    #t-att .card .dline .actrow button { width:100%; }
+    #t-att .card .datenav { display:flex; flex-wrap:wrap; gap:6px; }
+    body:not(.appmode) header { padding-bottom:24px !important; }
+  }
+  @media (prefers-reduced-motion:reduce) { .act, .chipbtn, .tab { transition:none !important; } }
 </style>
 <style id="pageStyle"></style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style id="modernUI">:root{--pine:#0f766e;--pine-d:#0b3b3a;--pine-l:#d9f3ef;--mint:#6ee7c8;--radius:18px;--shadow:0 10px 30px -12px rgba(15,40,38,.28);--shadow-s:0 1px 2px rgba(15,40,38,.06),0 4px 14px -6px rgba(15,40,38,.12)}
+@media (prefers-color-scheme:dark){:root{--pine:#2dd4bf;--shadow:0 12px 32px -12px rgba(0,0,0,.7);--shadow-s:0 1px 2px rgba(0,0,0,.4)}}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(135deg,#0b3b3a 0%,#0f766e 60%,#14917f 100%);border-radius:0 0 32px 32px}
+header #title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.today{border-left-color:rgba(255,255,255,.25)}
+.tabs-in{background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:22px;box-shadow:var(--shadow);padding:5px}
+.tab{border-radius:17px;font-weight:500;font-size:12px;transition:all .2s ease}
+.tab:hover{background:var(--pine-l);color:var(--pine-d)}
+.tab.on{background:linear-gradient(135deg,var(--pine),#14917f);color:#fff;box-shadow:0 6px 14px -6px var(--pine)}
+.card,.hero{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:var(--shadow)}
+label{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--mute)}
+select,input[type=date],input[type=month],input[type=search],input[type=text],input[type=password],input[type=email]{border:1px solid var(--line);border-radius:14px;background-color:var(--surface);box-shadow:inset 0 1px 0 rgba(0,0,0,.02);transition:border-color .15s,box-shadow .15s}
+select:focus,input:focus{border-color:var(--pine);box-shadow:0 0 0 4px color-mix(in srgb,var(--pine) 18%,transparent);outline:none}
+button{transition:transform .12s,box-shadow .2s,background .2s,filter .2s}
+button:active{transform:scale(.97)}
+.act,.save,.chipbtn,.dchip,.hbtn{border-radius:14px;font-weight:600}
+.act:hover,.save:hover{filter:brightness(1.06);box-shadow:var(--shadow-s)}
+.note{border-radius:14px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;border:2px solid var(--bg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.td-wrap{padding:14px}
+.td-seg{display:flex;gap:6px;margin:10px 0;background:var(--bg);padding:4px;border-radius:14px}
+.td-tab{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font-weight:600;font-size:13.5px;color:var(--mute);cursor:pointer}
+.td-tab.on.a{background:var(--a-l);color:var(--a-t)}.td-tab.on.p{background:var(--p-l);color:var(--p-t)}
+.td-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.td-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:14px 8px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--p);box-shadow:var(--shadow-s)}
+.td-card.a{border-top-color:var(--a)}
+.td-av{width:64px;height:64px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:26px;font-weight:700;background:var(--p-l);color:var(--p-t);margin-bottom:4px;box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--p)}
+.td-card.a .td-av{background:var(--a-l);color:var(--a-t);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--a)}
+.td-av img{width:100%;height:100%;object-fit:cover}
+.td-card b{font-size:14px;line-height:1.25;word-break:break-word}
+.td-card small{font-size:12px;color:var(--mute)}
+
+.bc-card{border-radius:20px;border:1px solid var(--line);box-shadow:var(--shadow-s);padding:14px 16px;transition:transform .15s,box-shadow .2s}
+.bc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.bc-card .ds-cn{font-weight:700;font-size:16px;letter-spacing:-.01em}
+.bc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.bc-chip{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--mute)}
+.bc-chip.pres{background:var(--p-l);color:var(--p-t)}.bc-chip.abs{background:var(--a-l);color:var(--a-t)}
+.bc-chip.oth{background:var(--l-l);color:var(--l-t)}.bc-chip.pend{background:var(--l-l);color:var(--l-t)}
+</style>
 </head>
 <body>
 <header>
   <div class="head-in">
     <div class="brand">
-      <svg class="flag" viewBox="0 0 100 60" role="img" aria-label="বাংলাদেশের জাতীয় পতাকা"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
+      <svg class="flag" viewBox="0 0 100 60" role="img" aria-label="National flag of Bangladesh"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
       <div>
-        <div class="pgt" id="pgTitle">হাজিরা</div>
-        <div id="title">শিক্ষার্থী হাজিরা</div>
+        <div class="pgt" id="pgTitle">Attendance</div>
+        <div id="title">Student Attendance</div>
         <small id="sess"></small>
       </div>
     </div>
@@ -1566,10 +1717,10 @@
       <div class="userbar">
         <small id="who"></small>
         <span id="hbtns">
-          <button type="button" class="hbtn" id="themeBtn" onclick="toggleTheme()" aria-label="ডার্ক/লাইট মোড">🌓</button>
-          <button type="button" class="hbtn" onclick="doRefresh()">🔄 রিফ্রেশ</button>
+          <button type="button" class="hbtn" id="themeBtn" onclick="toggleTheme()" aria-label="Dark/Light mode">🌓</button>
+          <button type="button" class="hbtn" onclick="doRefresh()">🔄 Refresh</button>
         </span>
-        <a class="hbtn" id="homeBtn" href="/" title="হোম পেজ" aria-label="হোম পেজ" style="display:none">🏠</a>
+        <a class="hbtn" id="homeBtn" href="/" title="Home page" aria-label="Home page" style="display:none">🏠</a>
         <button type="button" class="logout" id="logoutBtn" style="display:none" onclick="doLogout()">Logout</button>
       </div>
     </div>
@@ -1578,7 +1729,7 @@
 
 <div id="denied" class="wrap" style="display:none">
   <div class="card">
-    <div class="name">প্রবেশের অনুমতি নেই</div>
+    <div class="name">Access denied</div>
     <div id="deniedMsg"></div>
   </div>
 </div>
@@ -1586,52 +1737,52 @@
 <div id="login" class="wrap" style="display:none">
   <div class="lg-orb o1"></div><div class="lg-orb o2"></div><div class="lg-orb o3"></div>
   <div class="lg-hero">
-    <svg class="flag lg-flag" viewBox="0 0 100 60" role="img" aria-label="বাংলাদেশের জাতীয় পতাকা"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
+    <svg class="flag lg-flag" viewBox="0 0 100 60" role="img" aria-label="National flag of Bangladesh"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
     <div class="lg-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-    <div class="lg-app" id="lgApp">শিক্ষার্থী হাজিরা</div>
-    <div class="lg-sub">আপনার অ্যাকাউন্টে প্রবেশ করুন</div>
+    <div class="lg-app" id="lgApp">Student Attendance</div>
+    <div class="lg-sub">Sign in to your account</div>
   </div>
   <form class="card lg-card" onsubmit="doLogin(); return false;" autocomplete="on">
-    <div class="cls-title">লগইন করুন</div>
+    <div class="cls-title">Log in</div>
     <div class="lg-mode" role="tablist">
-      <button type="button" id="lgmT" class="on" onclick="setLoginMode('teacher')">👤 শিক্ষক</button>
-      <button type="button" id="lgmO" onclick="setLoginMode('office')">🏢 অফিস</button>
+      <button type="button" id="lgmT" class="on" onclick="setLoginMode('teacher')">👤 Teacher</button>
+      <button type="button" id="lgmO" onclick="setLoginMode('office')">🏢 Office</button>
     </div>
     <div class="lg-gap" id="lgUserBox">
-      <label for="lgUser">ইমেইল</label>
+      <label for="lgUser">Email</label>
       <div class="fld">
         <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/></svg>
-        <input type="text" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ইমেইল বা ইউজারনেম">
+        <input type="text" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or username">
       </div>
     </div>
     <div class="lg-gap">
-      <label for="lgPass">পাসওয়ার্ড</label>
+      <label for="lgPass">Password</label>
       <div class="pw">
         <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
-        <input type="password" id="lgPass" autocomplete="current-password" placeholder="পাসওয়ার্ড">
-        <button type="button" class="pwbtn" id="pwBtn" onclick="togglePw()" aria-label="পাসওয়ার্ড দেখান বা লুকান">দেখান</button>
+        <input type="password" id="lgPass" autocomplete="current-password" placeholder="Password">
+        <button type="button" class="pwbtn" id="pwBtn" onclick="togglePw()" aria-label="Show or hide password">Show</button>
       </div>
     </div>
-    <button class="act" id="lgBtn" type="submit">লগইন</button>
+    <button class="act" id="lgBtn" type="submit">Login</button>
     <div class="note" id="lgNote"></div>
   </form>
-  <div class="lg-foot">নিরাপদ লগইন · শুধু অনুমোদিত শিক্ষকদের জন্য</div>
+  <div class="lg-foot">Secure login · Authorized teachers only</div>
 </div>
 
 <div id="app" style="display:none">
   <nav class="tabs">
     <div class="side-brand">
       <svg class="flag" viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
-      <div><div class="sb-t" id="sbTitle">শিক্ষার্থী হাজিরা</div><div class="sb-s">হাজিরা ব্যবস্থাপনা</div></div>
+      <div><div class="sb-t" id="sbTitle">Student Attendance</div><div class="sb-s">Attendance Management</div></div>
     </div>
     <div class="tabs-in">
-    <button class="tab on" data-t="home" type="button" onclick="showTab('home')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v10h4v-6h4v6h4V10"/></svg><span>ড্যাশবোর্ড</span></button>
-    <button class="tab" data-t="att" type="button" onclick="showTab('att')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>হাজিরা</span></button>
-    <button class="tab" data-t="mon" type="button" onclick="showTab('mon')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>রিপোর্ট</span></button>
-    <button class="tab" data-t="alr" type="button" onclick="showTab('alr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><span>সতর্কতা</span></button>
-    <button class="tab" data-t="reg" id="regTab" type="button" style="display:none" onclick="showTab('reg')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>নিবন্ধন</span><i class="bdg" id="regBdg"></i></button>
-    <button class="tab" data-t="pro" id="proTab" type="button" style="display:none" onclick="showTab('pro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>প্রোমোশন</span></button>
-    <button class="tab" data-t="ff" id="ffTab" type="button" style="display:none" title="ফরম ফিলাপ" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>ফিলাপ</span></button>
+    <button class="tab on" data-t="home" type="button" onclick="showTab('home')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v10h4v-6h4v6h4V10"/></svg><span>Dashboard</span></button>
+    <button class="tab" data-t="att" type="button" onclick="showTab('att')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Attendance</span></button>
+    <button class="tab" data-t="mon" type="button" onclick="showTab('mon')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Reports</span></button>
+    <button class="tab" data-t="alr" type="button" onclick="showTab('alr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><span>Alerts</span></button>
+    <button class="tab" data-t="reg" id="regTab" type="button" style="display:none" onclick="showTab('reg')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>Registration</span><i class="bdg" id="regBdg"></i></button>
+    <button class="tab" data-t="pro" id="proTab" type="button" style="display:none" onclick="showTab('pro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>Promotion</span></button>
+    <button class="tab" data-t="ff" id="ffTab" type="button" style="display:none" title="Form Fill-up" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Fill-up</span></button>
   </div></nav>
 
   <section class="wrap" id="dash">
@@ -1645,29 +1796,29 @@
         </div>
       </div>
       <div class="dh-chips">
-        <button type="button" class="dchip" onclick="showTab('att')">✅ হাজিরা নিন</button>
-        <button type="button" class="dchip" onclick="showTab('mon')">🗓️ রিপোর্ট</button>
-        <button type="button" class="dchip" onclick="showTab('alr')">🔔 সতর্কতা</button>
-        <button type="button" class="dchip" id="regChip" style="display:none" onclick="showTab('reg')">🧾 নিবন্ধন</button>
-        <button type="button" class="dchip" id="proChip" style="display:none" onclick="showTab('pro')">🎓 প্রোমোশন</button>
-        <button type="button" class="dchip" id="ffChip" style="display:none" onclick="showTab('ff')">📝 ফরম ফিলাপ</button>
-        <a class="dchip" href="https://script.google.com/macros/s/AKfycbyvlOMpiqRFE5xJTxG56sKiYamGwNN5XlDmYfWXEwy4KrX049oM4bgfv3ljUTaX6sX7/exec" target="_blank" rel="noopener">✏️ সম্পাদনা</a>
+        <button type="button" class="dchip" onclick="showTab('att')">✅ Take attendance</button>
+        <button type="button" class="dchip" onclick="showTab('mon')">🗓️ Reports</button>
+        <button type="button" class="dchip" onclick="showTab('alr')">🔔 Alerts</button>
+        <button type="button" class="dchip" id="regChip" style="display:none" onclick="showTab('reg')">🧾 Registration</button>
+        <button type="button" class="dchip" id="proChip" style="display:none" onclick="showTab('pro')">🎓 Promotion</button>
+        <button type="button" class="dchip" id="ffChip" style="display:none" onclick="showTab('ff')">📝 Form fill-up</button>
+        <a class="dchip" href="https://script.google.com/macros/s/AKfycbyvlOMpiqRFE5xJTxG56sKiYamGwNN5XlDmYfWXEwy4KrX049oM4bgfv3ljUTaX6sX7/exec" target="_blank" rel="noopener">✏️ Edit</a>
       </div>
     </div>
-    <div class="ds-skel" id="dsSkel" style="display:none" aria-busy="true" aria-label="লোড হচ্ছে"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>
-    <div class="ds-err" id="dsErr" style="display:none" role="alert"><div>ড্যাশবোর্ডের তথ্য আনা যায়নি। নেট সংযোগ দেখে আবার চেষ্টা করুন।</div><button type="button" onclick="loadDash()">আবার চেষ্টা করুন</button></div>
+    <div class="ds-skel" id="dsSkel" style="display:none" aria-busy="true" aria-label="Loading"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>
+    <div class="ds-err" id="dsErr" style="display:none" role="alert"><div>Could not load dashboard data. Check your connection and try again.</div><button type="button" onclick="loadDash()">Try again</button></div>
     <div id="dashSum" style="display:none">
       <div class="ds-quick" id="dsQuick"></div>
-      <div class="ds-head"><b>📊 আজকের সারাংশ</b><span id="dsInfo" aria-live="polite"></span>
-        <button type="button" class="ds-prt" onclick="rpSummary(cfg.today)" aria-label="আজকের সারাংশ প্রিন্ট করুন">🖨️ প্রিন্ট</button>
-        <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="সারাংশ নতুন করুন">↻</button></div>
+      <div class="ds-head"><b>📊 Today’s summary</b><span id="dsInfo" aria-live="polite"></span>
+        <button type="button" class="ds-prt" onclick="rpSummary(cfg.today)" aria-label="Print today’s summary">🖨️ Print</button>
+        <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="Refresh summary">↻</button></div>
       <div class="ds-hol" id="dsHol" style="display:none"></div>
       <div id="dsTot" style="display:none"></div>
       <div id="dsCmp"></div>
       <div class="ds-kpi" id="dsKpi"></div>
       <div id="dsBday"></div>
       <div id="dsMon"></div>
-      <div class="ds-sec">শ্রেণি অনুযায়ী</div>
+      <div class="ds-sec">By class</div>
       <div class="ds-grid" id="dsGrid"></div>
       <div class="ds-sec" id="dsAbsH" style="display:none"></div>
       <div class="ds-abs" id="dsAbs"></div>
@@ -1690,122 +1841,122 @@
       <div class="dline">
       <div class="grid">
         <div>
-          <label for="date">তারিখ</label>
+          <label for="date">Date</label>
           <input type="date" id="date" onchange="onAttChange()">
         </div>
         <div>
-          <label for="cls">শ্রেণি</label>
+          <label for="cls">Class</label>
           <select id="cls" onchange="onAttChange()">
-            <option value="">-- বাছাই করুন --</option>
+            <option value="">-- Select --</option>
           </select>
         </div>
       </div>
       <div class="actrow" id="actRow">
-        <button type="button" class="act alt" id="viewBtn" onclick="toggleView()" aria-pressed="false" disabled>👁 দেখুন</button>
-        <button type="button" class="act alt" id="editBtn" onclick="editMode()" style="display:none" disabled>✏️ পরিবর্তন</button>
+        <button type="button" class="act alt" id="viewBtn" onclick="toggleView()" aria-pressed="false" disabled>👁 Show</button>
+        <button type="button" class="act alt" id="editBtn" onclick="editMode()" style="display:none" disabled>✏️ Change</button>
       </div>
       </div>
       <div class="toolline">
       <div class="datenav">
-        <button type="button" class="chipbtn" onclick="stepDate(-1)">‹ আগের দিন</button>
-        <button type="button" class="chipbtn" onclick="stepDate(0)">আজ</button>
-        <button type="button" class="chipbtn" onclick="stepDate(1)">পরের দিন ›</button>
-        <button type="button" class="chipbtn" onclick="stepClass(1)">পরের শ্রেণি ›</button>
-        <button type="button" class="chipbtn p" id="nextPend" onclick="nextPending()">বাকি শ্রেণি ⏭</button>
+        <button type="button" class="chipbtn" onclick="stepDate(-1)">‹ Previous day</button>
+        <button type="button" class="chipbtn" onclick="stepDate(0)">Today</button>
+        <button type="button" class="chipbtn" onclick="stepDate(1)">Next day ›</button>
+        <button type="button" class="chipbtn" onclick="stepClass(1)">Next class ›</button>
+        <button type="button" class="chipbtn p" id="nextPend" onclick="nextPending()">Remaining classes ⏭</button>
       </div>
       </div>
       <div class="dlbl" id="dateLbl"></div>
-      <div class="clschips" id="clsChips" role="group" aria-label="শ্রেণি বাছাই"></div>
+      <div class="clschips" id="clsChips" role="group" aria-label="Select class"></div>
       <div class="note" id="note"></div>
     </div>
 
     <div class="hero" id="hero" style="display:none">
-      <div class="ring" id="ring"><b><span id="ringPct">০%</span><small>উপস্থিত</small></b></div>
+      <div class="ring" id="ring"><b><span id="ringPct">০%</span><small>Present</small></b></div>
       <div class="hcount" id="hcount"></div>
     </div>
     <div class="abs-line" id="absLine"></div>
 
     <div class="card" id="searchCard" style="display:none">
-      <input type="search" id="q" placeholder="নাম বা রোল দিয়ে খুঁজুন" oninput="applySearch()">
+      <input type="search" id="q" placeholder="Search by name or roll" oninput="applySearch()">
     </div>
 
     <div class="tools" id="fbar" style="display:none"></div>
 
     <div class="tools" id="tools" style="display:none">
-      <button class="chipbtn p" type="button" onclick="setAll(0)">সবাই উপস্থিত (P)</button>
-      <button class="chipbtn a" type="button" onclick="setAll(1)">সবাই অনুপস্থিত (A)</button>
-      <button class="chipbtn p" type="button" onclick="printAttendance('P')">উপস্থিত তালিকা প্রিন্ট</button>
-      <button class="chipbtn a" type="button" onclick="printAttendance('A')">অনুপস্থিত তালিকা প্রিন্ট</button>
-      <button class="chipbtn" type="button" onclick="printAttendance('all')">সব হাজিরা প্রিন্ট</button>
-      <button class="chipbtn" type="button" onclick="printAttendance('blank')">খালি তালিকা প্রিন্ট</button>
+      <button class="chipbtn p" type="button" onclick="setAll(0)">All present (P)</button>
+      <button class="chipbtn a" type="button" onclick="setAll(1)">All absent (A)</button>
+      <button class="chipbtn p" type="button" onclick="printAttendance('P')">Print present list</button>
+      <button class="chipbtn a" type="button" onclick="printAttendance('A')">Print absent list</button>
+      <button class="chipbtn" type="button" onclick="printAttendance('all')">Print all attendance</button>
+      <button class="chipbtn" type="button" onclick="printAttendance('blank')">Print blank list</button>
     </div>
 
-    <div id="list"><div class="empty">শ্রেণি বাছাই করুন</div></div>
+    <div id="list"><div class="empty">Select class</div></div>
     <!-- জমা বোতাম: শুধু হাজিরা শুরু করলে বা পরিবর্তন চাপলে, সিটের নিচে ভাসমান স্টাইলিশ বোতাম -->
-    <div class="bar" id="saveBar"><div class="bar-in"><button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>জমা দিন</button></div></div>
+    <div class="bar" id="saveBar"><div class="bar-in"><button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>Submit</button></div></div>
   </section>
 
   <!-- ২. তারিখ অনুযায়ী সারাংশ -->
   <section id="t-sum" class="wrap" style="display:none">
     <div class="card">
-      <label for="sdate">তারিখ</label>
+      <label for="sdate">Date</label>
       <input type="date" id="sdate" onchange="loadSummary()">
       <div class="grid" style="margin-top:10px">
         <div>
-          <label for="sfcls">শ্রেণি</label>
-          <select id="sfcls" onchange="onSumFilter()"><option value="">সব শ্রেণি</option></select>
+          <label for="sfcls">Class</label>
+          <select id="sfcls" onchange="onSumFilter()"><option value="">All classes</option></select>
         </div>
         <div>
           <label for="sfsec">শাখা / ছাত্র-ছাত্রী</label>
-          <select id="sfsec" onchange="onSumFilter()"><option value="">সব</option></select>
+          <select id="sfsec" onchange="onSumFilter()"><option value="">All</option></select>
         </div>
       </div>
       <div class="note" id="snote"></div>
     </div>
     <div id="sumBox"></div>
-    <button class="act" id="sPrintBtn" type="button" onclick="printSummary()" disabled>সারাংশ প্রিন্ট করুন</button>
+    <button class="act" id="sPrintBtn" type="button" onclick="printSummary()" disabled>Print summary</button>
   </section>
 
-  <!-- ৩. রিপোর্ট (মাসিক ছক + প্রিন্ট) — সারাংশ এখন ড্যাশবোর্ডে -->
+  <!-- ৩. রিপোর্ট (মাসিক ছক + print) — সারাংশ এখন ড্যাশবোর্ডে -->
   <section id="t-mon" class="wrap" style="display:none">
     <div class="card">
-      <div class="cls-title">রিপোর্ট</div>
+      <div class="cls-title">Reports</div>
       <div class="rpline">
       <div class="grid">
         <div>
-          <label for="mcls">শ্রেণি</label>
+          <label for="mcls">Class</label>
           <select id="mcls" onchange="onMonSel()">
-            <option value="">-- বাছাই করুন --</option>
+            <option value="">-- Select --</option>
           </select>
         </div>
         <div>
-          <label for="mmonth">মাস</label>
+          <label for="mmonth">Month</label>
           <input type="month" id="mmonth" onchange="onMonSel()">
         </div>
       </div>
       <div class="grid">
         <div style="display:none">
-          <label for="rpDate">তারিখ</label>
+          <label for="rpDate">Date</label>
           <input type="date" id="rpDate">
         </div>
         <div>
-          <label for="rpFeature">ধরন</label>
+          <label for="rpFeature">Type</label>
           <select id="rpFeature" onchange="onRpFeature()">
-            <option value="">-- প্রিন্টের ধরন বাছাই করুন --</option>
+            <option value="">-- Select print type --</option>
             <option value="monthly">🗓️ মাসিক রিপোর্ট (ছক)</option>
             <option value="daily-all">📋 দৈনিক — সব হাজিরা</option>
             <option value="daily-P">✅ দৈনিক — উপস্থিত তালিকা</option>
             <option value="daily-A">❌ দৈনিক — অনুপস্থিত তালিকা</option>
             <option value="daily-blank">📝 দৈনিক — খালি তালিকা</option>
-            <option value="summary">📊 দিনের সারাংশ (সব শ্রেণি)</option>
+            <option value="summary">📊 Day summary (all classes)</option>
             <option value="alerts">⚠️ সতর্কতা (কম উপস্থিতি)</option>
             <option value="range">📅 তারিখ রেঞ্জ অনুযায়ী</option>
           </select>
         </div>
       </div>
       <div class="rprow">
-        <button type="button" class="act alt" id="rpViewBtn" onclick="toggleMonView()" aria-pressed="false">👁 দেখুন</button>
-        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()" style="display:none">🖨️ প্রিন্ট</button>
+        <button type="button" class="act alt" id="rpViewBtn" onclick="toggleMonView()" aria-pressed="false">👁 Show</button>
+        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()" style="display:none">🖨️ Print</button>
         <button type="button" class="act alt" id="expBtn" onclick="exportReport()" disabled title="Sheet-এ রিপোর্ট">📤 Sheet</button>
       </div>
       </div>
@@ -1816,22 +1967,22 @@
     <!-- 👁 চাপলে মাসিক ছক (শিক্ষার্থীসহ) দেখা যায়; ডিফল্টে লুকানো -->
     <div id="monBox"></div>
 
-    <!-- তারিখ রেঞ্জ অনুযায়ী প্রিন্ট (শুধু "তারিখ রেঞ্জ" বাছলে দেখা যায়) -->
+    <!-- তারিখ রেঞ্জ অনুযায়ী print (শুধু "তারিখ রেঞ্জ" বাছলে দেখা যায়) -->
     <details class="card rp-det" id="rpRange" style="margin-top:14px;display:none">
-      <summary class="cls-title">৩ · তারিখ রেঞ্জ অনুযায়ী প্রিন্ট</summary>
+      <summary class="cls-title">3 · Print by date range</summary>
       <div class="grid">
         <div>
-          <label for="rtype">ধরন</label>
+          <label for="rtype">Type</label>
           <select id="rtype" onchange="rngNote()">
-            <option value="daily">দৈনিক</option>
-            <option value="weekly">সাপ্তাহিক (৭ দিন)</option>
-            <option value="fortnight">পাক্ষিক (১৫ দিন)</option>
-            <option value="monthly">মাসিক (পুরো মাস)</option>
-            <option value="custom">তারিখ থেকে – পর্যন্ত</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly (7 days)</option>
+            <option value="fortnight">Fortnightly (15 days)</option>
+            <option value="monthly">Monthly (full month)</option>
+            <option value="custom">From date – to date</option>
           </select>
         </div>
         <div>
-          <label for="rkind">প্রিন্টের রকম</label>
+          <label for="rkind">Print type</label>
           <select id="rkind">
             <option value="report">হাজিরা রিপোর্ট (নেওয়া হাজিরা)</option>
             <option value="blank">খালি সিট (সব দিন, ঘর ফাঁকা)</option>
@@ -1840,16 +1991,16 @@
       </div>
       <div class="grid" style="margin-top:10px">
         <div>
-          <label for="rfrom">শুরুর তারিখ</label>
+          <label for="rfrom">Start date</label>
           <input type="date" id="rfrom" onchange="rngNote()">
         </div>
         <div id="rtoBox" style="display:none">
-          <label for="rto">শেষ তারিখ</label>
+          <label for="rto">End date</label>
           <input type="date" id="rto" onchange="rngNote()">
         </div>
       </div>
       <div class="note" id="rrnote"></div>
-      <button class="act" type="button" style="margin-top:12px" onclick="printRange()">রেঞ্জ অনুযায়ী প্রিন্ট করুন</button>
+      <button class="act" type="button" style="margin-top:12px" onclick="printRange()">Print by range</button>
     </details>
   </section>
 
@@ -1872,32 +2023,32 @@
   <!-- ৬. প্রোমোশন (শুধু অ্যাডমিন) -->
   <section id="t-pro" class="wrap" style="display:none">
     <div class="card">
-      <div class="pro-step"><i>১</i><div><b>শ্রেণি বাছাই</b><small>যে শ্রেণির শিক্ষার্থী উপরে উঠবে</small></div></div>
-      <label for="proCls">আপনার শ্রেণি (যে শ্রেণির শিক্ষার্থী উঠবে)</label>
-      <select id="proCls" onchange="loadPromo()"><option value="">-- বাছাই করুন --</option></select>
+      <div class="pro-step"><i>১</i><div><b>Select class</b><small>Class to promote from</small></div></div>
+      <label for="proCls">Your class (students will be promoted from)</label>
+      <select id="proCls" onchange="loadPromo()"><option value="">-- Select --</option></select>
       <div class="note" id="pnote"></div>
     </div>
     <div class="pro-hero" id="proFT" style="display:none"></div>
     <div class="card" id="proOpt" style="display:none">
-      <div class="pro-step"><i>২</i><div><b>নতুন সেশন ও শ্রেণি</b><small>শাখা ও গ্রুপ শুধু "পরের শ্রেণিতে" যাওয়াদের জন্য</small></div></div>
+      <div class="pro-step"><i>২</i><div><b>New session & class</b><small>Section & group apply only to "পরের class" students</small></div></div>
       <div class="pro-set">
         <div>
-          <label for="proSes">নতুন সেশন</label>
+          <label for="proSes">New session</label>
           <input type="text" id="proSes" inputmode="numeric" autocomplete="off">
         </div>
         <div>
-          <label for="proSec">নতুন শাখা / ছাত্র-ছাত্রী</label>
-          <select id="proSec"><option value="">-- শাখা নেই --</option></select>
+          <label for="proSec">New section / boys-girls</label>
+          <select id="proSec"><option value="">-- No section --</option></select>
         </div>
         <div>
-          <label for="proGrp">নতুন গ্রুপ (৯–১০ শ্রেণি)</label>
-          <select id="proGrp"><option value="">-- গ্রুপ নেই --</option></select>
+          <label for="proGrp">New group (Class 9–10)</label>
+          <select id="proGrp"><option value="">-- No group --</option></select>
         </div>
       </div>
       <div class="tools" style="margin:14px 0 0">
-        <button class="chipbtn p" type="button" id="proAllUp" onclick="proSetAction('up')">সবাই পরের শ্রেণিতে</button>
-        <button class="chipbtn" type="button" onclick="proRolls('same')">রোল অপরিবর্তিত</button>
-        <button class="chipbtn" type="button" onclick="proRolls('seq')">রোল ১ থেকে ক্রমিক</button>
+        <button class="chipbtn p" type="button" id="proAllUp" onclick="proSetAction('up')">Everyone to next class</button>
+        <button class="chipbtn" type="button" onclick="proRolls('same')">Keep roll</button>
+        <button class="chipbtn" type="button" onclick="proRolls('seq')">Sequential from roll 1</button>
       </div>
       <div class="pro-prev" id="proPrev"></div>
     </div>
@@ -1905,8 +2056,8 @@
 
     <div class="card" id="arCard" style="margin-top:14px;display:none">
       <div class="cls-title">বছর শেষে হাজিরা সিট আর্কাইভ (শুধু অ্যাডমিন)</div>
-      <div class="detail">সব শ্রেণির প্রোমোশন শেষ হলে এটি করুন। Attendance-৬…১০ ট্যাবের নাম বদলে Archive-সেশন-… হবে এবং নতুন খালি ট্যাব তৈরি হবে। এরপর Code.gs-এ SESSION বদলান।</div>
-      <label for="arLabel">আর্কাইভ লেবেল (পুরোনো সেশন, ইংরেজিতে)</label>
+      <div class="detail">Do this after promotion of all classes is complete. Attendance-6…10 tabs will be renamed Archive-session-… and new empty tabs will be created. Then update SESSION in Code.gs.</div>
+      <label for="arLabel">আর্কাইভ লেবেল (পুরোনো session, ইংরেজিতে)</label>
       <input type="text" id="arLabel" autocomplete="off">
       <button class="act alt" type="button" style="margin-top:12px" onclick="doArchive()">হাজিরা সিট আর্কাইভ করুন</button>
     </div>
@@ -1914,7 +2065,7 @@
     <div class="pro-bar" id="proBar">
       <div class="pro-bar-in">
         <div class="pro-bar-t" id="proBarT"></div>
-        <button class="act" id="proBtn" type="button" onclick="runPromo()" disabled>প্রোমোশন দিন</button>
+        <button class="act" id="proBtn" type="button" onclick="runPromo()" disabled>Promote</button>
       </div>
     </div>
   </section>
@@ -1922,11 +2073,11 @@
   <!-- ৭. ফরম ফিলাপ -->
   <section id="t-ff" class="wrap" style="display:none">
     <div class="card">
-      <div class="pro-step"><i>১</i><div><b>শ্রেণি বাছাই</b><small>পরীক্ষার ফরম ফিলাপ ও ফি আদায়</small></div></div>
-      <label>পরীক্ষার ধরন</label>
+      <div class="pro-step"><i>১</i><div><b>Select class</b><small>পরীক্ষার ফরম ফিলাপ ও ফি আদায়</small></div></div>
+      <label>Exam type</label>
       <div class="seg ft" id="ffType"></div>
-      <label for="ffCls">শ্রেণি</label>
-      <select id="ffCls" onchange="onFfCls()"><option value="">-- বাছাই করুন --</option></select>
+      <label for="ffCls">Class</label>
+      <select id="ffCls" onchange="onFfCls()"><option value="">-- Select --</option></select>
       <label class="ff-both"><input type="checkbox" id="ffBoth" checked> <span>অর্ধবার্ষিক ও বার্ষিক — দুটোতেই একসাথে সংরক্ষণ <small>(রেজি., বোর্ড রোল, ৪র্থ বিষয়, অবস্থা, মন্তব্য; ফি আলাদা থাকে)</small></span></label>
       <div class="note" id="ffNote"></div>
     </div>
@@ -1935,20 +2086,20 @@
       <div class="hcount" id="ffHc"></div>
     </div>
     <div class="card" id="ffSearchCard" style="display:none">
-      <input type="search" id="ffQ" placeholder="নাম বা রোল দিয়ে খুঁজুন" oninput="ffApplyFilter()">
+      <input type="search" id="ffQ" placeholder="Search by name or roll" oninput="ffApplyFilter()">
     </div>
     <div class="tools" id="ffFbar" style="display:none"></div>
     <div class="tools" id="ffTools" style="display:none">
-      <button class="chipbtn" type="button" onclick="ffPrintList()">ফরম ফিলাপ তালিকা প্রিন্ট</button>
-      <button class="chipbtn" type="button" onclick="ffPrintFee()">ফি আদায় তালিকা প্রিন্ট</button>
+      <button class="chipbtn" type="button" onclick="ffPrintList()">Print form fill-up list</button>
+      <button class="chipbtn" type="button" onclick="ffPrintFee()">Print fee collection list</button>
     </div>
     <div class="ff-all" id="ffAll"></div>
-    <div id="ffBox"><div class="empty">শ্রেণি বাছাই করুন</div></div>
+    <div id="ffBox"><div class="empty">Select class</div></div>
     <datalist id="ffFourth"></datalist>
     <div class="ff-bar" id="ffBar">
       <div class="pro-bar-in">
         <div class="pro-bar-t" id="ffBarT"></div>
-        <button class="act" id="ffSaveBtn" type="button" onclick="ffSave()" disabled>সংরক্ষণ করুন</button>
+        <button class="act" id="ffSaveBtn" type="button" onclick="ffSave()" disabled>Save</button>
       </div>
     </div>
   </section>
@@ -1958,7 +2109,7 @@
 
 <div class="modal" id="edModal" onclick="if (event.target === this) closeEdit()">
   <div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="edTitle">
-    <h4 id="edTitle">তথ্য সম্পাদনা</h4>
+    <h4 id="edTitle">Edit info</h4>
     <div class="ed-top">
       <div class="reg-ph" id="edPh"></div>
       <div class="ed-ro" id="edRo"></div>
@@ -1967,8 +2118,8 @@
     <div class="ed-foot">
       <div class="ed-cnt" id="edCnt"></div>
       <div class="btn2">
-        <button type="button" class="act" id="edSave" onclick="saveEdit(false)">সংরক্ষণ করুন</button>
-        <button type="button" class="act alt" onclick="closeEdit()">বাতিল</button>
+        <button type="button" class="act" id="edSave" onclick="saveEdit(false)">Save</button>
+        <button type="button" class="act alt" onclick="closeEdit()">Cancel</button>
       </div>
       <button type="button" class="act" id="edSaveOk" onclick="saveEdit(true)">✅ সংরক্ষণ ও কনফার্ম</button>
     </div>
@@ -1977,7 +2128,7 @@
 
 <div id="netBar" role="status" aria-live="polite"></div>
 <div class="toast" id="toast"></div>
-<div class="loading" id="loading"><div class="spin"></div><span id="loadingMsg">লোড হচ্ছে...</span></div>
+<div class="loading" id="loading"><div class="spin"></div><span id="loadingMsg">Loading...</span></div>
 
 <div id="printArea"></div>
 
@@ -1994,9 +2145,10 @@
     // ২) লেখার কাজ (হাজিরা, ফরম ফিলাপ): নেট না থাকলে কিউতে জমে, নেট এলে নিজে নিজে জমা হয়
     var INSTANT_CB = { getClassData: 1, getFormData: 1, getDaySummary: 1, getAlerts: 1 };   // ক্যাশ আগে, নতুন এলে আবার আঁকে
     var INSTANT_SILENT = { getInitData: 1, getFormInit: 1 };                                   // ক্যাশ আগে, নতুন শুধু ক্যাশে রাখে
-    var RACE = { getMonthReport: 1, getClassStudents: 1 };                                      // নেট ধীর হলে (১.২ সেকেন্ড) ক্যাশ দেখায়
+    var RACE = { getMonthReport: 1, getClassStudents: 1, getPromotionPreview: 1, getPending: 1 };                                      // নেট ধীর হলে (১.২ সেকেন্ড) ক্যাশ দেখায়
     var WRITE_Q = { saveAttendance: 1, saveFormData: 1 };                                       // অফলাইনে কিউতে যাবে
-    var RACE_MS = 1200, QKEY = 'att_queue';
+    var RACE_MS = 1000, QKEY = 'att_queue';
+    function raceMs() { var c = navigator.connection; if (c && (c.saveData || /^(slow-)?2g$|^3g$/.test(c.effectiveType || ''))) return 250; return RACE_MS; }
     var syncing = false;
 
     function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -2023,8 +2175,9 @@
     function isNetErr(e) { return !!(e && e.netErr); }
     function msgOf(e) { return String(e && e.message ? e.message : e); }
 
-    // ----- নেটওয়ার্ক কল -----
-    function callApi(fn, args) {
+    // ----- নেটওয়ার্ক কল (দুর্বল নেটের জন্য: ছোট timeout, নিজে নিজে পুনরায় চেষ্টা, একসাথে সর্বোচ্চ ৪টি) -----
+    function tmo(fn) { return WRITE_Q[fn] ? 40000 : (/^get/.test(fn) ? 25000 : 60000); }
+    function callOnce(fn, args, ms) {
       if (!/^https:\/\/[a-z0-9]+\.supabase\.co\/functions\/v1\/.+$/.test(API_URL) || !API_KEY || /PASTE_/.test(API_KEY)) {
         return Promise.reject(new Error('API_KEY বসানো হয়নি। index.html-এ Supabase Publishable key বসান।'));
       }
@@ -2033,7 +2186,7 @@
         return Promise.reject(oe);
       }
       var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 120000) : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms) : null;
       return fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': API_KEY },
@@ -2041,19 +2194,42 @@
         redirect: 'follow',
         signal: ctrl ? ctrl.signal : undefined
       }).then(function (res) {
+        if (res.status >= 502 && res.status <= 504) { var be = new Error('server busy'); be.netErr = true; throw be; }
         return res.json().catch(function () {
           throw new Error('সার্ভার থেকে সঠিক উত্তর আসেনি। Supabase-এ function-এর Verify JWT বন্ধ আছে কি না দেখুন।');
         });
       }).then(function (out) {
         if (timer) clearTimeout(timer);
-        if (!out || !out.ok) throw new Error((out && out.error) || 'অজানা ত্রুটি');
+        if (!out || !out.ok) throw new Error((out && out.error) || 'Unknown error');
         return stripLT(out.data);
       }).catch(function (e) {
         if (timer) clearTimeout(timer);
-        if (e && e.name === 'AbortError') { var te = new Error('timeout — সময় শেষ হয়েছে, আবার চেষ্টা করুন।'); te.netErr = true; throw te; }
+        if (e && e.name === 'AbortError') { var te = new Error('Timeout — please try again.'); te.netErr = true; throw te; }
         if (e instanceof TypeError) e.netErr = true;           // fetch ব্যর্থ = নেট নেই / সংযোগ বিচ্ছিন্ন
         throw e;
       });
+    }
+    var inflight = 0, waitQ = [], MAXC = 4;
+    function slot() {
+      return new Promise(function (res) {
+        function go() { inflight++; res(); }
+        if (inflight < MAXC) go(); else waitQ.push(go);
+      });
+    }
+    function release() { inflight--; var n = waitQ.shift(); if (n) n(); }
+    function callApi(fn, args) {
+      var tries = /^get/.test(fn) ? 2 : ((fn === 'login' || fn === 'logout' || fn === 'setMySession') ? 2 : 1), n = 0;
+      return slot().then(function () {
+        return (function attempt() {
+          n++;
+          return callOnce(fn, args, tmo(fn)).catch(function (e) {
+            if (isNetErr(e) && n < tries && navigator.onLine !== false) {
+              return new Promise(function (r) { setTimeout(r, 1200 * n); }).then(attempt);
+            }
+            throw e;
+          });
+        })();
+      }).then(function (v) { release(); return v; }, function (e) { release(); throw e; });
     }
 
     // ----- IndexedDB ক্যাশ -----
@@ -2080,6 +2256,31 @@
     function kvGet(k) { return kvOp('readonly', function (s) { return s.get(k); }); }
     function kvSet(k, v) { return kvOp('readwrite', function (s) { return s.put(v, k); }); }
     function kvDel(k) { return kvOp('readwrite', function (s) { return s.delete(k); }); }
+    function kvKeys() {
+      return dbP.then(function (db) {
+        if (!db) return [];
+        return new Promise(function (res) {
+          try { var r = db.transaction('kv', 'readonly').objectStore('kv').getAllKeys(); r.onsuccess = function () { res(r.result || []); }; r.onerror = function () { res([]); }; }
+          catch (e) { res([]); }
+        });
+      });
+    }
+    // নেট নেই + এই তারিখের ক্যাশ নেই: একই class-এর অন্য তারিখের ক্যাশ থেকে শিক্ষার্থী তালিকা নিয়ে অফলাইনে হাজিরা নেওয়া যায়
+    function synthClass(args) {
+      var pre = 'getClassData|';
+      return kvKeys().then(function (keys) {
+        var best = null;
+        keys.forEach(function (k) {
+          if (typeof k !== 'string' || k.indexOf(pre) !== 0) return;
+          try { var a = JSON.parse(k.substr(pre.length)); if (a[1] === args[2] && a[2] === args[3] && (!best || a[0] > best.d)) best = { d: a[0], k: k }; } catch (e) {}
+        });
+        if (!best) return null;
+        return kvGet(best.k).then(function (rec) {
+          if (!rec || !rec.d || !rec.d.students) return null;
+          var d = clone(rec.d); d.saved = {}; d.holiday = null; d.blocked = false; return d;
+        });
+      });
+    }
     function kvClear() { return kvOp('readwrite', function (s) { return s.clear(); }); }
 
     // ----- অফলাইন কিউ (localStorage) -----
@@ -2124,9 +2325,10 @@
     function netUI() {
       var b = document.getElementById('netBar');
       if (!b) return;
+      b.onclick = function () { syncQueue(false); };
       var n = qMine().length, off = typeof navigator !== 'undefined' && navigator.onLine === false;
-      if (off) { b.textContent = '📴 অফলাইন মোড' + (n ? ' · অপেক্ষমাণ ' + bn(n) + 'টি' : ''); b.className = 'on off'; }
-      else if (syncing || n) { b.textContent = '🔄 অপেক্ষমাণ ' + bn(n) + 'টি কাজ জমা হচ্ছে...'; b.className = 'on'; }
+      if (off) { b.textContent = '📴 Offline mode' + (n ? ' · অপেক্ষমাণ ' + bn(n) + '' : ''); b.className = 'on off'; }
+      else if (syncing || n) { b.textContent = '🔄 অপেক্ষমাণ ' + bn(n) + 'টি কাজ Submitting... (চাপলে আবার চেষ্টা)'; b.className = 'on'; }
       else b.className = '';
     }
 
@@ -2178,7 +2380,7 @@
       if (!isNetErr(e)) return e;
       try { console.warn('API সংযোগ ব্যর্থ:', e && e.message, '| online =', navigator.onLine); } catch (x) {}
       if (typeof navigator !== 'undefined' && navigator.onLine === false) return new Error('অফলাইন: এই তথ্য ডিভাইসে সংরক্ষিত নেই। একবার ইন্টারনেট চালু করে খুলুন।');
-      return new Error('ইন্টারনেট আছে, কিন্তু সার্ভারের (Supabase) সাথে যোগাযোগ হয়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।');
+      return new Error('ইন্টারনেট আছে, কিন্তু সার্ভারের (Supabase) সাথে যোগাযোগ হয়নি। কিছুক্ষণ পর Try again।');
     }
 
     // ----- পড়ার কাজ -----
@@ -2214,6 +2416,12 @@
           if (settled) return;
           settled = true; if (timer) clearTimeout(timer);
           if (isNetErr(e) && cached) { if (ok) ok(prep(fn, args, cached, true)); }
+          else if (isNetErr(e) && fn === 'getClassData') {
+            synthClass(args).then(function (d) {
+              if (d) { if (ok) ok(prep(fn, args, d, true)); }
+              else if (ng) ng(offErr(e)); else console.error(e);
+            });
+          }
           else if (ng) ng(offErr(e)); else console.error(e);
         });
         if (RACE[fn] && cached) {
@@ -2221,7 +2429,7 @@
             if (settled) return;
             settled = true;
             if (ok) ok(prep(fn, args, cached, true));
-          }, RACE_MS);
+          }, raceMs());
         }
       });
     }
@@ -2252,7 +2460,7 @@
       function fin() {
         syncing = false; netUI();
         if (typeof toast !== 'function') return;
-        if (warns.length) toast('সংরক্ষিত, কিন্তু ক্লাস শিটে জমা হয়নি: ' + warns[0], true);
+        if (warns.length) toast('Saved, but not submitted to the class sheet: ' + warns[0], true);
         else if (netFail && quiet) toast('নেট সমস্যা — তথ্য ফোনে সংরক্ষিত আছে, নেট এলে জমা হবে', true);
         else if (done && !quiet) toast('📶 অফলাইনে রাখা ' + bn(done) + 'টি কাজ জমা হয়েছে', false);
         else if (bad.length) toast('অফলাইন কাজ জমা হয়নি: ' + bad[0], true);
@@ -2263,7 +2471,7 @@
         if (!q.length) { fin(); return; }
         var it = q[0];
         callApi(it.fn, [tok].concat(it.args)).then(function (r) {
-          if (r && r.synced === false) warns.push(r.syncMsg || 'অজানা কারণ');
+          if (r && r.synced === false) warns.push(r.syncMsg || 'Unknown reason');
           qDrop(it.id);
           if (it.fn === 'saveAttendance') cacheAtt([tok].concat(it.args));
           done++; step();
@@ -2294,6 +2502,15 @@
         if (ng) ng(e); else console.error(e);
       });
     }
+
+    // আগাম লোড (UI ছাড়া): ক্যাশ ২০ মিনিটের মধ্যে নতুন থাকলে নেট ডাকে না
+    window.__prefetch = function (fn, args, cb) {
+      var key = fn + '|' + JSON.stringify(args.slice(1));
+      kvGet(key).then(function (rec) {
+        if (rec && rec.t && Date.now() - rec.t < 20 * 60000) { cb(rec.d); return; }
+        callApi(fn, args).then(function (d) { if (cacheable(d)) kvSet(key, { t: Date.now(), d: d }); cb(d); }, function () { cb(null); });
+      });
+    };
 
     function run(fn, args, ok, ng) {
       if (WRITE_Q[fn]) return doWrite(fn, args, ok, ng);
@@ -2336,7 +2553,7 @@
   var monOpen = false;   // রিপোর্টে শিক্ষার্থী ছক ডিফল্টে লুকানো
   var sumData = null;
 
-  // ===== লগইন সেশন =====
+  // ===== লগইন session =====
   var TOKEN = '';
   function saveToken(t) { try { if (t) localStorage.setItem('att_token', t); else localStorage.removeItem('att_token'); } catch (e) {} }
   function loadToken() { try { return localStorage.getItem('att_token') || ''; } catch (e) { return ''; } }
@@ -2365,14 +2582,18 @@
     return list;
   }
 
-  function bn(x) {
+  function bnD(x) {
     return String(x).replace(/\d/g, function (d) { return '০১২৩৪৫৬৭৮৯'.charAt(d); });
   }
 
+  function bn(x) {
+    return String(x).replace(/[০-৯]/g, function (d) { return '০১২৩৪৫৬৭৮৯'.indexOf(d); });
+  }
+
   // e-SIF-এর ইংরেজি মান → বাংলা প্রদর্শন
-  var SEC_BN = { 'Boys': 'ছাত্র', 'Girls': 'ছাত্রী' };
-  var GRP_BN = { 'Science': 'বিজ্ঞান', 'Humanities': 'মানবিক', 'Business Studies': 'ব্যবসায় শিক্ষা' };
-  function secText(s) { return SEC_BN[s] ? SEC_BN[s] : 'শাখা ' + s; }
+  var SEC_BN = { 'Boys': 'Boys', 'Girls': 'Girls', 'ছাত্র': 'Boys', 'ছাত্রী': 'Girls', 'ক': 'A', 'খ': 'B', 'গ': 'C', 'ঘ': 'D' };
+  var GRP_BN = { 'Science': 'Science', 'Humanities': 'Humanities', 'Business Studies': 'Business Studies', 'বিজ্ঞান': 'Science', 'মানবিক': 'Humanities', 'ব্যবসায় শিক্ষা': 'Business Studies' };
+  function secText(s) { return SEC_BN[s] ? SEC_BN[s] : 'Section ' + s; }
   function grpText(g) { return GRP_BN[g] || g; }
 
   // "9 | Boys | Science" → "৯, ছাত্র, বিজ্ঞান"  /  "6 | A" → "৬, শাখা A"
@@ -2395,12 +2616,12 @@
       : d.classes.map(function (c) { return { label: c, base: c, section: '', group: '' }; });
     ['cls', 'mcls', 'proCls'].forEach(function (id) {
       var sel = $(id);
-      sel.innerHTML = '<option value="">-- বাছাই করুন --</option>';
+      sel.innerHTML = '<option value="">-- Select --</option>';
       var grp = null, lastBase = null;
       meta.forEach(function (m) {
         if (m.base !== lastBase) {
           grp = document.createElement('optgroup');
-          grp.label = 'শ্রেণি ' + bn(m.base);
+          grp.label = 'Class ' + bn(m.base);
           sel.appendChild(grp);
           lastBase = m.base;
         }
@@ -2409,14 +2630,14 @@
         var parts = [];
         if (m.section) parts.push(secText(m.section));
         if (m.group) parts.push(grpText(m.group));
-        o.textContent = parts.length ? 'শ্রেণি ' + bn(m.base) + ' — ' + parts.join(' — ') : 'শ্রেণি ' + bn(m.base);
+        o.textContent = parts.length ? 'Class ' + bn(m.base) + ' — ' + parts.join(' — ') : 'Class ' + bn(m.base);
         grp.appendChild(o);
       });
     });
 
-    // সারাংশ ট্যাবের শ্রেণি ও শাখা ফিল্টার
-    $('sfcls').innerHTML = '<option value="">সব শ্রেণি</option>';
-    $('sfsec').innerHTML = '<option value="">সব</option>';
+    // সারাংশ ট্যাবের class ও শাখা ফিল্টার
+    $('sfcls').innerHTML = '<option value="">All classes</option>';
+    $('sfsec').innerHTML = '<option value="">All</option>';
     var bases = [], secs = [];
     meta.forEach(function (m) {
       if (bases.indexOf(m.base) === -1) bases.push(m.base);
@@ -2424,7 +2645,7 @@
     });
     bases.forEach(function (b) {
       var o = document.createElement('option');
-      o.value = b; o.textContent = 'শ্রেণি ' + bn(b);
+      o.value = b; o.textContent = 'Class ' + bn(b);
       $('sfcls').appendChild(o);
     });
     secs.forEach(function (s) {
@@ -2458,7 +2679,7 @@
       return 'Sheet খোলা যাচ্ছে না। Sheet-এর শেয়ারিং/অনুমতি এবং Spreadsheet ID ঠিক আছে কি না দেখুন।';
     }
     if (/network|fetch|timeout|timed out|offline|Failed to/i.test(m)) {
-      return 'ইন্টারনেট সংযোগে সমস্যা। সংযোগ দেখে আবার চেষ্টা করুন।';
+      return 'ইন্টারনেট সংযোগে সমস্যা। সংযোগ দেখে Try again।';
     }
     return m;
   }
@@ -2467,7 +2688,7 @@
     TOKEN = '';
     saveToken('');
     loading(false);
-    toast('সেশন শেষ হয়েছে। আবার লগইন করুন।', true);
+    toast('Session expired. Please log in again.', true);
     setTimeout(function () { location.reload(); }, 1500);
   }
 
@@ -2475,7 +2696,7 @@
     if (e && String(e.message || e).indexOf('SESSION_EXPIRED') !== -1) { sessionExpired(); return; }
     loading(false);
     $('saveBtn').disabled = !(students.length && !blocked && listOpen && listMode === 'edit');
-    toast('ত্রুটি: ' + friendlyErr(e), true);
+    toast('Error: ' + friendlyErr(e), true);
   }
 
   function setNote(id, msg, isErr) {
@@ -2489,7 +2710,7 @@
     var i = $('lgPass'), b = $('pwBtn');
     var show = i.type === 'password';
     i.type = show ? 'text' : 'password';
-    b.textContent = show ? 'লুকান' : 'দেখান';
+    b.textContent = show ? 'লুকান' : 'Show';
   }
 
   function showLogin() {
@@ -2513,26 +2734,26 @@
     $('lgmT').classList.toggle('on', !LG_OFFICE);
     $('lgmO').classList.toggle('on', LG_OFFICE);
     $('lgUserBox').style.display = LG_OFFICE ? 'none' : '';
-    $('lgPass').placeholder = LG_OFFICE ? 'অফিসের পাসওয়ার্ড' : 'পাসওয়ার্ড';
+    $('lgPass').placeholder = LG_OFFICE ? 'Office password' : 'Password';
     setNote('lgNote', '');
     try { (LG_OFFICE ? $('lgPass') : $('lgUser')).focus(); } catch (e) {}
   }
 
   function doLogin() {
     var u = LG_OFFICE ? 'office' : $('lgUser').value.trim(), p = $('lgPass').value;
-    if (!u || !p) { setNote('lgNote', LG_OFFICE ? 'অফিসের পাসওয়ার্ড দিন।' : 'ইমেইল ও পাসওয়ার্ড দিন।', true); return; }
+    if (!u || !p) { setNote('lgNote', LG_OFFICE ? 'Enter the office password.' : 'Enter email and password.', true); return; }
     $('lgBtn').disabled = true;
     setNote('lgNote', '');
-    loading(true, 'যাচাই হচ্ছে...');
+    loading(true, 'Verifying...');
     google.script.run
       .withSuccessHandler(function (res) {
         TOKEN = res.token;
         saveToken(TOKEN);
         $('lgPass').value = '';
         $('lgPass').type = 'password';
-        $('pwBtn').textContent = 'দেখান';
+        $('pwBtn').textContent = 'Show';
         $('lgBtn').disabled = false;
-        loading(true, 'লোড হচ্ছে...');
+        loading(true, 'Loading...');
         google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
       })
       .withFailureHandler(function (e) {
@@ -2554,31 +2775,31 @@
   // ===== শুরু =====
   window.onload = function () {
     TOKEN = loadToken();
-    loading(true, 'লোড হচ্ছে...');
+    loading(true, 'Loading...');
     google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
   };
 
-  // শ্রেণির তালিকা খালি হলে কারণসহ বার্তা
+  // class তালিকা খালি হলে কারণসহ বার্তা
   function emptyClassesBox(sess) {
     var box = el('div', 'empty');
-    box.appendChild(el('b', null, 'কোনো শ্রেণি বা শিক্ষার্থী পাওয়া যায়নি'));
-    box.appendChild(document.createTextNode('সম্ভাব্য কারণ:'));
+    box.appendChild(el('b', null, 'No class or student found'));
+    box.appendChild(document.createTextNode('Possible reasons:'));
     var ul = document.createElement('ul');
-    ['আপনার অ্যাকাউন্টের Access-এ শ্রেণি মিলছে না (যেমন: all, 9, 6, 7)',
-     'Students ট্যাবে সেশন ' + (sess ? bn(sess) : '') + ' নেই, অথবা Session কলামের মান আলাদা',
-     'e-SIF ফর্মে এখনো শিক্ষার্থীর তথ্য জমা হয়নি'
+    ['আপনার অ্যাকাউন্টের Access-এ class মিলছে না (যেমন: all, 9, 6, 7)',
+     'Students ট্যাবে session ' + (sess ? bn(sess) : '') + ' নেই, অথবা Session কলামের মান আলাদা',
+     'e-SIF ফর্মে এখনো Student info জমা হয়নি'
     ].forEach(function (t) { ul.appendChild(el('li', null, t)); });
     box.appendChild(ul);
     return box;
   }
 
-  // সেশন বাছাই (একাধিক সেশন থাকলে হেডারে ড্রপডাউন)
+  // session বাছাই (একাধিক session থাকলে হেডারে ড্রপডাউন)
   function buildSessSel(d) {
     var box = $('sess');
     if (!d.sessions || d.sessions.length < 2 || !d.session) return;
     box.textContent = '';
     var lb = document.createElement('span'); lb.textContent = 'Session '; box.appendChild(lb);
-    var sel = document.createElement('select'); sel.id = 'sessSel'; sel.setAttribute('aria-label', 'সেশন বাছাই করুন');
+    var sel = document.createElement('select'); sel.id = 'sessSel'; sel.setAttribute('aria-label', 'Select session');
     sel.className = 'sess-sel';
     d.sessions.forEach(function (x) {
       var o = document.createElement('option'); o.value = x; o.textContent = x;
@@ -2588,7 +2809,7 @@
       var v = sel.value;
       if (curTab === 'att' && !confirmLeave()) { sel.value = d.session; return; }
       dirty = false; attStale = false;
-      loading(true, 'সেশন বদলানো হচ্ছে...');
+      loading(true, 'session বদলানো হচ্ছে...');
       google.script.run
         .withSuccessHandler(function () { google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN); })
         .withFailureHandler(function (e) { loading(false); sel.value = d.session; fail(e); })
@@ -2627,7 +2848,7 @@
     $('sess').style.display = d.session ? 'block' : 'none';
     buildSessSel(d);
     $('todayBox').innerHTML = '';
-    $('todayBox').appendChild(document.createTextNode('আজ'));
+    $('todayBox').appendChild(document.createTextNode('Today'));
     $('todayBox').appendChild(el('b', null, fmtLong(d.today)));
 
     $('date').value = d.today;
@@ -2659,7 +2880,7 @@
     if (!d.classes.length) {
       $('list').innerHTML = '';
       $('list').appendChild(emptyClassesBox(d.session));
-      toast('কোনো শ্রেণি পাওয়া যায়নি', true);
+      toast('No classes found', true);
       return;
     }
     if (d.classes.length === 1) {
@@ -2671,24 +2892,35 @@
 
   // ===== আগাম লোড: আজকের হাজিরার তথ্য আগেই ফোনে রাখা, যাতে খুললেই তাৎক্ষণিক =====
   function warmCache() {
-    if (!cfg || !cfg.classes || navigator.onLine === false) return;
+    if (!cfg || !cfg.classes || navigator.onLine === false || !window.__prefetch) return;
     var T = TOKEN, date = cfg.today, period = cfg.defaultPeriod, month = date.substr(0, 7), jobs = [];
+    var pm = (function () { var y = +month.substr(0, 4), m = +month.substr(5, 2) - 1; if (m < 1) { m = 12; y--; } return y + '-' + (m < 10 ? '0' : '') + m; })();
     function J(f) { jobs.push(f); }
-    // অফলাইনে সব ট্যাব চলার জন্য আগেই ফোনে রাখা (ধাপে ধাপে, নেট ধীর হলেও ঝামেলা নেই)
-    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getDaySummary(T, date, period); });
-    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getAlerts(T, month, period); });
-    cfg.classes.slice(0, 20).forEach(function (c) {
-      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getClassData(T, date, c, period); });
-      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getClassStudents(T, c); });
-      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getMonthReport(T, month, c, period); });
-      J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getPromotionPreview(T, c); });
+    function P(fn, args, after) { J(function (n) { window.__prefetch(fn, [T].concat(args), function (d) { if (after) { try { after(d); } catch (e) {} } n(); }); }); }
+    // অফলাইনে সব ট্যাব চলার জন্য আগেই ফোনে রাখা (একটি একটি করে, দুর্বল নেটেও চলে)
+    P('getClassData', [date, cfg.classes[0], period]);            // আজকের হাজিরার তালিকা আগে
+    cfg.classes.slice(0, 30).forEach(function (c) {
+      if (c !== cfg.classes[0]) P('getClassData', [date, c, period]);
     });
-    J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getFormInit(T); });
-    if (cfg.canConfirm) J(function (n) { google.script.run.withSuccessHandler(n).withFailureHandler(n).getPending(T, 'pending'); });
+    P('getDaySummary', [date, period]);
+    P('getAlerts', [month, period]);
+    cfg.classes.slice(0, 30).forEach(function (c) {
+      P('getClassStudents', [c]);
+      P('getMonthReport', [month, c, period]);
+      P('getMonthReport', [pm, c, period]);
+      P('getPromotionPreview', [c]);
+    });
+    P('getFormInit', [], function (d) {                           // ফরম ফিলাপ: প্রতিটি class ও ধরনের তথ্য
+      if (!d || !d.classes) return;
+      (d.types || [{ code: d.defaultType || 'annual' }]).forEach(function (t) {
+        d.classes.forEach(function (c) { P('getFormData', [c, t.code]); });
+      });
+    });
+    if (cfg.canConfirm) P('getPending', ['pending']);
     (function step(i) {
       if (i >= jobs.length || navigator.onLine === false || T !== TOKEN) return;
       var called = false;
-      function nxt() { if (called) return; called = true; setTimeout(function () { step(i + 1); }, 250); }
+      function nxt() { if (called) return; called = true; setTimeout(function () { step(i + 1); }, 300); }
       try { jobs[i](nxt); } catch (e) { nxt(); }
     })(0);
   }
@@ -2760,7 +2992,7 @@
     renderList();
     if (!cls || !date) return;
     var id = ++rq.att;
-    loading(true, 'শিক্ষার্থী তালিকা লোড হচ্ছে...');
+    loading(true, 'Loading student list...');
     google.script.run
       .withSuccessHandler(function (d) {
         if (id !== rq.att) return;
@@ -2770,7 +3002,7 @@
         students.forEach(function (s) { state[s.roll] = d.saved[s.roll] || cfg.defaultStatus; });
         attTaken = Object.keys(d.saved).length > 0;
         if (d.holiday) {
-          setNote('note', 'ছুটির দিন: ' + d.holiday + (blocked ? ' — হাজিরা নেওয়া যাবে না।' : ''), blocked);
+          setNote('note', 'Holiday: ' + d.holiday + (blocked ? ' — হাজিরা নেওয়া যাবে না।' : ''), blocked);
         } else if (Object.keys(d.saved).length) {
           setNote('note', 'এই তারিখের হাজিরা আগে নেওয়া হয়েছে। সংশোধন করে আবার জমা দিতে পারবেন।');
         }
@@ -2805,11 +3037,11 @@
         box.appendChild(emptyClassesBox(cfg.session));
       } else if ($('cls').value && !blocked) {
         var eb = el('div', 'empty');
-        eb.appendChild(el('b', null, 'এই শ্রেণিতে কোনো শিক্ষার্থী নেই'));
-        eb.appendChild(document.createTextNode('Students ট্যাবে এই শ্রেণির শিক্ষার্থী আছে কি না দেখুন।'));
+        eb.appendChild(el('b', null, 'No students in this class'));
+        eb.appendChild(document.createTextNode('Students ট্যাবে এই class শিক্ষার্থী আছে কি না দেখুন।'));
         box.appendChild(eb);
       } else {
-        box.appendChild(el('div', 'empty', blocked ? 'এই দিন ছুটি' : 'শ্রেণি বাছাই করুন'));
+        box.appendChild(el('div', 'empty', blocked ? 'Holiday on this day' : 'Select class'));
       }
       updateBar();
       return;
@@ -2857,7 +3089,7 @@
     updateBar();
   }
 
-  // ===== হাজিরা: খসড়া, তারিখ/শ্রেণি বদল =====
+  // ===== হাজিরা: খসড়া, তারিখ/class বদল =====
   function draftKey() { return 'att_draft|' + cur.date + '|' + cur.cls + '|' + cur.period; }
   function saveDraft() { try { localStorage.setItem(draftKey(), JSON.stringify({ t: Date.now(), s: state })); } catch (e) {} }
   function clearDraft() { try { localStorage.removeItem(draftKey()); } catch (e) {} }
@@ -2890,7 +3122,7 @@
     var i = -1;
     opts.forEach(function (o, k) { if (o.value === $('cls').value) i = k; });
     var j = i + n;
-    if (j < 0 || j >= opts.length) { toast(n > 0 ? 'এটি শেষ শ্রেণি' : 'এটিই প্রথম শ্রেণি', false); return; }
+    if (j < 0 || j >= opts.length) { toast(n > 0 ? 'This is the last class' : 'This is the first class', false); return; }
     if (!confirmLeave()) return;
     $('cls').value = opts[j].value;
     loadClass();
@@ -2900,10 +3132,10 @@
   function renderGate(box) {
     var g = el('div', 'card gate');
     var top = el('div', 'gate-top');
-    top.appendChild(el('div', 'cls-title', 'শ্রেণি ' + clsPlain(cur.cls)));
-    top.appendChild(el('span', 'pchip ' + (attTaken ? 'up' : 'same'), attTaken ? '✅ জমা আছে' : '⏳ হাজিরা বাকি'));
+    top.appendChild(el('div', 'cls-title', 'Class ' + clsPlain(cur.cls)));
+    top.appendChild(el('span', 'pchip ' + (attTaken ? 'up' : 'same'), attTaken ? '✅ Submitted' : '⏳ Attendance pending'));
     g.appendChild(top);
-    g.appendChild(el('div', 'detail', 'তারিখ: ' + fmtFull(cur.date) + ' · মোট ' + bn(students.length) + ' জন'));
+    g.appendChild(el('div', 'detail', 'Date: ' + fmtFull(cur.date) + ' · মোট ' + bn(students.length) + ' students'));
 
     if (attTaken) {                       // জমা থাকলে সংখ্যা ও অনুপস্থিতের রোল
       var c = {}, n = students.length;
@@ -2911,7 +3143,7 @@
       students.forEach(function (s) { if (c[state[s.roll]] !== undefined) c[state[s.roll]]++; });
       var here = c[STATUS[0]] + (STATUS[3] ? c[STATUS[3]] : 0);
       var chips = el('div', 'gate-chips');
-      chips.appendChild(el('span', 'pill s0', 'উপস্থিতি ' + bn(n ? Math.round(here * 1000 / n) / 10 : 0) + '%'));
+      chips.appendChild(el('span', 'pill s0', 'Attendance ' + bn(n ? Math.round(here * 1000 / n) / 10 : 0) + '%'));
       STATUS.forEach(function (s, k) { if (c[s]) chips.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' ' + bn(c[s]))); });
       g.appendChild(chips);
       var abs = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; }).map(function (s) { return s.roll; });
@@ -2921,11 +3153,11 @@
       ? 'তালিকা দেখতে ওপরের 👁 চাপুন, সংশোধন করতে ✏️ পরিবর্তন চাপুন।'
       : 'শিক্ষার্থী তালিকা খুলে হাজিরা নিতে ওপরের 👁 চাপুন।'));
 
-    var tm = takenMap();                  // আজকের তারিখে অন্য বাকি শ্রেণি থাকলে দ্রুত যাওয়ার বোতাম
+    var tm = takenMap();                  // আজকের তারিখে অন্য বাকি class থাকলে দ্রুত যাওয়ার বোতাম
     if (tm) {
       var left = Object.keys(tm).filter(function (k) { return tm[k] === false && k !== cur.cls; }).length;
       if (left) {
-        var nx = el('button', 'act alt gate-next', '⏭ পরের বাকি শ্রেণি (' + bn(left) + 'টি বাকি)'); nx.type = 'button';
+        var nx = el('button', 'act alt gate-next', '⏭ Next pending class (' + bn(left) + ' left)'); nx.type = 'button';
         nx.onclick = nextPending;
         g.appendChild(nx);
       }
@@ -2941,7 +3173,7 @@
 
   // 👁 এক ক্লিকে দেখায়, আবার ক্লিকে লুকায়
   function toggleView() {
-    if (!students.length || blocked) { toast('আগে শ্রেণি বাছাই করুন', true); return; }
+    if (!students.length || blocked) { toast('Select a class first', true); return; }
     if (listOpen) { closeList(); return; }
     openList(attTaken ? 'view' : 'edit');
   }
@@ -2959,8 +3191,8 @@
     v.disabled = !has; e.disabled = !has;
     v.classList.toggle('on', listOpen);
     v.setAttribute('aria-pressed', listOpen ? 'true' : 'false');
-    v.textContent = listOpen ? '👁 লুকান' : '👁 দেখুন';
-    e.style.display = attTaken ? '' : 'none';           // পরিবর্তন শুধু জমা থাকা শ্রেণিতে
+    v.textContent = listOpen ? '👁 Hide' : '👁 Show';
+    e.style.display = attTaken ? '' : 'none';           // পরিবর্তন শুধু জমা থাকা class
     e.classList.toggle('on', listOpen && listMode === 'edit');
   }
 
@@ -3019,7 +3251,7 @@
       $('fbar').style.display = 'none';
       $('absLine').textContent = '';
       $('sum').textContent = '—';
-      $('saveBtn').textContent = attTaken ? '✔ জমা আছে' : 'জমা দিন';
+      $('saveBtn').textContent = attTaken ? '✔ Submitted' : 'Submit';
       $('saveBtn').disabled = true;
       return;
     }
@@ -3047,15 +3279,15 @@
       hc.appendChild(d);
     });
 
-    $('sum').textContent = 'মোট ' + bn(students.length) + ' জন | ' +
+    $('sum').textContent = 'Total ' + bn(students.length) + ' জন | ' +
       STATUS.map(function (s) { return s + ' ' + bn(c[s]); }).join(' | ') + (dirty ? ' | ● অসংরক্ষিত' : '');
-    $('saveBtn').textContent = dirty ? (attTaken ? 'সংশোধন জমা' : 'জমা দিন') : (attTaken ? '✔ জমা আছে' : 'জমা দিন');
+    $('saveBtn').textContent = dirty ? (attTaken ? 'Submit correction' : 'Submit') : (attTaken ? '✔ Submitted' : 'Submit');
     $('saveBtn').disabled = (listMode === 'view');
 
     // অনুপস্থিতদের রোল একনজরে
     var absRolls = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; })
       .map(function (s) { return s.roll; });
-    $('absLine').textContent = absRolls.length ? 'অনুপস্থিত (' + bn(absRolls.length) + '): রোল ' + absRolls.join(', ') : '';
+    $('absLine').textContent = absRolls.length ? 'Absent (' + bn(absRolls.length) + '): রোল ' + absRolls.join(', ') : '';
 
     // অবস্থা অনুযায়ী ফিল্টার
     var fb = $('fbar');
@@ -3075,21 +3307,21 @@
 
   function submitAtt() {
     if (!students.length || blocked) return;
-    if (cur.date > cfg.today && !confirm('এটি ভবিষ্যতের তারিখ (' + fmtFull(cur.date) + ')। তবুও হাজিরা জমা দেবেন?')) return;
+    if (cur.date > cfg.today && !confirm('This is a future date (' + fmtFull(cur.date) + '). Submit attendance anyway?')) return;
 
     // জমার আগে নিশ্চিতকরণ
     var c = {};
     STATUS.forEach(function (s) { c[s] = 0; });
     students.forEach(function (s) { c[state[s.roll]]++; });
-    var msg = 'শ্রেণি ' + clsPlain(cur.cls) + ' — ' + fmtFull(cur.date) + '\n' +
-      'মোট ' + bn(students.length) + ' জন\n' +
+    var msg = 'Class ' + clsPlain(cur.cls) + ' — ' + fmtFull(cur.date) + '\n' +
+      'Total ' + bn(students.length) + ' জন\n' +
       STATUS.map(function (s) { return cfg.labels[s] + ' (' + s + '): ' + bn(c[s]); }).join('\n') +
-      '\n\nহাজিরা জমা দেবেন?';
+      '\n\nSubmit attendance?';
     if (!confirm(msg)) return;
 
     var records = students.map(function (s) { return { roll: s.roll, status: state[s.roll] }; });
     $('saveBtn').disabled = true;
-    loading(true, 'জমা হচ্ছে...');
+    loading(true, 'Submitting...');
     google.script.run
       .withSuccessHandler(function (res) {
         loading(false);
@@ -3102,12 +3334,12 @@
         window.scrollTo(0, 0);
         updateBar();
         loadDash();
-        setNote('note', 'এই তারিখের হাজিরা জমা আছে। সংশোধন করলে আবার জমা দিন।');
+        setNote('note', 'Attendance for this date is submitted. Resubmit after editing.');
         var parts = STATUS.map(function (s) { return s + ' ' + bn(res.counts[s]); }).join(', ');
         if (res.queued) {
-          setNote('note', '📴 অফলাইনে সংরক্ষিত — ইন্টারনেট এলে নিজে নিজে জমা হবে।');
-          toast('📴 অফলাইনে সংরক্ষিত — নেট এলে স্বয়ংক্রিয়ভাবে জমা হবে', false);
-        } else toast('হাজিরা জমা হয়েছে — ' + parts, false);
+          setNote('note', '📴 Saved offline — will submit automatically when online.');
+          toast('📴 Saved offline — will submit automatically when online', false);
+        } else toast('Attendance submitted — ' + parts, false);
       })
       .withFailureHandler(fail)
       .saveAttendance(TOKEN, cur.date, cur.cls, cur.period, records);
@@ -3134,7 +3366,7 @@
     setNote('snote', '');
     if (!date) return;
     var id = ++rq.sum;
-    loading(true, 'সারাংশ লোড হচ্ছে...');
+    loading(true, 'Loading summary...');
     google.script.run
       .withSuccessHandler(function (d) {
         if (id !== rq.sum) return;
@@ -3151,8 +3383,8 @@
     sumData = d;
     var list = sumFiltered();
     $('sPrintBtn').disabled = !list.length;
-    setNote('snote', d.holiday ? 'ছুটির দিন: ' + d.holiday : '');
-    if (!list.length) { box.appendChild(el('div', 'empty', 'কোনো শ্রেণি নেই')); return; }
+    setNote('snote', d.holiday ? 'Holiday: ' + d.holiday : '');
+    if (!list.length) { box.appendChild(el('div', 'empty', 'No classes')); return; }
 
     var tot = {}, pending = 0;
     STATUS.forEach(function (s) { tot[s] = 0; });
@@ -3162,7 +3394,7 @@
     });
 
     var top = el('div', 'card');
-    top.appendChild(el('div', 'cls-title', 'সব শ্রেণি মিলিয়ে'));
+    top.appendChild(el('div', 'cls-title', 'All classes combined'));
     var chips = el('div', 'chips');
     STATUS.forEach(function (s, k) {
       var ch = el('div', 'chip s' + k);
@@ -3171,20 +3403,20 @@
       chips.appendChild(ch);
     });
     top.appendChild(chips);
-    if (pending) top.appendChild(el('div', 'warn', 'হাজিরা নেওয়া হয়নি: ' + bn(pending) + 'টি শ্রেণি'));
+    if (pending) top.appendChild(el('div', 'warn', 'Attendance not taken: ' + bn(pending) + ' classes'));
     box.appendChild(top);
 
     list.forEach(function (c) {
       var card = el('div', 'card');
-      card.appendChild(el('div', 'cls-title', 'শ্রেণি ' + clsPlain(c.cls) + ' — মোট ' + bn(c.total) + ' জন'));
+      card.appendChild(el('div', 'cls-title', 'Class ' + clsPlain(c.cls) + ' — Total ' + bn(c.total) + ' students'));
       if (!c.taken) {
-        card.appendChild(el('div', 'warn', 'হাজিরা নেওয়া হয়নি'));
+        card.appendChild(el('div', 'warn', 'Attendance not taken'));
       } else {
         var pills = el('div');
         STATUS.forEach(function (s, k) { pills.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' (' + s + ') ' + bn(c.counts[s]))); });
         card.appendChild(pills);
         if (c.absent.length) {
-          card.appendChild(el('div', 'abs', 'অনুপস্থিত: ' + c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')));
+          card.appendChild(el('div', 'abs', 'Absent: ' + c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')));
         }
       }
       box.appendChild(card);
@@ -3199,7 +3431,7 @@
     $('expLink').style.display = 'none';
     setNote('mnote', '');
     box.innerHTML = '';
-    if (!cls || !month) { if (monOpen) box.appendChild(el('div', 'empty', 'শ্রেণি ও মাস বাছাই করুন')); monSync(); return; }
+    if (!cls || !month) { if (monOpen) box.appendChild(el('div', 'empty', 'Select class and month')); monSync(); return; }
     var id = ++rq.mon;
     loading(true, 'রিপোর্টের তথ্য আনা হচ্ছে...');
     google.script.run
@@ -3216,17 +3448,17 @@
       .getMonthReport(TOKEN, month, cls, cur.period);
   }
 
-  // ===== রিপোর্ট ট্যাব: 👁 ছক দেখা/লুকানো, ফিচার বেছে প্রিন্ট =====
+  // ===== রিপোর্ট ট্যাব: 👁 ছক দেখা/লুকানো, ফিচার বেছে print =====
   function monSync() {
     var v = $('rpViewBtn'); if (!v) return;
     v.classList.toggle('on', monOpen);
     v.setAttribute('aria-pressed', monOpen ? 'true' : 'false');
-    v.textContent = monOpen ? '👁 লুকান' : '👁 দেখুন';
+    v.textContent = monOpen ? '👁 Hide' : '👁 Show';
     $('expBtn').disabled = !($('mcls').value && $('mmonth').value);
   }
   function toggleMonView() {
     if (monOpen) { monOpen = false; $('monBox').innerHTML = ''; monSync(); return; }
-    if (!$('mcls').value || !$('mmonth').value) { toast('আগে মাস ও শ্রেণি বাছাই করুন', true); return; }
+    if (!$('mcls').value || !$('mmonth').value) { toast('Select month and class first', true); return; }
     monOpen = true; monSync(); loadMonth();
   }
   function onMonSel() {
@@ -3236,14 +3468,14 @@
   }
   function onRpFeature() {
     var f = $('rpFeature').value, r = $('rpRange');
-    var pb = $('rpPrintBtn'); if (pb) pb.style.display = f ? '' : 'none';   // প্রিন্ট বোতাম: আইটেম বাছাইয়ের পরেই
+    var pb = $('rpPrintBtn'); if (pb) pb.style.display = f ? '' : 'none';   // print বোতাম: আইটেম বাছাইয়ের পরেই
     if (r) { r.style.display = f === 'range' ? '' : 'none'; if (f === 'range') r.open = true; }
   }
   function monInit() { monSync(); onRpFeature(); if (monOpen && !monData) loadMonth(); }
   function monRefresh() { monData = null; if (monOpen) loadMonth(); else { $('monBox').innerHTML = ''; monSync(); } }
   function rpPrint() {
     var f = $('rpFeature').value;
-    if (!f) { toast('আগে প্রিন্টের ধরন বাছাই করুন', true); return; }
+    if (!f) { toast('Select a print type first', true); return; }
     if (f === 'monthly') rpMonth();
     else if (f.indexOf('daily-') === 0) rpDaily(f.substr(6));
     else if (f === 'summary') rpSummary();
@@ -3252,7 +3484,7 @@
   }
 
   // মাসিক রিপোর্টের শিরোনাম ও সর্বমোট
-  function stHead(s) { return s === STATUS[0] ? 'মোট উপস্থিত' : (s === cfg.absentStatus ? 'মোট অনুপস্থিত' : cfg.labels[s]); }
+  function stHead(s) { return s === STATUS[0] ? 'Total present' : (s === cfg.absentStatus ? 'Total absent' : cfg.labels[s]); }
   function monTotals(rep) {
     var c = {}, tot = 0, pres = 0;
     STATUS.forEach(function (s) { c[s] = 0; });
@@ -3264,22 +3496,22 @@
     var box = $('monBox');
     box.innerHTML = '';
     if (!rep.dates.length) {
-      box.appendChild(el('div', 'empty', 'এই মাসে এই শ্রেণির কোনো হাজিরা নেই'));
+      box.appendChild(el('div', 'empty', 'No attendance for this class this month'));
       return;
     }
-    var mt = monTotals(rep);          // ছকের নিচের "সর্বমোট" সারি ও সারাংশ টাইলের জন্য
+    var mt = monTotals(rep);          // ছকের নিচের "Grand total" সারি ও সারাংশ টাইলের জন্য
     setNote('mnote', '');
 
     var low = rep.rows.filter(function (r) { return r.percent !== null && r.percent < cfg.lowPercent; }).length;
     var off = el('div', 'rp-off');
     off.appendChild(el('div', 'rp-off-s', cfg.school || cfg.title));
-    off.appendChild(el('div', 'rp-off-t', 'মাসিক হাজিরা প্রতিবেদন'));
-    off.appendChild(el('div', 'rp-off-m', 'শ্রেণি: ' + clsPlain(rep.cls) + '  |  মাস: ' + monthLabel(rep.month) + (cfg.session ? '  |  সেশন: ' + bn(cfg.session) : '')));
+    off.appendChild(el('div', 'rp-off-t', 'Monthly Attendance Report'));
+    off.appendChild(el('div', 'rp-off-m', 'Class: ' + clsPlain(rep.cls) + '  |  Month: ' + monthLabel(rep.month) + (cfg.session ? '  |  Session: ' + bn(cfg.session) : '')));
     var tl = el('div', 'rp-tiles');
-    [['কর্মদিবস', bn(rep.dates.length), ''], ['শিক্ষার্থী', bn(rep.rows.length) + ' জন', ''],
-     ['মোট উপস্থিত', bn(mt.c[STATUS[0]]), ' good'], ['মোট অনুপস্থিত', bn(mt.c[cfg.absentStatus] || 0), (mt.c[cfg.absentStatus] ? ' bad' : '')],
-     ['গড় উপস্থিতি', bn(mt.avg) + '%', mt.avg < cfg.lowPercent ? ' bad' : ' good'],
-     ['কম উপস্থিতি', bn(low) + ' জন', low ? ' bad' : ' good']].forEach(function (x) {
+    [['Working days', bn(rep.dates.length), ''], ['Students', bn(rep.rows.length) + ' students', ''],
+     ['Total present', bn(mt.c[STATUS[0]]), ' good'], ['Total absent', bn(mt.c[cfg.absentStatus] || 0), (mt.c[cfg.absentStatus] ? ' bad' : '')],
+     ['Average attendance', bn(mt.avg) + '%', mt.avg < cfg.lowPercent ? ' bad' : ' good'],
+     ['Low attendance', bn(low) + ' students', low ? ' bad' : ' good']].forEach(function (x) {
       var d = el('div', 'rp-tile' + x[2]);
       d.appendChild(el('b', null, x[1]));
       d.appendChild(el('span', null, x[0]));
@@ -3292,15 +3524,15 @@
     var t = el('table', 'mt');
     var thead = el('thead');
     var hr = el('tr');
-    hr.appendChild(el('th', 'c1', 'রোল'));
-    hr.appendChild(el('th', 'c2', 'নাম'));
+    hr.appendChild(el('th', 'c1', 'Roll'));
+    hr.appendChild(el('th', 'c2', 'Name'));
     rep.dates.forEach(function (d) { hr.appendChild(el('th', null, bn(parseInt(d.substr(8, 2), 10)))); });
     STATUS.forEach(function (s) {
       var th = el('th', null, stHead(s));
       th.title = cfg.labels[s];
       hr.appendChild(th);
     });
-    hr.appendChild(el('th', null, 'কর্মদিবস'));
+    hr.appendChild(el('th', null, 'Working days'));
     hr.appendChild(el('th', null, '%'));
     thead.appendChild(hr);
     t.appendChild(thead);
@@ -3323,7 +3555,7 @@
       tb.appendChild(tr);
     });
     t.appendChild(tb);
-    var tf = el('tfoot'), fr = el('tr', 'ft'), fc = el('td', 'c1', 'সর্বমোট');
+    var tf = el('tfoot'), fr = el('tr', 'ft'), fc = el('td', 'c1', 'Grand total');
     fc.colSpan = 2 + rep.dates.length; fc.style.textAlign = 'left'; fr.appendChild(fc);
     STATUS.forEach(function (s) { fr.appendChild(el('td', null, bn(mt.c[s]))); });
     fr.appendChild(el('td', null, bn(rep.dates.length)));
@@ -3336,7 +3568,7 @@
 
   function exportReport() {
     if (!monData) {
-      loadMonth(function () { if (monData && monData.dates.length) exportReport(); else toast('এই মাসে এই শ্রেণির কোনো হাজিরা নেই', true); });
+      loadMonth(function () { if (monData && monData.dates.length) exportReport(); else toast('No attendance for this class this month', true); });
       return;
     }
     $('expBtn').disabled = true;
@@ -3354,11 +3586,11 @@
       .exportReportToSheet(TOKEN, monData.month, monData.cls, monData.period);
   }
 
-  // ===== প্রিন্ট (A4) =====
+  // ===== print (A4) =====
   var MONTHS_BN = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
 
   function monthLabel(m) {
-    return MONTHS_BN[parseInt(m.substr(5, 2), 10) - 1] + ' ' + bn(m.substr(0, 4));
+    return MONTHS_BN[parseInt(m.substr(5, 2), 10) - 1] + ' ' + bnD(m.substr(0, 4));
   }
 
   function fmtFull(d) {
@@ -3370,7 +3602,7 @@
   function fmtLong(d) {
     var y = parseInt(d.substr(0, 4), 10), m = parseInt(d.substr(5, 2), 10), day = parseInt(d.substr(8, 2), 10);
     var wd = new Date(Date.UTC(y, m - 1, day)).getUTCDay();
-    return bn(day) + ' ' + MONTHS_BN[m - 1] + ' ' + bn(y) + ', ' + DAYS_BN[wd];
+    return bnD(day) + ' ' + MONTHS_BN[m - 1] + ' ' + bnD(y) + ', ' + DAYS_BN[wd];
   }
 
   function periodLine(p) {
@@ -3388,13 +3620,13 @@
   function prSign() {
     var w = el('div');
     var s = el('div', 'pr-sign');
-    [['প্রস্তুতকারক', cfg.teacher || ''], ['শ্রেণি শিক্ষক', ''], ['প্রধান শিক্ষক', '']].forEach(function (x) {
+    [['Prepared by', cfg.teacher || ''], ['Class teacher', ''], ['Head teacher', '']].forEach(function (x) {
       var d = el('div', null, x[0]);
       if (x[1]) d.appendChild(el('small', null, x[1]));
       s.appendChild(d);
     });
     w.appendChild(s);
-    w.appendChild(el('div', 'pr-foot', (cfg.school || cfg.title || '') + (cfg.session ? '  ·  সেশন ' + bn(cfg.session) : '') + '  ·  প্রিন্টের তারিখ: ' + fmtFull(cfg.today)));
+    w.appendChild(el('div', 'pr-foot', (cfg.school || cfg.title || '') + (cfg.session ? '  ·  Session ' + bn(cfg.session) : '') + '  ·  Print date: ' + fmtFull(cfg.today)));
     return w;
   }
 
@@ -3405,14 +3637,19 @@
   }
 
   function doPrint(landscape) {
-    $('pageStyle').textContent = '@page { size: A4 ' + (landscape ? 'landscape' : 'portrait') + '; margin: 10mm; }';
-    window.print();
+    $('pageStyle').textContent = '@page { size: A4 ' + (landscape ? 'landscape' : 'portrait') + '; margin: ' + (landscape ? '8mm' : '10mm') + '; }';
+    // @page ও ফন্ট প্রস্তুত হওয়ার পরে print ডায়ালগ খোলে (সরাসরি print() দিলে আগের সেটাপ থেকে যেতে পারে)
+    var go = function () { setTimeout(function () { window.print(); }, 150); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
   }
 
-  // --- দৈনিক হাজিরা প্রিন্ট (একটি শ্রেণি) ---
+  // মাসিক/রেঞ্জ টেবিলের class: কলাম বেশি হলে ছোট ফন্ট
+  function attCls(n) { return 'pt att' + (n > 40 ? ' dense xdense' : n > 20 ? ' dense' : ''); }
+
+  // --- দৈনিক হাজিরা print (এক classes) ---
   // mode: 'P' = শুধু উপস্থিত, 'A' = শুধু অনুপস্থিত, 'all' = সবার অবস্থাসহ, 'blank' = অবস্থা ঘর খালি
   function printAttendance(mode) {
-    if (!students.length || blocked) { toast('প্রিন্ট করার মতো শিক্ষার্থী তালিকা নেই', true); return; }
+    if (!students.length || blocked) { toast('No student list to print', true); return; }
     mode = (mode === true) ? 'blank' : (mode === false || !mode) ? 'all' : mode;
 
     var onlyCode = (mode === 'P') ? STATUS[0] : (mode === 'A') ? cfg.absentStatus : '';
@@ -3421,7 +3658,7 @@
       : students;
 
     if (onlyCode && !list.length) {
-      toast(cfg.labels[onlyCode] + ' তালিকায় কেউ নেই', true);
+      toast(cfg.labels[onlyCode] + ' তালিকায় None', true);
       return;
     }
 
@@ -3432,30 +3669,30 @@
     var title = mode === 'P' ? 'উপস্থিত শিক্ষার্থীর তালিকা'
               : mode === 'A' ? 'অনুপস্থিত শিক্ষার্থীর তালিকা'
               : mode === 'blank' ? 'হাজিরা তালিকা (খালি)'
-              : 'দৈনিক হাজিরা তালিকা';
+              : 'Daily Attendance List';
 
     var info = '';
     if (onlyCode) {
-      info = cfg.labels[onlyCode] + ': ' + bn(list.length) + ' জন (শ্রেণির মোট ' + bn(students.length) + ' জনের মধ্যে)';
+      info = cfg.labels[onlyCode] + ': ' + bn(list.length) + ' students (class total ' + bn(students.length) + ' students)';
     } else if (mode === 'all') {
-      info = 'মোট: ' + bn(students.length) + ' জন   |   ' +
+      info = 'Total: ' + bn(students.length) + ' students   |   ' +
         STATUS.map(function (s) { return cfg.labels[s] + ' ' + bn(c[s]); }).join('   |   ');
     }
 
     var pa = $('printArea');
     pa.innerHTML = '';
     pa.appendChild(prHead(title, [
-      'শ্রেণি: ' + clsPlain(cur.cls) + '   |   তারিখ: ' + fmtFull(cur.date),
+      'Class: ' + clsPlain(cur.cls) + '   |   Date: ' + fmtFull(cur.date),
       periodLine(cur.period),
       info
     ]));
 
     var t = el('table', 'pt');
     var thead = el('thead');
-    var hc = [el('th', null, 'ক্র.'), el('th', null, 'রোল'), el('th', null, 'নাম')];
-    if (onlyCode === 'A') hc.push(el('th', null, 'মোবাইল'));
-    if (!onlyCode) hc.push(el('th', null, mode === 'blank' ? 'উপস্থিতি' : 'অবস্থা'));
-    hc.push(el('th', null, onlyCode === 'A' ? 'কারণ / মন্তব্য' : 'মন্তব্য'));
+    var hc = [el('th', null, 'No.'), el('th', null, 'Roll'), el('th', null, 'Name')];
+    if (onlyCode === 'A') hc.push(el('th', null, 'Mobile'));
+    if (!onlyCode) hc.push(el('th', null, mode === 'blank' ? 'Attendance' : 'Status'));
+    hc.push(el('th', null, onlyCode === 'A' ? 'Reason / remarks' : 'Remarks'));
     thead.appendChild(prRow(hc));
     t.appendChild(thead);
 
@@ -3476,12 +3713,12 @@
     pa.appendChild(t);
 
     pa.appendChild(el('div', 'pr-note',
-      'সংকেত: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ')));
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ')));
     pa.appendChild(prSign());
     doPrint(false);
   }
 
-  // --- সারাংশ প্রিন্ট: শ্রেণি অনুযায়ী গ্রুপ, শাখা/শ্রেণি ফিল্টার মানা হয় ---
+  // --- সারাংশ print: By class গ্রুপ, শাখা/class ফিল্টার মানা হয় ---
   function printSummary() {
     var list = sumFiltered();
     if (!sumData || !list.length) return;
@@ -3489,19 +3726,19 @@
 
     var fb = $('sfcls').value, fs = $('sfsec').value;
     var filt = (fb || fs)
-      ? 'বাছাই: ' + (fb ? 'শ্রেণি ' + bn(fb) : 'সব শ্রেণি') + (fs ? ', ' + secText(fs) : '')
+      ? 'বাছাই: ' + (fb ? 'Class ' + bn(fb) : 'All classes') + (fs ? ', ' + secText(fs) : '')
       : '';
 
     var pa = $('printArea');
     pa.innerHTML = '';
-    pa.appendChild(prHead('দৈনিক হাজিরা সারাংশ (শ্রেণি ও শাখা অনুযায়ী)', [
-      'তারিখ: ' + fmtFull(d.date) + (d.holiday ? ' (ছুটির দিন: ' + d.holiday + ')' : ''),
+    pa.appendChild(prHead('Daily attendance summary (by class & section)', [
+      'Date: ' + fmtFull(d.date) + (d.holiday ? ' (ছুটির দিন: ' + d.holiday + ')' : ''),
       periodLine(cur.period),
       filt,
-      'প্রিন্টের তারিখ: ' + fmtFull(cfg.today)
+      'Print date: ' + fmtFull(cfg.today)
     ]));
 
-    // শ্রেণি অনুযায়ী গ্রুপ
+    // By class গ্রুপ
     var groups = [], idx = {};
     list.forEach(function (c) {
       var b = clsParts(c.cls).base;
@@ -3511,7 +3748,7 @@
 
     var t = el('table', 'pt');
     var thead = el('thead');
-    var hc = [el('th', null, 'শ্রেণি'), el('th', null, 'শাখা / বিভাগ'), el('th', null, 'মোট')];
+    var hc = [el('th', null, 'Class'), el('th', null, 'Section / division'), el('th', null, 'Total')];
     STATUS.forEach(function (s) { hc.push(el('th', null, cfg.labels[s] + ' (' + s + ')')); });
     hc.push(el('th', null, 'অনুপস্থিতের তালিকা'));
     thead.appendChild(prRow(hc));
@@ -3536,12 +3773,12 @@
         });
         cells.push(el('td', 'l', c.taken
           ? c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')
-          : 'হাজিরা নেওয়া হয়নি'));
+          : 'Attendance not taken'));
         tb.appendChild(prRow(cells));
       });
 
-      if (g.items.length > 1) {               // একাধিক শাখা থাকলে শ্রেণির উপমোট
-        var sc = [el('td', null, 'শ্রেণি ' + bn(g.base) + ' মোট'), el('td', null, ''), el('td', null, bn(sStu))];
+      if (g.items.length > 1) {               // একাধিক শাখা থাকলে class উপমোট
+        var sc = [el('td', null, 'Class ' + bn(g.base) + ' মোট'), el('td', null, ''), el('td', null, bn(sStu))];
         STATUS.forEach(function (s) { sc.push(el('td', null, bn(sTot[s]))); });
         sc.push(el('td', null, ''));
         var r = prRow(sc); r.className = 'tot'; tb.appendChild(r);
@@ -3551,7 +3788,7 @@
     });
 
     if (groups.length > 1 || (groups.length === 1 && groups[0].items.length === 1)) {
-      var tc = [el('td', null, 'সর্বমোট'), el('td', null, ''), el('td', null, bn(gStu))];
+      var tc = [el('td', null, 'Grand total'), el('td', null, ''), el('td', null, bn(gStu))];
       STATUS.forEach(function (s) { tc.push(el('td', null, bn(gTot[s]))); });
       tc.push(el('td', null, ''));
       var tr = prRow(tc); tr.className = 'tot'; tb.appendChild(tr);
@@ -3573,19 +3810,19 @@
     rep.rows.forEach(function (r) { tp += r.present; tt += r.total; });
     var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
 
-    pa.appendChild(prHead('মাসিক হাজিরা রিপোর্ট', [
-      'শ্রেণি: ' + clsPlain(rep.cls) + '   |   মাস: ' + monthLabel(rep.month),
+    pa.appendChild(prHead('Monthly Attendance Report', [
+      'Class: ' + clsPlain(rep.cls) + '   |   Month: ' + monthLabel(rep.month),
       periodLine(rep.period),
-      'কর্মদিবস: ' + bn(rep.dates.length) + ' দিন   |   শিক্ষার্থী: ' + bn(rep.rows.length) + ' জন   |   মোট উপস্থিত: ' + bn(monTotals(rep).c[STATUS[0]]) +
-        '   |   মোট অনুপস্থিত: ' + bn(monTotals(rep).c[cfg.absentStatus] || 0) + '   |   গড় উপস্থিতি: ' + bn(avg) + '%'
+      'Working days: ' + bn(rep.dates.length) + ' days   |   Students: ' + bn(rep.rows.length) + ' জন   |   Total present: ' + bn(monTotals(rep).c[STATUS[0]]) +
+        '   |   Total absent: ' + bn(monTotals(rep).c[cfg.absentStatus] || 0) + '   |   Average attendance: ' + bn(avg) + '%'
     ]));
 
-    var t = el('table', 'pt' + (rep.dates.length > 20 ? ' dense' : ''));
+    var t = el('table', attCls(rep.dates.length));
     var thead = el('thead');
-    var hc = [el('th', null, 'রোল'), el('th', null, 'নাম')];
+    var hc = [el('th', null, 'Roll'), el('th', null, 'Name')];
     rep.dates.forEach(function (d) { hc.push(el('th', null, bn(parseInt(d.substr(8, 2), 10)))); });
     STATUS.forEach(function (s) { hc.push(el('th', null, stHead(s))); });
-    hc.push(el('th', null, 'কর্মদিবস'));
+    hc.push(el('th', null, 'Working days'));
     hc.push(el('th', null, '%'));
     thead.appendChild(prRow(hc));
     t.appendChild(thead);
@@ -3604,7 +3841,7 @@
       tb.appendChild(prRow(cells));
     });
     var mtp = monTotals(rep);
-    var ft = [el('td', 'l', 'সর্বমোট')]; ft[0].colSpan = 2 + rep.dates.length;
+    var ft = [el('td', 'l', 'Grand total')]; ft[0].colSpan = 2 + rep.dates.length;
     STATUS.forEach(function (s) { ft.push(el('td', null, bn(mtp.c[s]))); });
     ft.push(el('td', null, bn(rep.dates.length)));
     ft.push(el('td', null, bn(mtp.avg)));
@@ -3613,13 +3850,13 @@
     pa.appendChild(t);
 
     pa.appendChild(el('div', 'pr-note',
-      'সংকেত: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
-      '   |   * চিহ্নিত = উপস্থিতি ' + bn(cfg.lowPercent) + '%-এর কম'));
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
+      '   |   * চিহ্নিত = Attendance ' + bn(cfg.lowPercent) + '%-এর কম'));
     pa.appendChild(prSign());
     doPrint(true);
   }
 
-  // ===== তারিখ রেঞ্জ অনুযায়ী প্রিন্ট (দৈনিক / সাপ্তাহিক / পাক্ষিক / মাসিক / কাস্টম) =====
+  // ===== তারিখ রেঞ্জ অনুযায়ী print (দৈনিক / সাপ্তাহিক / পাক্ষিক / মাসিক / কাস্টম) =====
   function rngAddDays(iso, n) {
     var d = new Date(iso + 'T00:00:00Z');
     d.setUTCDate(d.getUTCDate() + n);
@@ -3656,27 +3893,27 @@
     $('rtoBox').style.display = $('rtype').value === 'custom' ? '' : 'none';
     var r = rngCalc();
     if (!r) { setNote('rrnote', ''); return; }
-    if (r.to < r.from) { setNote('rrnote', 'শেষ তারিখ শুরুর তারিখের আগে হতে পারে না।', true); return; }
+    if (r.to < r.from) { setNote('rrnote', 'End date cannot be before start date.', true); return; }
     var n = rngDiff(r.from, r.to) + 1;
-    if (n > 62) { setNote('rrnote', 'সর্বোচ্চ ৬২ দিনের রেঞ্জ নেওয়া যাবে।', true); return; }
+    if (n > 62) { setNote('rrnote', 'Maximum range is 62 days।', true); return; }
     setNote('rrnote', 'রেঞ্জ: ' + fmtFull(r.from) + ' থেকে ' + fmtFull(r.to) + ' (' + bn(n) + ' দিন)');
   }
 
   function printRange() {
     var cls = $('mcls').value;
-    if (!cls) { toast('আগে উপরে শ্রেণি বাছাই করুন', true); return; }
+    if (!cls) { toast('আগে উপরে Select class', true); return; }
     var r = rngCalc();
-    if (!r || r.to < r.from) { toast('তারিখ ঠিক করুন', true); return; }
+    if (!r || r.to < r.from) { toast('Fix the date', true); return; }
     var n = rngDiff(r.from, r.to) + 1;
-    if (n > 62) { toast('সর্বোচ্চ ৬২ দিনের রেঞ্জ নেওয়া যাবে', true); return; }
+    if (n > 62) { toast('Maximum range is 62 days', true); return; }
 
     // খালি সিট: রেঞ্জের সব দিনের কলাম, ঘর ফাঁকা (ছুটির দিনেও কাজ করে)
     if ($('rkind').value === 'blank') {
-      loading(true, 'শিক্ষার্থী তালিকা লোড হচ্ছে...');
+      loading(true, 'Loading student list...');
       google.script.run
         .withSuccessHandler(function (list) {
           loading(false);
-          if (!list || !list.length) { toast('এই শ্রেণির শিক্ষার্থী তালিকা পাওয়া যায়নি', true); return; }
+          if (!list || !list.length) { toast('No student list found for this class', true); return; }
           var dates = [];
           for (var i = 0; i < n; i++) dates.push(rngAddDays(r.from, i));
           var rows = sortByRoll(list.map(function (s) { return { roll: s.roll, name: s.name, cells: {} }; }), 'roll');
@@ -3689,12 +3926,12 @@
 
     // রিপোর্ট: প্রতি মাসের তথ্য এনে রেঞ্জে কেটে জোড়া লাগানো
     var months = rngMonths(r.from, r.to), map = {}, order = [], dset = {}, idx = 0;
-    loading(true, 'হাজিরার তথ্য আনা হচ্ছে...');
+    loading(true, 'Fetching attendance data...');
 
     function finish() {
       loading(false);
       var dates = Object.keys(dset).sort();
-      if (!dates.length) { toast('এই রেঞ্জে কোনো হাজিরা নেওয়া হয়নি', true); return; }
+      if (!dates.length) { toast('No attendance taken in this range', true); return; }
       rngRender(cls, r, dates, sortByRoll(order.map(function (k) { return map[k]; }), 'roll'), false);
     }
 
@@ -3734,27 +3971,27 @@
       x.percent = tot ? Math.round(x.present * 1000 / tot) / 10 : null;
     });
 
-    var T = { daily: 'দৈনিক হাজিরা সিট', weekly: 'সাপ্তাহিক হাজিরা সিট', fortnight: 'পাক্ষিক হাজিরা সিট',
-              monthly: 'মাসিক হাজিরা সিট', custom: 'হাজিরা সিট (তারিখ অনুযায়ী)' };
+    var T = { daily: 'Daily attendance sheet', weekly: 'Weekly attendance sheet', fortnight: 'Fortnightly attendance sheet',
+              monthly: 'Monthly attendance sheet', custom: 'হাজিরা সিট (তারিখ অনুযায়ী)' };
     var title = T[r.type] + (blank ? ' (খালি)' : '');
 
     var pa = $('printArea');
     pa.innerHTML = '';
     pa.appendChild(prHead(title, [
-      'শ্রেণি: ' + clsPlain(cls) + '   |   ' + (r.from === r.to ? 'তারিখ: ' + fmtFull(r.from) : 'তারিখ: ' + fmtFull(r.from) + ' থেকে ' + fmtFull(r.to)),
+      'Class: ' + clsPlain(cls) + '   |   ' + (r.from === r.to ? 'Date: ' + fmtFull(r.from) : 'Date: ' + fmtFull(r.from) + ' থেকে ' + fmtFull(r.to)),
       periodLine(cur.period),
-      blank ? 'শিক্ষার্থী: ' + bn(rows.length) + ' জন' : 'হাজিরা নেওয়া হয়েছে: ' + bn(dates.length) + ' দিন   |   শিক্ষার্থী: ' + bn(rows.length) + ' জন'
+      blank ? 'Students: ' + bn(rows.length) + ' students' : 'হাজিরা নেওয়া হয়েছে: ' + bn(dates.length) + ' days   |   Students: ' + bn(rows.length) + ' students'
     ]));
 
-    var t = el('table', 'pt' + (dates.length > 20 ? ' dense' : ''));
+    var t = el('table', attCls(dates.length));
     var thead = el('thead');
-    var hc = [el('th', null, 'রোল'), el('th', null, 'নাম')];
+    var hc = [el('th', null, 'Roll'), el('th', null, 'Name')];
     dates.forEach(function (d) {
-      hc.push(el('th', null, multi ? fmtDM(d) : bn(parseInt(d.substr(8, 2), 10))));
+      hc.push(el('th', multi ? 'dt' : null, multi ? fmtDM(d) : bn(parseInt(d.substr(8, 2), 10))));
     });
     if (!blank) {
       STATUS.forEach(function (s) { hc.push(el('th', null, s)); });
-      hc.push(el('th', null, 'মোট দিন'));
+      hc.push(el('th', null, 'Total days'));
       hc.push(el('th', null, '%'));
     }
     thead.appendChild(prRow(hc));
@@ -3780,8 +4017,8 @@
     pa.appendChild(t);
 
     pa.appendChild(el('div', 'pr-note',
-      'সংকেত: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
-      (blank ? '' : '   |   * চিহ্নিত = উপস্থিতি ' + bn(cfg.lowPercent) + '%-এর কম')));
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
+      (blank ? '' : '   |   * চিহ্নিত = Attendance ' + bn(cfg.lowPercent) + '%-এর কম')));
     pa.appendChild(prSign());
     doPrint(dates.length > 8);
   }
@@ -3791,7 +4028,7 @@
   var proData = null, proState = {}, proSel = {}, proInp = {};
 
   function proInit(d) {
-    var hasCls = !!(d.classes && d.classes.length);        // শ্রেণি শিক্ষকও নিজের শ্রেণির প্রোমোশন দিতে পারবেন
+    var hasCls = !!(d.classes && d.classes.length);        // Class teacherও নিজের class প্রোমোশন দিতে পারবেন
     $('proTab').style.display = hasCls ? '' : 'none';
     $('proChip').style.display = hasCls ? '' : 'none';
     $('arCard').style.display = d.isAdmin ? '' : 'none';  // আর্কাইভ শুধু অ্যাডমিন
@@ -3804,7 +4041,7 @@
     var allSec = ['Boys', 'Girls'];
     secs.forEach(function (x) { if (allSec.indexOf(x) === -1) allSec.push(x); });
     var ss = $('proSec');
-    ss.innerHTML = '<option value="">-- শাখা নেই --</option>';
+    ss.innerHTML = '<option value="">-- No section --</option>';
     allSec.forEach(function (x) {
       var o = document.createElement('option');
       o.value = x; o.textContent = secText(x);
@@ -3814,7 +4051,7 @@
     var all = Object.keys(GRP_BN);
     grps.forEach(function (g) { if (all.indexOf(g) === -1) all.push(g); });
     var gs = $('proGrp');
-    gs.innerHTML = '<option value="">-- গ্রুপ নেই --</option>';
+    gs.innerHTML = '<option value="">-- No group --</option>';
     all.forEach(function (g) {
       var o = document.createElement('option');
       o.value = g; o.textContent = grpText(g);
@@ -3877,7 +4114,7 @@
     proData = d;
     var box = $('proBox');
     box.innerHTML = '';
-    if (!d.students.length) { box.appendChild(el('div', 'empty', 'এই শ্রেণিতে কোনো শিক্ষার্থী নেই')); return; }
+    if (!d.students.length) { box.appendChild(el('div', 'empty', 'No students in this class')); return; }
 
     var canUp = d.base !== d.lastClass;
     var nb = parseInt(d.base, 10) + 1;
@@ -3892,8 +4129,8 @@
     $('proBar').style.display = 'block';
     $('proAllUp').style.display = canUp ? '' : 'none';
     setNote('pnote', canUp
-      ? 'শ্রেণি ' + bn(d.base) + ' → শ্রেণি ' + bn(nb) + ' | টিক দেওয়া শিক্ষার্থীরাই প্রোমোশন পাবে'
-      : 'এটি সর্বোচ্চ শ্রেণি (' + bn(d.base) + ')। পরের শ্রেণি নেই — অকৃতকার্যদের টিক দিলে "একই শ্রেণিতে" নতুন সেশনে যুক্ত হবে।');
+      ? 'Class ' + bn(d.base) + ' → Class ' + bn(nb) + ' | টিক দেওয়া শিক্ষার্থীরাই প্রোমোশন পাবে'
+      : 'This is the highest class (' + bn(d.base) + '). There is no next class — ticked failed students go to "একই class" of the new session.');
 
     var h3 = el('div', 'pro-step');
     h3.innerHTML = '<i>৩</i><div><b>শিক্ষার্থী ও নতুন রোল</b><small>টিক দেওয়াদের প্রোমোশন হবে</small></div>';
@@ -3904,10 +4141,10 @@
     var top = el('div', 'reg-bk-top');
     var all = document.createElement('input');
     all.type = 'checkbox'; all.id = 'proAll'; all.className = 'reg-cb';
-    all.setAttribute('aria-label', 'সবাইকে বাছাই করুন');
+    all.setAttribute('aria-label', 'Select everyone');
     all.onchange = function () { proToggleAll(all.checked); };
     top.appendChild(all);
-    top.appendChild(el('b', null, 'সব বাছাই'));
+    top.appendChild(el('b', null, 'Select all'));
     var cnt = el('span', null, ''); cnt.id = 'proCnt';
     top.appendChild(cnt);
     bar.appendChild(top);
@@ -3953,7 +4190,7 @@
         att.appendChild(tr);
         att.appendChild(el('span', null, 'হাজিরা ' + bn(s.percent) + '%'));
       } else {
-        att.appendChild(el('span', null, 'হাজিরার তথ্য নেই'));
+        att.appendChild(el('span', null, 'No attendance data'));
       }
       nm.appendChild(att);
       main.appendChild(nm);
@@ -3961,7 +4198,7 @@
       main.appendChild(el('div', 'pro-arrow', '→'));
 
       var nw = el('div', 'pro-new');
-      nw.appendChild(el('small', null, 'নতুন রোল'));
+      nw.appendChild(el('small', null, 'New roll'));
       var inp = document.createElement('input');
       inp.type = 'text'; inp.value = ''; inp.autocomplete = 'off';
       inp.placeholder = '—';
@@ -3982,8 +4219,8 @@
       // প্রোমোশনের ধরন: দুই-ভাগের বোতাম
       var seg = el('div', 'seg' + (canUp ? '' : ' one'));
       var acts = canUp
-        ? [['up', '⬆️ পরের শ্রেণিতে'], ['same', '🔁 একই শ্রেণিতে']]
-        : [['same', '🔁 একই শ্রেণিতে (অকৃতকার্য)']];
+        ? [['up', '⬆️ Next class'], ['same', '🔁 Same class']]
+        : [['same', '🔁 Same class (failed)']];
       acts.forEach(function (a) {
         var b = el('button', a[0], a[1]);
         b.type = 'button';
@@ -4025,7 +4262,7 @@
     return bad;
   }
 
-  // নতুন শ্রেণি ও সেশনের লাইভ প্রিভিউ (উপরের ব্যানার, চিপ ও নিচের বার)
+  // নতুন class ও sessionের লাইভ প্রিভিউ (উপরের ব্যানার, চিপ ও নিচের বার)
   function proPreview() {
     var box = $('proPrev'), ft = $('proFT');
     box.innerHTML = '';
@@ -4041,20 +4278,20 @@
 
     var toLbl = canUp ? proLabel(String(parseInt(d.base, 10) + 1), sec, grp) : d.cls;
     ft.innerHTML =
-      '<div class="pf-box"><small>বর্তমান</small><b>শ্রেণি ' + esc(clsPlain(d.cls)) + '</b><span>সেশন ' + esc(bn(cfg.session || '—')) + '</span></div>' +
+      '<div class="pf-box"><small>Current</small><b>Class ' + esc(clsPlain(d.cls)) + '</b><span>Session ' + esc(bn(cfg.session || '—')) + '</span></div>' +
       '<div class="pf-arrow">➜</div>' +
-      '<div class="pf-box to"><small>নতুন</small><b>শ্রেণি ' + esc(clsPlain(toLbl)) + '</b><span>সেশন ' + esc(ses ? bn(ses) : '—') + '</span></div>';
+      '<div class="pf-box to"><small>New</small><b>Class ' + esc(clsPlain(toLbl)) + '</b><span>Session ' + esc(ses ? bn(ses) : '—') + '</span></div>';
 
     function chip(cls, txt) { box.appendChild(el('span', 'pchip ' + cls, txt)); }
-    if (n.up) chip('up', '⬆️ পরের শ্রেণিতে ' + bn(n.up) + ' জন');
-    if (n.same) chip('same', '🔁 একই শ্রেণিতে ' + bn(n.same) + ' জন');
-    if (n.out) chip('off', '⏹️ বাদ ' + bn(n.out) + ' জন');
-    if (empty) chip('todo', '✏️ ' + bn(empty) + ' জনের নতুন রোল বাকি');
+    if (n.up) chip('up', '⬆️ Next class ' + bn(n.up) + ' students');
+    if (n.same) chip('same', '🔁 Same class ' + bn(n.same) + ' students');
+    if (n.out) chip('off', '⏹️ বাদ ' + bn(n.out) + ' students');
+    if (empty) chip('todo', '✏️ ' + bn(empty) + ' new rolls pending');
     var bad = proCheckDup();
-    if (bad) chip('warn', '⚠️ ' + bn(bad) + 'টি নতুন রোল দুইবার (লাল ঘর)');
+    if (bad) chip('warn', '⚠️ ' + bn(bad) + ' new rolls duplicated (red fields)');
 
-    $('proBarT').textContent = 'পরের শ্রেণিতে ' + bn(n.up) + ' · একই শ্রেণিতে ' + bn(n.same) + ' · বাদ ' + bn(n.out);
-    $('proBtn').textContent = 'প্রোমোশন দিন (' + bn(n.up + n.same) + ' জন)';
+    $('proBarT').textContent = 'পরের class ' + bn(n.up) + ' · একই class ' + bn(n.same) + ' · বাদ ' + bn(n.out);
+    $('proBtn').textContent = 'Promote (' + bn(n.up + n.same) + ' students)';
   }
 
   function proUpdateCnt() {
@@ -4075,7 +4312,7 @@
     proUpdateCnt();
   }
 
-  // সবাইকে "পরের শ্রেণিতে" ধরে বাছাই
+  // সবাইকে "পরের class" ধরে বাছাই
   function proSetAction(a) {
     if (!proData) return;
     proData.students.forEach(function (s) {
@@ -4101,7 +4338,7 @@
     var d = proData;
     if (!d) return;
     var ses = $('proSes').value.trim(), sec = $('proSec').value.trim(), grp = $('proGrp').value.trim();
-    if (!ses) { toast('নতুন সেশন দিন', true); $('proSes').focus(); return; }
+    if (!ses) { toast('Enter the new session', true); $('proSes').focus(); return; }
 
     var items = [], cnt = { up: 0, same: 0, out: 0 }, seen = {};
     for (var i = 0; i < d.students.length; i++) {
@@ -4109,18 +4346,18 @@
       if (!st.on) { cnt.out++; continue; }
       cnt[st.action]++;
       var nr = edBn2en(st.newRoll || '').trim();
-      if (!nr) { toast('রোল ' + s.roll + '-এর নতুন রোল দিন', true); proInp[s.roll].focus(); return; }
+      if (!nr) { toast('Roll ' + s.roll + '-এর নতুন রোল দিন', true); proInp[s.roll].focus(); return; }
       var k = st.action + '|' + nr;
       if (seen[k]) { toast('নতুন রোল ' + nr + ' দুইবার দেওয়া হয়েছে', true); proInp[s.roll].focus(); return; }
       seen[k] = true;
       items.push({ roll: s.roll, action: st.action, newRoll: nr });
     }
-    if (!items.length) { toast('কাউকে বাছাই করা হয়নি', true); return; }
+    if (!items.length) { toast('No one selected', true); return; }
     if (cnt.up && parseInt(d.base, 10) + 1 >= 9 && !grp &&
-        !confirm('নতুন গ্রুপ ফাঁকা। শ্রেণি ৯–১০-এর জন্য গ্রুপ দেওয়া ভালো।\nগ্রুপ ছাড়াই চালিয়ে যাবেন?')) return;
+        !confirm('New group is empty. A group is recommended for classes 9–10.\nContinue without a group?')) return;
 
-    var msg = 'শ্রেণি ' + clsPlain(d.cls) + ' → সেশন ' + ses + '\n' +
-      'পরের শ্রেণিতে: ' + bn(cnt.up) + ' জন (' + clsPlain(proLabel(String(parseInt(d.base, 10) + 1), sec, grp)) + ')\nএকই শ্রেণিতে: ' + bn(cnt.same) + ' জন\nবাদ (টিক নেই): ' + bn(cnt.out) + ' জন\n\n' +
+    var msg = 'Class ' + clsPlain(d.cls) + ' → Session ' + ses + '\n' +
+      'পরের class: ' + bn(cnt.up) + ' জন (' + clsPlain(proLabel(String(parseInt(d.base, 10) + 1), sec, grp)) + ')\nএকই class: ' + bn(cnt.same) + ' জন\nবাদ (টিক নেই): ' + bn(cnt.out) + ' জন\n\n' +
       'Students ট্যাবে নতুন সারি যোগ হবে (পুরোনো সারি থাকবে)। চালিয়ে যাবেন?';
     if (!confirm(msg)) return;
 
@@ -4136,7 +4373,7 @@
         toast(bn(done) + ' জন যুক্ত হয়েছে', false);
         var m = 'যুক্ত হয়েছে: ' + bn(done) + ' জন\n';
         if (issues.length) m += '\nবাদ গেছে:\n' + issues.join('\n') + '\n';
-        m += '\nমনে রাখবেন: সব শ্রেণির কাজ শেষে অ্যাডমিন হাজিরা সিট আর্কাইভ করবেন, তারপর Code.gs-এ SESSION = \'' + ses + '\' করবেন।';
+        m += '\nমনে রাখবেন: সব class কাজ শেষে অ্যাডমিন হাজিরা সিট আর্কাইভ করবেন, তারপর Code.gs-এ SESSION = \'' + ses + '\' করবেন।';
         alert(m);
         return;
       }
@@ -4146,7 +4383,7 @@
       google.script.run
         .withSuccessHandler(function (res) {
           done += res.done;
-          res.results.forEach(function (r) { if (r.status !== 'ok') issues.push('রোল ' + r.roll + ': ' + r.msg); });
+          res.results.forEach(function (r) { if (r.status !== 'ok') issues.push('Roll ' + r.roll + ': ' + r.msg); });
           next();
         })
         .withFailureHandler(function (e) { proUpdateCnt(); fail(e); })
@@ -4158,7 +4395,7 @@
   function doArchive() {
     var lb = $('arLabel').value.trim();
     if (!lb) { toast('আর্কাইভ লেবেল দিন (যেমন 2026)', true); return; }
-    if (!confirm('সব Attendance-N ট্যাব "Archive-' + lb + '-Attendance-N" নামে সরে যাবে এবং নতুন খালি ট্যাব তৈরি হবে।\nনতুন সেশন শুরুর আগে এটি করবেন। চালিয়ে যাবেন?')) return;
+    if (!confirm('সব Attendance-N ট্যাব "Archive-' + lb + '-Attendance-N" নামে সরে যাবে এবং নতুন খালি ট্যাব তৈরি হবে।\nনতুন session শুরুর আগে এটি করবেন। চালিয়ে যাবেন?')) return;
     loading(true, 'আর্কাইভ হচ্ছে...');
     google.script.run
       .withSuccessHandler(function (res) {
@@ -4190,7 +4427,7 @@
              paidDate: s(o.paidDate, ''), status: s(o.status, 'pending'), remarks: s(o.remarks, '') };
   }
 
-  // paid = পূর্ণ/বেশি জমা, part = আংশিক, due = কিছুই জমা নেই, nofee = ফি নির্ধারিত নয়
+  // paid = পূর্ণ/বেশি জমা, part = আংশিক, due = কিছুই জমা নেই, nofee = Fee not set
   function ffFeeState(r) {
     var fee = ffNum(r.fee), paid = ffNum(r.paid);
     if (paid > 0 && (fee <= 0 || paid >= fee)) return 'paid';
@@ -4199,7 +4436,7 @@
     return 'nofee';
   }
 
-  // দেখানো হবে কি না ঠিক করে: শ্রেণির বেস ফরম ফিলাপের তালিকায় আছে কি না
+  // দেখানো হবে কি না ঠিক করে: class বেস ফরম ফিলাপের তালিকায় আছে কি না
   function ffInit(d) {
     var bases = d.formBases || [];
     var ok = (d.classes || []).some(function (c) { return bases.indexOf(clsParts(c).base) !== -1; });
@@ -4217,7 +4454,7 @@
     var sel = $('ffCls');
     for (var i = 0; i < sel.options.length; i++) {
       var o = sel.options[i];
-      if (o.value) o.textContent = 'শ্রেণি ' + clsPlain(o.value) + ' — ' + ffTypeLabel(clsParts(o.value).base);
+      if (o.value) o.textContent = 'Class ' + clsPlain(o.value) + ' — ' + ffTypeLabel(clsParts(o.value).base);
     }
   }
 
@@ -4267,7 +4504,7 @@
       var inp = document.createElement('input');
       inp.type = 'text'; inp.id = 'ffAllSubj'; inp.autocomplete = 'off';
       inp.setAttribute('list', 'ffFourth');
-      inp.placeholder = '৪র্থ বিষয়ের নাম';
+      inp.placeholder = '4th subject name';
       inp.value = ffAllSubj || ((ffCfg && ffCfg.fourth && ffCfg.fourth[0]) || '');
       ffAllSubj = inp.value;
       inp.oninput = function () { ffAllSubj = inp.value; };
@@ -4294,26 +4531,26 @@
     var list = ffData.students;
     if (what === 'form') {
       var sub = list.filter(function (s) { return ffRec[s.key].status === 'submitted'; }).length;
-      if (!on && sub && !confirm(bn(sub) + ' জন "বোর্ডে জমা" অবস্থায় আছে। সবাইকে "ফরম বাকি" করবেন?')) { ffAllSync(); return; }
+      if (!on && sub && !confirm(bn(sub) + ' জন "Submitted to board" অবস্থায় আছে। সবাইকে "Form pending" করবেন?')) { ffAllSync(); return; }
       list.forEach(function (s) {
         var r = ffRec[s.key];
         r.status = on ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
       });
     } else {
       var subj = String(ffAllSubj || '').trim();
-      if (on && !subj) { toast('আগে ৪র্থ বিষয়ের নাম লিখুন', true); ffAllSync(); return; }
+      if (on && !subj) { toast('আগে 4th subject name লিখুন', true); ffAllSync(); return; }
       list.forEach(function (s) { ffRec[s.key].fourth = on ? subj : ''; });
     }
     list.forEach(function (s) {
       if (JSON.stringify(ffRec[s.key]) !== ffOrig[s.key]) ffDirty[s.key] = true; else delete ffDirty[s.key];
     });
     ffRender();
-    toast('সবার জন্য প্রয়োগ হয়েছে — সংরক্ষণ করুন', false);
+    toast('সবার জন্য প্রয়োগ হয়েছে — Save', false);
   }
 
   function ffOpen() {
     if (ffCfg) return;
-    loading(true, 'লোড হচ্ছে...');
+    loading(true, 'Loading...');
     google.script.run
       .withSuccessHandler(function (d) {
         loading(false);
@@ -4321,11 +4558,11 @@
         ffType = d.defaultType || 'annual';
         ffTypeRender();
         var sel = $('ffCls');
-        sel.innerHTML = '<option value="">-- বাছাই করুন --</option>';
+        sel.innerHTML = '<option value="">-- Select --</option>';
         d.classes.forEach(function (c) {
           var o = document.createElement('option');
           o.value = c;
-          o.textContent = 'শ্রেণি ' + clsPlain(c) + ' — ' + (d.exams[clsParts(c).base] || '');
+          o.textContent = 'Class ' + clsPlain(c) + ' — ' + (d.exams[clsParts(c).base] || '');
           sel.appendChild(o);
         });
         ffClsLabels();
@@ -4336,7 +4573,7 @@
           o.value = x;
           dl.appendChild(o);
         });
-        if (!d.classes.length) { setNote('ffNote', 'ফরম ফিলাপের জন্য আপনার অ্যাকাউন্টে কোনো শ্রেণি নেই।', true); return; }
+        if (!d.classes.length) { setNote('ffNote', 'Your account has no class for form fill-up.', true); return; }
         if (d.classes.length === 1) { sel.value = d.classes[0]; onFfCls(); }
       })
       .withFailureHandler(fail)
@@ -4356,14 +4593,14 @@
     setNote('ffNote', '');
     ffRender();
     if (!cls) return;
-    loading(true, 'শিক্ষার্থীর তথ্য আনা হচ্ছে...');
+    loading(true, 'Student info আনা হচ্ছে...');
     google.script.run
       .withSuccessHandler(function (d) {
         loading(false);
         if ($('ffCls').value !== cls || ffType !== type) return;
         sortByRoll(d.students, 'roll');
         ffData = d;
-        setNote('ffNote', d.exam + ' — সেশন ' + bn(d.session || ''));
+        setNote('ffNote', d.exam + ' — Session ' + bn(d.session || ''));
         d.students.forEach(function (s) {
           var rec = ffNormRec(s.saved ? s.saved : { fee: s.defFee });
           if (!rec.regNo && s.sid) rec.regNo = s.sid;     // Students ট্যাব থেকে স্বয়ংক্রিয় রেজি. নম্বর
@@ -4386,7 +4623,7 @@
     $('ffFbar').style.display = has ? 'flex' : 'none';
     ffAllBar();
     if (!has) {
-      box.appendChild(el('div', 'empty', ffData ? 'এই শ্রেণিতে কোনো শিক্ষার্থী নেই' : 'শ্রেণি বাছাই করুন'));
+      box.appendChild(el('div', 'empty', ffData ? 'No students in this class' : 'Select class'));
       ffStatsUpdate();
       return;
     }
@@ -4399,7 +4636,7 @@
   function ffFbar() {
     var fb = $('ffFbar');
     fb.innerHTML = '';
-    [['', 'সব'], ['due', 'ফি বকেয়া'], ['paid', 'ফি পরিশোধিত'], ['pending', 'ফরম বাকি'], ['submitted', 'বোর্ডে জমা']].forEach(function (f) {
+    [['', 'All'], ['due', 'Fee due'], ['paid', 'Fee paid'], ['pending', 'Form pending'], ['submitted', 'Submitted to board']].forEach(function (f) {
       var b = el('button', 'chipbtn' + (ffFilter === f[0] ? ' on' : ''), f[1]);
       b.type = 'button';
       b.onclick = function () { ffFilter = f[0]; ffFbar(); ffApplyFilter(); };
@@ -4443,7 +4680,7 @@
     head.appendChild(el('div', 'roll', s.roll));
     var ckF = ffCheck('ফরম', function (cb) {
       var r = ffRec[key];
-      if (!cb.checked && r.status === 'submitted' && !confirm('"বোর্ডে জমা" অবস্থা বদলে "ফরম বাকি" করবেন?')) { cb.checked = true; return; }
+      if (!cb.checked && r.status === 'submitted' && !confirm('"Submitted to board" অবস্থা বদলে "Form pending" করবেন?')) { cb.checked = true; return; }
       r.status = cb.checked ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
       var ee = ffEls[key];
       if (ee && ee.ins && ee.ins.status) ee.ins.status.value = r.status;
@@ -4453,24 +4690,24 @@
     var nm = el('div', 'ff-nm');
     nm.appendChild(el('div', 'name', s.nameBn || s.nameEn));
     var sub = [];
-    if (s.father) sub.push('পিতা: ' + s.father);
-    if (s.mother) sub.push('মাতা: ' + s.mother);
+    if (s.father) sub.push('Father: ' + s.father);
+    if (s.mother) sub.push('Mother: ' + s.mother);
     if (sub.length) nm.appendChild(el('div', 'ff-sub', sub.join(' · ')));
     var meta = el('div', 'ff-meta');
     nm.appendChild(meta);
 
-    // দ্রুত ফি এন্ট্রি: কার্ড না খুলেই "জমা" লেখা বা "পূর্ণ ফি" চাপা
+    // দ্রুত ফি এন্ট্রি: কার্ড না খুলেই "Paid" লেখা বা "Full fee" চাপা
     var qk = el('div', 'ff-qk');
     qk.onclick = function (ev) { ev.stopPropagation(); };
     var qlb = el('label', 'q-in');
     qlb.appendChild(el('span', null, '৳'));
     var qIn = document.createElement('input');
-    qIn.type = 'text'; qIn.autocomplete = 'off'; qIn.placeholder = 'জমা';
+    qIn.type = 'text'; qIn.autocomplete = 'off'; qIn.placeholder = 'Paid';
     qIn.setAttribute('inputmode', 'decimal');
     qIn.setAttribute('enterkeyhint', 'next');
-    qIn.setAttribute('aria-label', 'ফি জমা — ' + (s.nameBn || s.nameEn));
+    qIn.setAttribute('aria-label', 'Fee paid — ' + (s.nameBn || s.nameEn));
     qlb.appendChild(qIn);
-    var qFull = el('button', 'q-full', 'পূর্ণ ফি');
+    var qFull = el('button', 'q-full', 'Full fee');
     qFull.type = 'button';
     qk.appendChild(qlb); qk.appendChild(qFull);
     nm.appendChild(qk);
@@ -4493,7 +4730,7 @@
     }
     qIn.oninput = function () { qApply(qIn.value.trim() === '' ? '0' : qIn.value); };
     qFull.onclick = function () { qApply(ffRec[key].fee); };
-    qIn.onkeydown = function (ev) {                 // Enter চাপলে পরের (দৃশ্যমান) জনের "জমা" ঘরে যাবে
+    qIn.onkeydown = function (ev) {                 // Enter চাপলে পরের (দৃশ্যমান) জনের "Paid" ঘরে যাবে
       if (ev.key !== 'Enter') return;
       ev.preventDefault();
       var list = ffData ? ffData.students : [], i0 = -1;
@@ -4548,7 +4785,7 @@
     var body = el('div', 'ff-body');
 
     var dl = el('div', 'reg-dl');
-    [['স্টুডেন্ট আইডি', s.sid], ['Name (English)', s.nameEn], ['জন্ম নিবন্ধন', s.birth], ['জন্ম তারিখ', s.dob], ['গ্রুপ', s.group ? grpText(s.group) : ''], ['মোবাইল', s.mobile]].forEach(function (x) {
+    [['Student ID', s.sid], ['Name (English)', s.nameEn], ['Birth certificate', s.birth], ['Date of birth', s.dob], ['Group', s.group ? grpText(s.group) : ''], ['Mobile', s.mobile]].forEach(function (x) {
       if (!x[1]) return;
       var ln = el('div', 'reg-ln');
       ln.appendChild(el('span', 'k', x[0]));
@@ -4591,15 +4828,15 @@
       body.appendChild(g);
     }
 
-    pair(field('regNo', 'রেজিস্ট্রেশন নম্বর', { int: true }), field('boardRoll', 'বোর্ড রোল', { int: true }));
+    pair(field('regNo', 'Registration number', { int: true }), field('boardRoll', 'Board roll', { int: true }));
     var stOpts = ffCfg.statuses.map(function (x) { return [x, ffCfg.labels[x]]; });
-    if (ffIsHigh()) pair(field('fourth', '৪র্থ বিষয়', { list: 'ffFourth' }), field('status', 'ফরম অবস্থা', { select: stOpts }));
-    else pair(field('status', 'ফরম অবস্থা', { select: stOpts }), el('div'));
-    pair(field('fee', 'নির্ধারিত ফি (৳)', { num: true }), field('paid', 'জমা (৳)', { num: true }));
-    pair(field('receipt', 'রসিদ নম্বর'), field('paidDate', 'জমার তারিখ', { type: 'date' }));
-    body.appendChild(field('remarks', 'মন্তব্য'));
+    if (ffIsHigh()) pair(field('fourth', '4th subject', { list: 'ffFourth' }), field('status', 'Form status', { select: stOpts }));
+    else pair(field('status', 'Form status', { select: stOpts }), el('div'));
+    pair(field('fee', 'Fee set (৳)', { num: true }), field('paid', 'Paid (৳)', { num: true }));
+    pair(field('receipt', 'Receipt no.'), field('paidDate', 'Payment date', { type: 'date' }));
+    body.appendChild(field('remarks', 'Remarks'));
 
-    var btn = el('button', 'act alt', '💰 পূর্ণ ফি জমা');
+    var btn = el('button', 'act alt', '💰 Full fee paid');
     btn.type = 'button';
     btn.style.marginTop = '4px';
     btn.onclick = function () {
@@ -4630,9 +4867,9 @@
     if (st === 'paid') chip('up', 'ফি পরিশোধিত ' + ffMoney(ffNum(r.paid)));
     else if (st === 'part') chip('same', 'আংশিক — বকেয়া ' + ffMoney(due));
     else if (st === 'due') chip('warn', 'ফি বকেয়া ' + ffMoney(due));
-    else chip('off', 'ফি নির্ধারিত নয়');
+    else chip('off', 'Fee not set');
     chip(r.status === 'pending' ? 'todo' : 'up', ffCfg.labels[r.status] || r.status);
-    if (ffDirty[key]) chip('same', '● অসংরক্ষিত');
+    if (ffDirty[key]) chip('same', '● Unsaved');
     if (e.qpaid) {                                   // দ্রুত-এন্ট্রি ঘর ও ফি-প্রগ্রেস মেলানো
       if (document.activeElement !== e.qpaid) e.qpaid.value = ffNum(r.paid) > 0 ? r.paid : '';
       var fee = ffNum(r.fee), pd = ffNum(r.paid);
@@ -4658,7 +4895,7 @@
     $('ffRingPct').textContent = bn(pct) + '%';
     var hc = $('ffHc');
     hc.innerHTML = '';
-    [['s0', bn(done), 'ফরম পূরণ'], ['s1', bn(n - done), 'ফরম বাকি'], ['s3', ffMoney(paid), 'ফি আদায়'], ['s2', ffMoney(due), 'বকেয়া']].forEach(function (x) {
+    [['s0', bn(done), 'ফরম পূরণ'], ['s1', bn(n - done), 'Form pending'], ['s3', ffMoney(paid), 'ফি আদায়'], ['s2', ffMoney(due), 'Due']].forEach(function (x) {
       var d = el('div', 'hc ' + x[0]);
       d.appendChild(el('i'));
       d.appendChild(el('b', null, x[1]));
@@ -4671,9 +4908,9 @@
   function ffBar() {
     var n = ffDirtyCount();
     $('ffBar').style.display = (ffData && ffData.students.length) ? 'block' : 'none';
-    $('ffBarT').textContent = n ? 'অসংরক্ষিত: ' + bn(n) + ' জন' : 'সব সংরক্ষিত';
+    $('ffBarT').textContent = n ? 'অসংরক্ষিত: ' + bn(n) + ' students' : 'সব সংরক্ষিত';
     $('ffSaveBtn').disabled = !n;
-    $('ffSaveBtn').textContent = n ? 'সংরক্ষণ করুন (' + bn(n) + ' জন)' : 'সংরক্ষণ করুন';
+    $('ffSaveBtn').textContent = n ? 'Save (' + bn(n) + ' students)' : 'Save';
   }
 
   function ffSave() {
@@ -4684,7 +4921,7 @@
     for (var i = 0; i < keys.length; i++) {
       var r0 = ffRec[keys[i]];
       if (ffNum(r0.fee) < 0 || ffNum(r0.paid) < 0) {
-        toast('রোল ' + byKey[keys[i]].roll + ': টাকার অঙ্ক ঋণাত্মক হতে পারে না', true);
+        toast('Roll ' + byKey[keys[i]].roll + ': টাকার অঙ্ক ঋণাত্মক হতে পারে না', true);
         return;
       }
       if (ffNum(r0.paid) > 0 && !r0.paidDate) {             // জমা আছে কিন্তু তারিখ নেই → আজকের তারিখ
@@ -4693,7 +4930,7 @@
         if (e0 && e0.ins && e0.ins.paidDate) e0.ins.paidDate.value = r0.paidDate;
       }
       if (ffNum(r0.fee) > 0 && ffNum(r0.paid) > ffNum(r0.fee)) {
-        toast('রোল ' + byKey[keys[i]].roll + ': জমা নির্ধারিত ফির চেয়ে বেশি', true);
+        toast('Roll ' + byKey[keys[i]].roll + ': জমা Fee setর চেয়ে বেশি', true);
         return;
       }
     }
@@ -4715,14 +4952,14 @@
       if (pos >= keys.length) {
         loading(false);
         ffStatsUpdate();
-        if (qdone) toast('📴 অফলাইনে সংরক্ষিত — নেট এলে স্বয়ংক্রিয়ভাবে জমা হবে', false);
+        if (qdone) toast('📴 Saved offline — will submit automatically when online', false);
         else if (syncBad) toast(bn(ok) + ' জন সংরক্ষিত, কিন্তু শিটে জমা হয়নি: ' + syncBad, true);
-        else toast(bn(ok) + ' জনের তথ্য সংরক্ষিত' + (syncOk ? ' ও ক্লাস শিটে জমা' : '') + ' হয়েছে', false);
+        else toast(bn(ok) + ' জনের তথ্য সংরক্ষিত' + (syncOk ? ' and submitted to the class sheet' : '') + ' done', false);
         return;
       }
       var chunk = keys.slice(pos, pos + size);
       pos += size;
-      loading(true, 'সংরক্ষণ হচ্ছে... ' + bn(Math.min(pos, keys.length)) + '/' + bn(keys.length));
+      loading(true, 'Saving... ' + bn(Math.min(pos, keys.length)) + '/' + bn(keys.length));
       var items = chunk.map(function (k) {
         var r = ffRec[k];
         return { key: k, regNo: r.regNo, boardRoll: r.boardRoll, fourth: r.fourth, fee: r.fee, paid: r.paid,
@@ -4732,7 +4969,7 @@
         .withSuccessHandler(function (r) {
           if (r && r.queued) qdone = true;
           else if (r && r.synced === true) syncOk++;
-          else if (r && r.synced === false) syncBad = r.syncMsg || 'অজানা কারণ';
+          else if (r && r.synced === false) syncBad = r.syncMsg || 'Unknown reason';
           chunk.forEach(function (k) { ffOrig[k] = JSON.stringify(ffRec[k]); delete ffDirty[k]; ffMeta(k); });
           ok += chunk.length;
           next();
@@ -4743,20 +4980,20 @@
     next();
   }
 
-  // --- প্রিন্ট: ফরম ফিলাপ তালিকা (বোর্ডে পাঠানোর খসড়া মেলানোর জন্য) ---
+  // --- print: ফরম ফিলাপ তালিকা (বোর্ডে পাঠানোর খসড়া মেলানোর জন্য) ---
   function ffPrintList() {
-    if (!ffData || !ffData.students.length) { toast('প্রিন্ট করার মতো তালিকা নেই', true); return; }
+    if (!ffData || !ffData.students.length) { toast('Nothing to print', true); return; }
     var n = ffData.students.length;
     var pa = $('printArea');
     pa.innerHTML = '';
     pa.appendChild(prHead(ffData.exam + ' — ফরম ফিলাপ তালিকা', [
-      'শ্রেণি: ' + clsPlain(ffData.cls) + '   |   সেশন: ' + bn(ffData.session || ''),
-      'শিক্ষার্থী: ' + bn(n) + ' জন   |   প্রিন্টের তারিখ: ' + fmtFull(cfg.today)
+      'Class: ' + clsPlain(ffData.cls) + '   |   Session: ' + bn(ffData.session || ''),
+      'Students: ' + bn(n) + ' জন   |   Print date: ' + fmtFull(cfg.today)
     ]));
     var t = el('table', 'pt dense');
     var thead = el('thead');
-    thead.appendChild(prRow(['ক্র.', 'রোল', 'নাম (বাংলা)', 'Name (English)', 'পিতার নাম', 'মাতার নাম', 'জন্ম নিবন্ধন', 'জন্ম তারিখ',
-                             'গ্রুপ', 'রেজি. নং', '৪র্থ বিষয়', 'অবস্থা'].map(function (h) { return el('th', null, h); })));
+    thead.appendChild(prRow(['No.', 'Roll', 'Name (Bangla)', 'Name (English)', 'Father’s name', 'Mother’s name', 'Birth certificate', 'Date of birth',
+                             'Group', 'Reg. no.', '4th subject', 'Status'].map(function (h) { return el('th', null, h); })));
     t.appendChild(thead);
     var tb = el('tbody');
     ffData.students.forEach(function (s, i) {
@@ -4774,18 +5011,18 @@
     doPrint(true);
   }
 
-  // --- প্রিন্ট: ফি আদায় তালিকা (মোট সহ) ---
+  // --- print: ফি আদায় তালিকা (মোট সহ) ---
   function ffPrintFee() {
-    if (!ffData || !ffData.students.length) { toast('প্রিন্ট করার মতো তালিকা নেই', true); return; }
+    if (!ffData || !ffData.students.length) { toast('Nothing to print', true); return; }
     var pa = $('printArea');
     pa.innerHTML = '';
     pa.appendChild(prHead(ffData.exam + ' — ফি আদায় তালিকা', [
-      'শ্রেণি: ' + clsPlain(ffData.cls) + '   |   সেশন: ' + bn(ffData.session || ''),
-      'প্রিন্টের তারিখ: ' + fmtFull(cfg.today)
+      'Class: ' + clsPlain(ffData.cls) + '   |   Session: ' + bn(ffData.session || ''),
+      'Print date: ' + fmtFull(cfg.today)
     ]));
     var t = el('table', 'pt');
     var thead = el('thead');
-    thead.appendChild(prRow(['ক্র.', 'রোল', 'নাম', 'নির্ধারিত ফি', 'জমা', 'বকেয়া', 'রসিদ নং', 'জমার তারিখ', 'স্বাক্ষর']
+    thead.appendChild(prRow(['No.', 'Roll', 'Name', 'Fee set', 'Paid', 'Due', 'Receipt no.', 'Payment date', 'Signature']
       .map(function (h) { return el('th', null, h); })));
     t.appendChild(thead);
     var tb = el('tbody'), tf = 0, tp = 0, td = 0;
@@ -4798,7 +5035,7 @@
         el('td', null, r.receipt), el('td', null, r.paidDate ? fmtFull(r.paidDate) : ''), el('td', 'bx', '')
       ]));
     });
-    var tot = prRow([el('td', null, 'মোট'), el('td', null, ''), el('td', null, ''),
+    var tot = prRow([el('td', null, 'Total'), el('td', null, ''), el('td', null, ''),
                      el('td', null, bn(tf)), el('td', null, bn(tp)), el('td', null, bn(td)),
                      el('td', null, ''), el('td', null, ''), el('td', null, '')]);
     tot.className = 'tot';
@@ -4810,7 +5047,7 @@
   }
 
 
-  // ===== স্মার্ট তারিখ ও শ্রেণি বাছাই =====
+  // ===== স্মার্ট তারিখ ও Select class =====
   function lastClsGet() { try { return localStorage.getItem('att_last_cls') || ''; } catch (e) { return ''; } }
   function lastClsSet(v) { try { if (v) localStorage.setItem('att_last_cls', v); } catch (e) {} }
   function takenMap() {
@@ -4825,7 +5062,7 @@
     opts.forEach(function (o) {
       var b = el('button', 'cc' + (o.value === now ? ' on' : '')); b.type = 'button';
       if (tm && tm[o.value] !== undefined) b.appendChild(el('i', 'st ' + (tm[o.value] ? 'ok' : 'wait')));
-      b.appendChild(document.createTextNode('শ্রেণি ' + clsPlain(o.value)));
+      b.appendChild(document.createTextNode('Class ' + clsPlain(o.value)));
       b.onclick = function () {
         if (o.value === $('cls').value) return;
         if (!confirmLeave()) return;
@@ -4839,21 +5076,21 @@
     if (d) {
       lb.appendChild(document.createTextNode(fmtLong(d)));
       var wd = new Date(d + 'T00:00:00Z').getUTCDay();
-      if (d === cfg.today) lb.appendChild(el('span', 'tg ok', 'আজ'));
-      else if (d > cfg.today) lb.appendChild(el('span', 'tg', 'ভবিষ্যতের তারিখ'));
-      if (wd === 5 || wd === 6) lb.appendChild(el('span', 'tg', 'সাপ্তাহিক ছুটি?'));
+      if (d === cfg.today) lb.appendChild(el('span', 'tg ok', 'Today'));
+      else if (d > cfg.today) lb.appendChild(el('span', 'tg', 'Future date'));
+      if (wd === 5 || wd === 6) lb.appendChild(el('span', 'tg', 'Weekly holiday?'));
     }
     var np = $('nextPend'); if (np) np.style.display = tm ? '' : 'none';
   }
-  // আজকের তারিখে হাজিরা বাকি এমন পরের শ্রেণিতে যান
+  // আজকের তারিখে হাজিরা বাকি এমন পরের class যান
   function nextPending() {
     var tm = takenMap();
-    if (!tm) { toast('বাকি শ্রেণি শুধু আজকের তারিখে দেখা যায়', true); return; }
+    if (!tm) { toast('Pending classes are shown for today only', true); return; }
     var opts = [].slice.call($('cls').options).filter(function (o) { return o.value && tm[o.value] === false; });
-    if (!opts.length) { toast('সব শ্রেণির হাজিরা নেওয়া হয়েছে ✅', false); return; }
+    if (!opts.length) { toast('Attendance taken for all classes ✅', false); return; }
     var now = $('cls').value, nx = null;
     for (var i = 0; i < opts.length; i++) { if (opts[i].value !== now) { nx = opts[i]; if (opts[i].value > now) break; } }
-    if (!nx) { toast('এটিই একমাত্র বাকি শ্রেণি', false); return; }
+    if (!nx) { toast('This is the only pending class', false); return; }
     if (!confirmLeave()) return;
     $('cls').value = nx.value; loadClass();
   }
@@ -4863,7 +5100,7 @@
     var _rd = renderDash;
     renderDash = function (d) {
       _rd(d); syncChips();
-      // প্রথমবার খুললে: শেষবারের শ্রেণি, না থাকলে প্রথম বাকি শ্রেণি আগে থেকেই বাছাই
+      // প্রথমবার খুললে: শেষবারের class, না থাকলে প্রথম বাকি class আগে থেকেই বাছাই
       if (!$('cls').value && !window._autoCls) {
         window._autoCls = 1;
         var opts = [].slice.call($('cls').options).filter(function (o) { return o.value; }), pick = '';
@@ -4923,12 +5160,12 @@
     var box = $('alrBox');
     box.innerHTML = '';
 
-    box.appendChild(el('h3', null, 'টানা ' + bn(d.minStreak) + ' দিন বা বেশি অনুপস্থিত (' + bn(d.streak.length) + ' জন)'));
-    if (!d.streak.length) box.appendChild(el('div', 'empty', '🎉 কেউ নেই'));
+    box.appendChild(el('h3', null, 'Streak ' + bn(d.minStreak) + ' days or more absent (' + bn(d.streak.length) + ' students)'));
+    if (!d.streak.length) box.appendChild(el('div', 'empty', '🎉 None'));
     d.streak.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'abs'), i)); });
 
-    box.appendChild(el('h3', null, 'উপস্থিতি ' + bn(d.threshold) + '%-এর কম (' + bn(d.low.length) + ' জন)'));
-    if (!d.low.length) box.appendChild(el('div', 'empty', '🎉 কেউ নেই'));
+    box.appendChild(el('h3', null, 'Attendance ' + bn(d.threshold) + '% or below (' + bn(d.low.length) + ' students)'));
+    if (!d.low.length) box.appendChild(el('div', 'empty', '🎉 None'));
     d.low.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'low'), i)); });
   }
 
@@ -4958,18 +5195,18 @@
     var top = el('div', 'al-top');
     var bd = el('div', 'al-bd');
     bd.setAttribute('aria-hidden', 'true');
-    if (kind === 'abs') { bd.appendChild(document.createTextNode(bn(o.n))); bd.appendChild(el('small', null, 'দিন')); }
+    if (kind === 'abs') { bd.appendChild(document.createTextNode(bn(o.n))); bd.appendChild(el('small', null, 'days')); }
     else { var pc = parseFloat(o.percent); bd.appendChild(document.createTextNode(isNaN(pc) ? '–' : bn(Math.round(pc)) + '%')); }
     top.appendChild(bd);
     var inf = el('div', 'al-in');
     inf.appendChild(el('div', 'name', o.name));
-    inf.appendChild(el('div', 'detail', 'শ্রেণি ' + clsPlain(o.cls) + ' · রোল ' + o.roll));
+    inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
     top.appendChild(inf);
     card.appendChild(top);
 
     var detail = kind === 'abs'
-      ? 'টানা ' + bn(o.n) + ' দিন অনুপস্থিত (' + fmtDM(o.since) + ' থেকে; সর্বশেষ হাজিরা ' + fmtDM(o.last) + ')'
-      : 'উপস্থিতি ' + bn(o.percent) + '% (' + bn(o.present) + '/' + bn(o.total) + ' দিন)';
+      ? 'Streak ' + bn(o.n) + ' দিন অনুপস্থিত (' + fmtDM(o.since) + ' থেকে; সর্বশেষ হাজিরা ' + fmtDM(o.last) + ')'
+      : 'Attendance ' + bn(o.percent) + '% (' + bn(o.present) + '/' + bn(o.total) + ' দিন)';
     var dt = el('div', 'detail', detail);
     dt.style.marginTop = '8px';
     card.appendChild(dt);
@@ -4992,14 +5229,14 @@
         w.target = '_blank'; w.rel = 'noopener';
         acts.appendChild(w);
       }
-      var tl = el('a', 'abtn alt', '📞 কল');
+      var tl = el('a', 'abtn alt', '📞 Call');
       tl.href = 'tel:' + o.phone;
       acts.appendChild(tl);
       acts.appendChild(el('span', 'ph', o.phone));
     } else {
-      acts.appendChild(el('span', 'ph', 'মোবাইল নম্বর নেই'));
+      acts.appendChild(el('span', 'ph', 'No mobile number'));
     }
-    var cp = el('button', 'abtn alt', '📋 বার্তা কপি');
+    var cp = el('button', 'abtn alt', '📋 Copy message');
     cp.type = 'button';
     cp.onclick = function () { copyText(msg); };
     acts.appendChild(cp);
@@ -5018,22 +5255,22 @@
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(ta);
-      toast(ok ? 'বার্তা কপি হয়েছে' : 'কপি করা যায়নি', !ok);
+      toast(ok ? 'Message copied' : 'Could not copy', !ok);
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(function () { toast('বার্তা কপি হয়েছে', false); }, fallback);
+      navigator.clipboard.writeText(txt).then(function () { toast('Message copied', false); }, fallback);
     } else {
       fallback();
     }
   }
 
   // ===== ড্যাশবোর্ড ধাঁচ: শুভেচ্ছা, থিম, রিফ্রেশ =====
-  // ===== রিপোর্ট ট্যাব: সব রিপোর্ট এক জায়গা থেকে প্রিন্ট =====
+  // ===== রিপোর্ট ট্যাব: সব রিপোর্ট এক জায়গা থেকে print =====
   function rpWait(ok, run) {
     var t0 = Date.now();
     (function tick() {
       if (ok()) { run(); return; }
-      if (Date.now() - t0 > 20000) { loading(false); toast('সময় শেষ হয়েছে, আবার চেষ্টা করুন', true); return; }
+      if (Date.now() - t0 > 20000) { loading(false); toast('Timed out, try again', true); return; }
       setTimeout(tick, 200);
     })();
   }
@@ -5041,11 +5278,11 @@
 
   function rpDaily(mode) {
     var cls = $('mcls').value;
-    if (!cls) { toast('আগে ওপরে শ্রেণি বাছাই করুন', true); return; }
+    if (!cls) { toast('Select a class above first', true); return; }
     if (dirty && !confirmLeave()) return;
     var date = rpDateVal();
     $('cls').value = cls; $('date').value = date;
-    if ($('cls').value !== cls) { toast('শ্রেণিটি হাজিরা তালিকায় পাওয়া যায়নি', true); return; }
+    if ($('cls').value !== cls) { toast('Class not found in the attendance list', true); return; }
     loadClass();
     rpWait(function () { return cur.cls === cls && cur.date === date && (students.length || blocked); },
            function () { printAttendance(mode); });
@@ -5065,39 +5302,39 @@
   }
 
   function rpMonth() {
-    if (!$('mcls').value || !$('mmonth').value) { toast('আগে মাস ও শ্রেণি বাছাই করুন', true); return; }
+    if (!$('mcls').value || !$('mmonth').value) { toast('Select month and class first', true); return; }
     loadMonth();
     rpWait(function () { return monData; }, function () {
-      if (!monData.dates.length) { toast('এই মাসে এই শ্রেণির কোনো হাজিরা নেই', true); return; }
+      if (!monData.dates.length) { toast('No attendance for this class this month', true); return; }
       printMonth();
     });
   }
 
   function rpAlerts() {
     var month = $('mmonth').value || cfg.today.substr(0, 7);
-    loading(true, 'সতর্কতা তালিকা তৈরি হচ্ছে...');
+    loading(true, 'Preparing alert list...');
     google.script.run
       .withSuccessHandler(function (d) {
         loading(false);
         var pa = $('printArea');
         pa.innerHTML = '';
-        pa.appendChild(prHead('সতর্কতা রিপোর্ট', ['মাস: ' + monthLabel(month), periodLine(cur.period), 'প্রিন্টের তারিখ: ' + fmtFull(cfg.today)]));
+        pa.appendChild(prHead('Alert Report', ['Month: ' + monthLabel(month), periodLine(cur.period), 'Print date: ' + fmtFull(cfg.today)]));
         function table(title, heads, rows) {
           pa.appendChild(el('h3', null, title));
           var t = el('table', 'pt'), th = el('thead');
           th.appendChild(prRow(heads.map(function (h) { return el('th', null, h); })));
           t.appendChild(th);
           var tb = el('tbody');
-          if (!rows.length) { var c = el('td', null, 'কেউ নেই'); c.colSpan = heads.length; tb.appendChild(prRow([c])); }
+          if (!rows.length) { var c = el('td', null, 'None'); c.colSpan = heads.length; tb.appendChild(prRow([c])); }
           rows.forEach(function (r, i) { tb.appendChild(prRow([el('td', null, bn(i + 1))].concat(r.map(function (v, k) { return el('td', k === 2 ? 'l' : null, v); })))); });
           t.appendChild(tb);
           pa.appendChild(t);
         }
-        table('টানা ' + bn(d.minStreak) + ' দিন বা বেশি অনুপস্থিত (' + bn(d.streak.length) + ' জন)',
-          ['ক্রম', 'শ্রেণি', 'রোল', 'নাম', 'টানা (দিন)', 'শুরু', 'সর্বশেষ'],
+        table('Streak ' + bn(d.minStreak) + ' days or more absent (' + bn(d.streak.length) + ' students)',
+          ['Serial', 'Class', 'Roll', 'Name', 'Streak (days)', 'Start', 'Latest'],
           d.streak.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.n), fmtFull(o.since), fmtFull(o.last)]; }));
-        table('উপস্থিতি ' + bn(d.threshold) + '%-এর কম (' + bn(d.low.length) + ' জন)',
-          ['ক্রম', 'শ্রেণি', 'রোল', 'নাম', 'উপস্থিত', 'মোট দিন', '%'],
+        table('Attendance ' + bn(d.threshold) + '% or below (' + bn(d.low.length) + ' students)',
+          ['Serial', 'Class', 'Roll', 'Name', 'Present', 'Total days', '%'],
           d.low.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.present), bn(o.total), bn(o.percent)]; }));
         pa.appendChild(prSign());
         doPrint(false);
@@ -5106,7 +5343,7 @@
       .getAlerts(TOKEN, month, cur.period);
   }
 
-  // ===== ড্যাশবোর্ডে আজকের সারাংশ (কার্ড) =====
+  // ===== ড্যাশবোর্ডে Today’s summary (কার্ড) =====
   var dashData = null, dashReq = 0, dashBusy = false, dashFail = false, dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
   // ===== ড্যাশবোর্ড v15: skeleton, স্বয়ংক্রিয় রিফ্রেশ, animation (ক্যাশ shim-এ আগে থেকেই আছে) =====
   function loadDash() {
@@ -5123,7 +5360,7 @@
       .withFailureHandler(function () {
         if (id !== dashReq) return;
         dashBusy = false; dashFail = true;
-        if (dashData) $('dsInfo').textContent = '⚠️ সংযোগ সমস্যা — আগের তথ্য দেখাচ্ছে';
+        if (dashData) $('dsInfo').textContent = '⚠️ Connection problem — showing previous data';
         dsSync();
       })
       .getDaySummary(TOKEN, cfg.today, cur.period);
@@ -5157,7 +5394,7 @@
     }
     requestAnimationFrame(step);
   }
-  // হাজিরা বাকি শ্রেণি আগে, তারপর বাকিগুলো (আগের ক্রম বজায় রেখে)
+  // হাজিরা বাকি class আগে, তারপর বাকিগুলো (আগের ক্রম বজায় রেখে)
   function dsSorted(list) {
     return list.map(function (c, i) { return { c: c, i: i }; })
       .sort(function (a, b) { return ((a.c.taken ? 1 : 0) - (b.c.taken ? 1 : 0)) || (a.i - b.i); })
@@ -5170,12 +5407,12 @@
     box.style.display = 'block'; box.style.marginBottom = '14px';
     var ov = el('div', 'ds-ov');
     var ring = el('div', 'ds-ring'); ring.setAttribute('role', 'img');
-    ring.setAttribute('aria-label', done ? 'আজকের উপস্থিতি ' + bn(pct) + ' শতাংশ' : 'আজ এখনো হাজিরা নেওয়া হয়নি');
+    ring.setAttribute('aria-label', done ? 'আজকের Attendance ' + bn(pct) + ' শতাংশ' : 'Attendance not taken yet today');
     var rb = el('b', null, done ? bn(pct) + '%' : '—');
-    ring.appendChild(rb); ring.appendChild(el('span', null, done ? 'উপস্থিত' : 'হাজিরা শুরু হয়নি'));
+    ring.appendChild(rb); ring.appendChild(el('span', null, done ? 'Present' : 'Attendance not started'));
     ring.style.setProperty('--pc', done ? dashLast.pct : 0);
     var r = el('div', 'ds-ovr');
-    r.appendChild(el('div', 'ds-ovt', 'পুরো স্কুল · মোট ' + bn(tot) + ' জন'));
+    r.appendChild(el('div', 'ds-ovt', 'পুরো স্কুল · মোট ' + bn(tot) + ' students'));
     var nums = [];
     STATUS.forEach(function (x, k) {
       var row = el('div', 'ds-ovrow s' + k);
@@ -5186,7 +5423,7 @@
       nums.push([b, dashLast.cnt[x] || 0, cnt[x] || 0]);
     });
     var pr = el('div', 'ds-prog');
-    pr.appendChild(el('div', 'ds-pt', bn(nDone) + '/' + bn(nCls) + ' শ্রেণির হাজিরা নেওয়া হয়েছে'));
+    pr.appendChild(el('div', 'ds-pt', bn(nDone) + '/' + bn(nCls) + ' classes completed'));
     var bar = el('div', 'ds-bar'), fi = el('i');
     fi.style.width = (dashLast.prog || 0) + '%';
     bar.appendChild(fi); pr.appendChild(bar); r.appendChild(pr);
@@ -5230,17 +5467,17 @@
     var pct = done ? Math.round(cnt[P] * 1000 / done) / 10 : 0;
     var nCls = d.classes.length, nDone = nCls - pend;
     var nowT = new Date();
-    $('dsInfo').textContent = 'হালনাগাদ ' + bn(('0' + nowT.getHours()).slice(-2) + ':' + ('0' + nowT.getMinutes()).slice(-2));
+    $('dsInfo').textContent = 'Updated ' + bn(('0' + nowT.getHours()).slice(-2) + ':' + ('0' + nowT.getMinutes()).slice(-2));
     var hol = $('dsHol');
     hol.style.display = d.holiday ? 'block' : 'none';
-    hol.textContent = d.holiday ? '🌴 আজ ছুটির দিন — ' + d.holiday : '';
+    hol.textContent = d.holiday ? '🌴 Today is a holiday — ' + d.holiday : '';
 
     // দ্রুত কাজ
     var q = $('dsQuick'); q.innerHTML = '';
-    var qs = [['✅', 'হাজিরা নিন', 'att'], ['🗓️', 'রিপোর্ট', 'mon'], ['🔔', 'সতর্কতা', 'alr']];
-    if ($('regChip').style.display !== 'none') qs.push(['🧾', 'নিবন্ধন', 'reg']);
-    if ($('proChip').style.display !== 'none') qs.push(['🎓', 'প্রোমোশন', 'pro']);
-    if ($('ffChip').style.display !== 'none') qs.push(['📝', 'ফরম ফিলাপ', 'ff']);
+    var qs = [['✅', 'Take attendance', 'att'], ['🗓️', 'Reports', 'mon'], ['🔔', 'Alerts', 'alr']];
+    if ($('regChip').style.display !== 'none') qs.push(['🧾', 'Registration', 'reg']);
+    if ($('proChip').style.display !== 'none') qs.push(['🎓', 'Promotion', 'pro']);
+    if ($('ffChip').style.display !== 'none') qs.push(['📝', 'Form Fill-up', 'ff']);
     qs.forEach(function (x) {
       var b = el('button', 'ds-q'); b.type = 'button';
       b.onclick = function () { showTab(x[2]); };
@@ -5250,32 +5487,38 @@
 
     dsOverview(d, cnt, tot, done, pct, nCls, nDone);
 
-    // শ্রেণি কার্ড
+    // class কার্ড
     var g = $('dsGrid'); g.innerHTML = '';
     dsSorted(d.classes).forEach(function (c) {
-      var card = el('button', 'ds-card' + (c.taken ? '' : ' wait')); card.type = 'button';
+      var card = el('button', 'ds-card bc-card' + (c.taken ? '' : ' wait')); card.type = 'button';
       card.onclick = function () { dashPick(c.cls); };
       var l = el('div', 'ds-l');
       l.appendChild(el('div', 'ds-cn', clsPlain(c.cls)));
-      var mini = el('div', 'ds-mini');
+      var mini = el('div', 'ds-mini'), pc = 0;
+      var chips = el('div', 'bc-chips');
       if (!c.taken) {
-        l.appendChild(el('div', 'ds-st', 'হাজিরা বাকি'));
-        l.appendChild(el('div', 'ds-sub', 'মোট ' + bn(c.total) + ' জন'));
-        mini.style.setProperty('--pc', 0); mini.appendChild(el('b', null, '＋'));
+        chips.appendChild(el('span', 'bc-chip pend', '⏳ Attendance pending'));
+        l.appendChild(chips);
+        l.appendChild(el('div', 'ds-sub', 'Total ' + bn(c.total) + ' students'));
+        mini.style.setProperty('--pc', 0); mini.appendChild(el('b', null, '–'));
       } else {
         var n = STATUS.reduce(function (a, x) { return a + (c.counts[x] || 0); }, 0);
-        var pc = n ? Math.round((c.counts[P] || 0) * 100 / n) : 0;
-        l.appendChild(el('div', 'ds-st ok', STATUS.map(function (x) { return cfg.labels[x] + ' ' + bn(c.counts[x] || 0); }).join(' · ')));
+        pc = n ? Math.round((c.counts[P] || 0) * 100 / n) : 0;
+        STATUS.forEach(function (x, k) {
+          var kind = x === P ? 'pres' : (x === cfg.absentStatus ? 'abs' : 'oth');
+          chips.appendChild(el('span', 'bc-chip ' + kind, cfg.labels[x] + ' ' + bn(c.counts[x] || 0)));
+        });
+        l.appendChild(chips);
         var stk = el('div', 'ds-stack');
         STATUS.forEach(function (x, k) { if (c.counts[x]) { var seg = el('i', 's' + k); seg.style.flex = c.counts[x]; stk.appendChild(seg); } });
         l.appendChild(stk);
-        l.appendChild(el('div', 'ds-sub', 'মোট ' + bn(c.total) + ' জন' + (c.absent.length ? ' · অনুপস্থিত ' + bn(c.absent.length) + ' জন ⚠️' : '')));
+        l.appendChild(el('div', 'ds-sub', 'Total ' + bn(c.total) + ' students' + (c.absent.length ? ' · ' + bn(c.absent.length) + ' absent' : '')));
         mini.style.setProperty('--pc', pc); mini.appendChild(el('b', null, bn(pc) + '%'));
         if (pc < cfg.lowPercent) mini.className += ' low';
       }
       card.appendChild(l); card.appendChild(mini);
       mini.setAttribute('aria-hidden', 'true');
-      card.setAttribute('aria-label', clsPlain(c.cls) + (c.taken ? ': উপস্থিতি ' + bn(pc) + ' শতাংশ' : ': হাজিরা বাকি'));
+      card.setAttribute('aria-label', clsPlain(c.cls) + (c.taken ? ': attendance ' + bn(pc) + '%' : ': attendance pending'));
       if (c.taken) {
         (function (m, key, to) {
           dsTween(dashLast.mini[key] || 0, to, 700, function (v) { m.style.setProperty('--pc', v); });
@@ -5285,11 +5528,11 @@
       g.appendChild(card);
     });
 
-    // আজকের অনুপস্থিত — নাম ছাড়া, শুধু শ্রেণিভিত্তিক সংখ্যা (নামসহ তালিকা হাজিরা ট্যাবে)
+    // আজকের অনুপস্থিত — নাম ছাড়া, শুধু classভিত্তিক সংখ্যা (নামসহ তালিকা হাজিরা ট্যাবে)
     var ah = $('dsAbsH'), ab = $('dsAbs'); ab.innerHTML = '';
     var absTot = absList.reduce(function (s, x) { return s + x.n; }, 0);
     ah.style.display = absTot ? 'block' : 'none';
-    ah.textContent = 'আজকের অনুপস্থিত (' + bn(absTot) + ' জন)';
+    ah.textContent = 'Absent today (' + bn(absTot) + ' students)';
     if (absTot) dsChips(ab, absList, function (o) { dashPick(o.cls); }, '');
     dashAgg = { nDone: nDone, nCls: nCls, rate: done ? Math.round(cnt[cfg.absentStatus] * 1000 / done) / 10 : null };
     renderKpi();
@@ -5340,10 +5583,10 @@
     box.innerHTML = '';
     var p = dashPrev, t = dashToday;
     if (!p || p.none || !t) return;
-    var lbl = p.back === 1 ? 'গতকাল' : 'আগের কর্মদিবস (' + fmtDM(p.date) + ')';
+    var lbl = p.back === 1 ? 'Yesterday' : 'আগের কর্মদিবস (' + fmtDM(p.date) + ')';
     var card = el('div', 'ds-cmp');
-    if (!t.done) {                       // আজ এখনো হাজিরা শুরু হয়নি
-      card.appendChild(el('div', 'ds-cmp-t', lbl + ' উপস্থিতি ছিল ' + bn(p.pct) + '%, অনুপস্থিত ' + bn(p.abs) + ' জন'));
+    if (!t.done) {                       // আজ এখনো Attendance not started
+      card.appendChild(el('div', 'ds-cmp-t', lbl + ' Attendance ছিল ' + bn(p.pct) + '%, অনুপস্থিত ' + bn(p.abs) + ' students'));
       box.appendChild(card);
       return;
     }
@@ -5355,8 +5598,8 @@
     main.appendChild(el('span', null, ' ' + (p.back === 1 ? 'গতকালের' : 'আগের কর্মদিবসের (' + fmtDM(p.date) + ')') + ' চেয়ে ' + (dp > 0 ? 'বেশি' : (dp < 0 ? 'কম' : 'একই'))));
     card.appendChild(main);
     card.appendChild(el('div', 'ds-cmp-t',
-      lbl + ': উপস্থিতি ' + bn(p.pct) + '% · অনুপস্থিত ' + bn(p.abs) + ' জন   →   আজ: ' + bn(t.pct) + '% · অনুপস্থিত ' + bn(t.abs) + ' জন' +
-      (da ? ' (' + (da > 0 ? '+' : '−') + bn(Math.abs(da)) + ' জন)' : '')));
+      lbl + ': Attendance ' + bn(p.pct) + '% · অনুপস্থিত ' + bn(p.abs) + ' জন   →   আজ: ' + bn(t.pct) + '% · অনুপস্থিত ' + bn(t.abs) + ' students' +
+      (da ? ' (' + (da > 0 ? '+' : '−') + bn(Math.abs(da)) + ' students)' : '')));
     box.appendChild(card);
   }
 
@@ -5366,12 +5609,12 @@
     var list = (d && d.birthdays) || [];
     if (!list.length) return;
     var card = el('div', 'ds-bd');
-    card.appendChild(el('div', 'ds-bd-h', '🎂 আজকের জন্মদিন (' + bn(list.length) + ' জন)'));
+    card.appendChild(el('div', 'ds-bd-h', '🎂 Birthdays today (' + bn(list.length) + ' students)'));
     var wrap = el('div', 'ds-bd-l');
     list.forEach(function (b) {
       var c = el('div', 'ds-bd-c');
       c.appendChild(el('b', null, b.name));
-      c.appendChild(el('small', null, 'শ্রেণি ' + clsPlain(b.cls) + ' · রোল ' + b.roll + ' · ' + bn(b.age) + ' বছর'));
+      c.appendChild(el('small', null, 'Class ' + clsPlain(b.cls) + ' · Roll ' + b.roll + ' · ' + bn(b.age) + ' yrs'));
       wrap.appendChild(c);
     });
     card.appendChild(wrap);
@@ -5391,10 +5634,9 @@
   function renderKpi() {
     var k = $('dsKpi'); if (!k || !dashAgg) return; k.innerHTML = '';
     var low = dashAlr ? dashAlr.low.length : null, str = dashAlr ? dashAlr.streak.length : null;
-    [['📋', dashAgg.nCls ? bn(dashAgg.nDone) + '/' + bn(dashAgg.nCls) : '–', 'হাজিরা নেওয়া শ্রেণি', dashAgg.nDone < dashAgg.nCls ? 'warn' : 'good'],
+    [['📋', dashAgg.nCls ? bn(dashAgg.nDone) + '/' + bn(dashAgg.nCls) : '–', 'Classes completed', dashAgg.nDone < dashAgg.nCls ? 'warn' : 'good'],
      ['📉', dashAgg.rate === null ? '–' : bn(dashAgg.rate) + '%', 'আজ অনুপস্থিতির হার', ''],
-     ['⚠️', low === null ? '…' : bn(low) + ' জন', 'কম উপস্থিতি (এ মাস)', low ? 'bad' : (low === 0 ? 'good' : '')],
-     ['🔁', str === null ? '…' : bn(str) + ' জন', 'টানা ' + bn(cfg.absentStreak) + '+ দিন অনুপস্থিত', str ? 'bad' : (str === 0 ? 'good' : '')]
+     ['🔁', str === null ? '…' : bn(str) + ' students', 'Streak ' + bn(cfg.absentStreak) + '+ দিন অনুপস্থিত', str ? 'bad' : (str === 0 ? 'good' : '')]
     ].forEach(function (x) {
       var d = el('div', 'ds-k ' + x[3]);
       d.appendChild(el('span', 'ki', x[0]));
@@ -5405,9 +5647,9 @@
   function renderDashAlr() {
     var box = $('dsAlr'); box.innerHTML = '';
     if (!dashAlr) return;
-    function sect(title, items, mod) {                 // নাম নয়, শ্রেণিভিত্তিক সংখ্যা
+    function sect(title, items, mod) {                 // নাম নয়, classভিত্তিক সংখ্যা
       if (!items.length) return;
-      box.appendChild(el('div', 'ds-sec', title + ' (' + bn(items.length) + ' জন)'));
+      box.appendChild(el('div', 'ds-sec', title + ' (' + bn(items.length) + ' students)'));
       var by = {};
       items.forEach(function (o) { by[o.cls] = (by[o.cls] || 0) + 1; });
       var list = Object.keys(by).map(function (k) { return { cls: k, n: by[k] }; });
@@ -5415,19 +5657,18 @@
       dsChips(w, list, function () { showTab('alr'); }, mod);
       box.appendChild(w);
     }
-    sect('টানা অনুপস্থিত', dashAlr.streak, '');
-    sect('কম উপস্থিতি (এ মাস)', dashAlr.low, 'w');
-    if (dashAlr.streak.length || dashAlr.low.length) box.appendChild(el('div', 'ds-more', 'নামসহ তালিকা "সতর্কতা" ট্যাবে'));
+    sect('Consecutive absences', dashAlr.streak, '');
+    if (dashAlr.streak.length) box.appendChild(el('div', 'ds-more', 'নামসহ তালিকা "Alerts" ট্যাবে'));
   }
 
-  // শ্রেণিভিত্তিক সংখ্যার চিপ (ট্যাপ করলে সংশ্লিষ্ট ট্যাবে যায়)
+  // classভিত্তিক সংখ্যার চিপ (ট্যাপ করলে সংশ্লিষ্ট ট্যাবে যায়)
   function dsChips(box, items, onTap, mod) {
     var wrap = el('div', 'ds-cg');
     items.slice().sort(function (a, b) { return b.n - a.n; }).forEach(function (o) {
       var b = el('button', 'ds-cgc' + (mod ? ' ' + mod : '')); b.type = 'button';
       b.appendChild(el('span', null, clsPlain(o.cls)));
       b.appendChild(el('b', null, bn(o.n)));
-      b.setAttribute('aria-label', clsPlain(o.cls) + ': ' + bn(o.n) + ' জন');
+      b.setAttribute('aria-label', clsPlain(o.cls) + ': ' + bn(o.n) + ' students');
       b.onclick = function () { onTap(o); };
       wrap.appendChild(b);
     });
@@ -5435,39 +5676,36 @@
   }
 
   // ===== ড্যাশবোর্ডে মাসিক সারাংশ (পুরো স্কুল, নাম ছাড়া) =====
-  // শ্রেণিগুলোর মাসিক ছক ২টি করে একসাথে এনে যোগ করা হয়; একই মাস/পিরিয়ডে একবারই, ↻ চাপলে আবার
+  // classগুলোর মাসিক ছক ২টি করে একসাথে এনে যোগ করা হয়; একই মাস/পিরিয়ডে একবারই, ↻ চাপলে আবার
   var dashMon = null, monReq = 0;
-  function dsMonCalc(cls, rep) {
-    var tp = 0, tt = 0, low = 0, c = {};
-    STATUS.forEach(function (s) { c[s] = 0; });
-    rep.rows.forEach(function (r) {
-      tp += r.present; tt += r.total;
-      STATUS.forEach(function (s) { c[s] += r.counts[s] || 0; });
-      if (r.percent !== null && r.percent < cfg.lowPercent) low++;
-    });
-    return { cls: cls, days: rep.dates.length, stu: rep.rows.length, c: c, tp: tp, tt: tt, low: low,
-             avg: tt ? Math.round(tp * 1000 / tt) / 10 : null };
+  function tdPhoto(s) {
+    var u = s && (s.photo || s.image || s.img || s.photoUrl || s.photo_url || '');
+    return (typeof u === 'string' && (u.indexOf('data:image/') === 0 || /^https?:\/\//.test(u))) ? u : '';
   }
   function loadDashMonth(force) {
     if (!cfg || !TOKEN || !cfg.classes || !cfg.classes.length) return;
-    var key = cfg.today.substr(0, 7) + '|' + (cur.period || '');
+    var key = cfg.today + '|' + (cur.period || '');
     if (!force && dashMon && dashMon.key === key) { renderDashMonth(); return; }
-    var id = ++monReq, month = cfg.today.substr(0, 7), list = cfg.classes.slice(), next = 0;
-    dashMon = { key: key, busy: true, rows: [], total: list.length, fin: 0, fails: 0 };
+    var id = ++monReq, list = cfg.classes.slice(), next = 0, seen = {};
+    dashMon = { key: key, busy: true, byCls: {}, total: list.length, fin: 0, fails: 0, tab: (dashMon && dashMon.tab) || 'A' };
     renderDashMonth();
+    function done(cls, ok) {
+      if (!seen[cls]) { seen[cls] = 1; dashMon.fin++; if (!ok) dashMon.fails++; }
+      if (dashMon.fin >= list.length) dashMon.busy = false;
+      renderDashMonth();
+      pump();
+    }
     function pump() {
       if (id !== monReq || next >= list.length) return;
       var cls = list[next++];
       google.script.run
-        .withSuccessHandler(function (rep) { if (id !== monReq) return; dashMon.rows.push(dsMonCalc(cls, rep)); step(); })
-        .withFailureHandler(function () { if (id !== monReq) return; dashMon.fails++; step(); })
-        .getMonthReport(TOKEN, month, cls, cur.period);
-    }
-    function step() {
-      dashMon.fin++;
-      if (dashMon.fin >= list.length) dashMon.busy = false;
-      renderDashMonth();
-      pump();
+        .withSuccessHandler(function (d) {
+          if (id !== monReq) return;
+          dashMon.byCls[cls] = { students: d.students || [], saved: d.saved || {}, blocked: !!d.blocked };
+          done(cls, true);
+        })
+        .withFailureHandler(function () { if (id !== monReq) return; done(cls, false); })
+        .getClassData(TOKEN, cfg.today, cls, cur.period);
     }
     pump(); pump();
   }
@@ -5475,71 +5713,64 @@
     var box = $('dsMon'); if (!box) return;
     box.innerHTML = '';
     if (!dashMon) return;
-    var m = dashMon, card = el('div', 'ds-mon');
+    var m = dashMon, card = el('div', 'ds-mon td-wrap');
+    var P = STATUS[0], A = cfg.absentStatus;
+    var pl = [], ab = [], taken = 0;
+    cfg.classes.forEach(function (c) {
+      var d = m.byCls[c]; if (!d || d.blocked || !Object.keys(d.saved).length) return;
+      taken++;
+      sortByRoll(d.students.slice(), 'roll').forEach(function (s) {
+        var st = d.saved[s.roll];
+        var o = { cls: c, roll: s.roll, name: s.name, photo: tdPhoto(s) };
+        if (st === P) pl.push(o); else if (st === A) ab.push(o);
+      });
+    });
     var h = el('div', 'ds-mon-h');
-    h.appendChild(el('b', null, '🗓️ ' + monthLabel(cfg.today.substr(0, 7)) + ' মাসের সারাংশ'));
-    h.appendChild(el('span', null, m.busy ? 'লোড হচ্ছে ' + bn(m.fin) + '/' + bn(m.total) : ''));
+    h.appendChild(el('b', null, '👥 Today’s attendance'));
+    h.appendChild(el('span', null, m.busy ? 'Loading ' + bn(m.fin) + '/' + bn(m.total) : ''));
     var rf = el('button', 'ds-ref' + (m.busy ? ' spin' : ''), '↻');
-    rf.type = 'button'; rf.setAttribute('aria-label', 'মাসিক সারাংশ নতুন করুন');
+    rf.type = 'button'; rf.setAttribute('aria-label', 'Refresh');
     rf.onclick = function () { loadDashMonth(true); };
     h.appendChild(rf);
     card.appendChild(h);
 
-    var order = {};
-    cfg.classes.forEach(function (c, i) { order[c] = i; });
-    var rows = m.rows.slice().sort(function (a, b) { return (order[a.cls] || 0) - (order[b.cls] || 0); });
-    var withData = rows.filter(function (r) { return r.days > 0; });
+    var seg = el('div', 'td-seg');
+    [['A', 'Absent (' + ab.length + ')'], ['P', 'Present (' + pl.length + ')']].forEach(function (t) {
+      var b = el('button', 'td-tab' + (m.tab === t[0] ? ' on ' + (t[0] === 'A' ? 'a' : 'p') : ''), t[1]);
+      b.type = 'button';
+      b.onclick = function () { m.tab = t[0]; renderDashMonth(); };
+      seg.appendChild(b);
+    });
+    card.appendChild(seg);
 
-    if (!rows.length) {
-      card.appendChild(el('div', 'ds-mon-note' + (!m.busy ? ' bad' : ''),
-        m.busy ? 'শ্রেণি অনুযায়ী তথ্য আনা হচ্ছে…' : 'মাসিক তথ্য আনা যায়নি। ↻ চেপে আবার চেষ্টা করুন।'));
-      box.appendChild(card);
-      return;
+    var list = m.tab === 'A' ? ab : pl;
+    if (!list.length) {
+      card.appendChild(el('div', 'ds-mon-note' + (!m.busy && m.fails ? ' bad' : ''),
+        m.busy ? 'Fetching students…' : (!taken ? 'Attendance not taken yet today' : (m.tab === 'A' ? '🎉 No one is absent' : 'No present students'))));
+      box.appendChild(card); return;
     }
-
-    var days = 0, stu = 0, pres = 0, abs = 0, tp = 0, tt = 0, low = 0;
-    rows.forEach(function (r) {
-      if (r.days > days) days = r.days;
-      stu += r.stu; pres += r.c[STATUS[0]] || 0; abs += r.c[cfg.absentStatus] || 0; tp += r.tp; tt += r.tt; low += r.low;
+    var grid = el('div', 'td-grid');
+    list.slice(0, 120).forEach(function (o) {
+      var c = el('div', 'td-card ' + (m.tab === 'A' ? 'a' : 'p'));
+      var av = el('div', 'td-av');
+      if (o.photo) { var im = document.createElement('img'); im.src = o.photo; im.alt = ''; im.loading = 'lazy'; av.appendChild(im); }
+      else av.textContent = Array.from(String(o.name || '?').trim())[0] || '?';
+      c.appendChild(av);
+      c.appendChild(el('b', null, o.name));
+      c.appendChild(el('small', null, clsPlain(o.cls) + ' · Roll ' + o.roll));
+      grid.appendChild(c);
     });
-    var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
-    var tiles = el('div', 'rp-tiles');
-    [['কর্মদিবস', bn(days), ''], ['শিক্ষার্থী', bn(stu), ''],
-     ['মোট উপস্থিত', bn(pres), ' good'], ['মোট অনুপস্থিত', bn(abs), abs ? ' bad' : ''],
-     ['গড় উপস্থিতি', bn(avg) + '%', avg < cfg.lowPercent ? ' bad' : ' good'],
-     ['কম উপস্থিতি', bn(low) + ' জন', low ? ' bad' : ' good']].forEach(function (x) {
-      var d = el('div', 'rp-tile' + x[2]);
-      d.appendChild(el('b', null, x[1]));
-      d.appendChild(el('span', null, x[0]));
-      tiles.appendChild(d);
-    });
-    card.appendChild(tiles);
-
-    withData.forEach(function (r) {
-      var isLow = r.avg !== null && r.avg < cfg.lowPercent;
-      var b = el('button', 'ds-mrow' + (isLow ? ' low' : '')); b.type = 'button';
-      b.appendChild(el('span', 'mn', clsPlain(r.cls)));
-      var bar = el('span', 'mb'), fi = el('i');
-      fi.style.width = Math.max(0, Math.min(100, r.avg || 0)) + '%';
-      bar.appendChild(fi); b.appendChild(bar);
-      b.appendChild(el('span', 'mv', r.avg === null ? '–' : bn(r.avg) + '%'));
-      b.appendChild(el('span', 'mw', r.low ? '⚠️ ' + bn(r.low) : ''));
-      b.setAttribute('aria-label', clsPlain(r.cls) + ': গড় উপস্থিতি ' + (r.avg === null ? 'নেই' : bn(r.avg) + ' শতাংশ') + (r.low ? ', কম উপস্থিতি ' + bn(r.low) + ' জন' : ''));
-      b.onclick = function () { $('mmonth').value = cfg.today.substr(0, 7); $('mcls').value = r.cls; monData = null; monOpen = true; showTab('mon'); };
-      card.appendChild(b);
-    });
-    if (!withData.length && !m.busy) card.appendChild(el('div', 'ds-mon-note', 'এই মাসে এখনো কোনো শ্রেণির হাজিরা নেই'));
-    if (!m.busy && m.fails) card.appendChild(el('div', 'ds-mon-note bad', '⚠️ ' + bn(m.fails) + 'টি শ্রেণির তথ্য আনা যায়নি — ↻ চেপে আবার চেষ্টা করুন'));
+    card.appendChild(grid);
+    if (list.length > 120) card.appendChild(el('div', 'ds-mon-note', '+' + (list.length - 120) + ' more'));
     box.appendChild(card);
   }
-
   // রিপোর্ট ট্যাব খুললে তারিখের ঘরে আজকের তারিখ বসবে
   (function () {
     var orig = showTab;
     showTab = function (t) { orig(t); dsSync(); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
   })();
 
-  var PG_TITLES = { home: 'ড্যাশবোর্ড', att: 'হাজিরা', sum: 'সারাংশ', mon: 'রিপোর্ট', alr: 'সতর্কতা', reg: 'নিবন্ধন', pro: 'প্রোমোশন', ff: 'ফরম ফিলাপ' };
+  var PG_TITLES = { home: 'Dashboard', att: 'Attendance', sum: 'Summary', mon: 'Reports', alr: 'Alerts', reg: 'Registration', pro: 'Promotion', ff: 'Form Fill-up' };
 
   // ===== বাংলা ও হিজরি তারিখ =====
   var HIJRI_ADJ = 0;   // চাঁদ দেখা অনুযায়ী মিলাতে -1 বা +1 দিন
@@ -5557,7 +5788,7 @@
       var len = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap ? 30 : 29, 30];
       var k = 0;
       while (k < 11 && diff >= len[k]) { diff -= len[k]; k++; }
-      return { t: bn(diff + 1) + ' ' + BN_MONTHS[k] + ' ' + bn(sy - 593) + ' বঙ্গাব্দ', k: k };
+      return { t: bnD(diff + 1) + ' ' + BN_MONTHS[k] + ' ' + bnD(sy - 593) + ' বঙ্গাব্দ', k: k };
     } catch (e) { return null; }
   }
 
@@ -5571,7 +5802,7 @@
       parts.forEach(function (x) { o[x.type] = x.value; });
       var y = o.relatedYear || o.year;
       if (!o.day || !o.month || !y || +y < 1000) return '';
-      return bn(o.day) + ' ' + HIJRI_M[+o.month - 1] + ' ' + bn(y) + ' হিজরি';
+      return bnD(o.day) + ' ' + HIJRI_M[+o.month - 1] + ' ' + bnD(y) + ' হিজরি';
     } catch (e) { return ''; }
   }
 
@@ -5588,7 +5819,7 @@
 
   function setupDash(d) {
     var h = new Date().getHours();
-    var g = h < 5 ? 'শুভ রাত্রি' : h < 12 ? 'শুভ সকাল' : h < 15 ? 'শুভ দুপুর' : h < 18 ? 'শুভ বিকাল' : h < 20 ? 'শুভ সন্ধ্যা' : 'শুভ রাত্রি';
+    var g = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 15 ? 'Good noon' : h < 18 ? 'Good afternoon' : h < 20 ? 'Good evening' : 'Good night';
     $('greet').textContent = g + '! ' + (d.teacher || d.school || d.title);
     fillDates(d.today);
     $('sbTitle').textContent = d.school || d.title;
@@ -5619,7 +5850,7 @@
 
   function updateBulk() {
     var n = Object.keys(regSel).length;
-    $('bkCnt').textContent = n ? bn(n) + ' জন বাছাই করা হয়েছে' : 'কাউকে বাছাই করা হয়নি';
+    $('bkCnt').textContent = n ? bn(n) + ' selected' : 'No one selected';
     $('bkOk').disabled = !n;
     $('bkNo').disabled = !n;
     $('bkAll').checked = n > 0 && n === regItems.length;
@@ -5629,16 +5860,16 @@
   function bulkRun(kind) {
     var ids = Object.keys(regSel);
     if (!ids.length) return;
-    var verb = kind === 'ok' ? 'কনফার্ম' : 'বাতিল';
+    var verb = kind === 'ok' ? 'Confirm' : 'Cancel';
     if (!confirm(bn(ids.length) + ' জনকে ' + verb + ' করবেন?' + (kind === 'no' ? '\nসারিগুলো মুছবে না; Status "Cancelled" হিসেবে থাকবে (বাতিল তালিকা থেকে ফিরিয়ে আনা যাবে)।' : ''))) return;
     var i = 0, done = 0, skipped = [], failed = [];
 
     function finish() {
       loading(false);
       attStale = true;
-      toast(bn(done) + ' জন ' + verb + ' হয়েছে', false);
+      toast(bn(done) + ' students ' + verb + ' done', false);
       var msg = '';
-      if (skipped.length) msg += 'রোল আগে থেকেই আছে, তাই বাদ গেছে (এগুলো আলাদাভাবে কনফার্ম করুন):\n' + skipped.join('\n') + '\n\n';
+      if (skipped.length) msg += 'রোল আগে থেকেই আছে, তাই বাদ গেছে (এগুলো আলাদাভাবে Confirm):\n' + skipped.join('\n') + '\n\n';
       if (failed.length) msg += 'ত্রুটি:\n' + failed.join('\n');
       if (msg) alert(msg);
       loadPending();
@@ -5651,7 +5882,7 @@
       loading(true, verb + ' হচ্ছে... ' + bn(i) + '/' + bn(ids.length));
       var run = google.script.run
         .withSuccessHandler(function (res) {
-          if (res && res.warn) skipped.push(nm + ' (রোল ' + o.roll + ')'); else done++;
+          if (res && res.warn) skipped.push(nm + ' (Roll ' + o.roll + ')'); else done++;
           next();
         })
         .withFailureHandler(function (e) {
@@ -5665,15 +5896,15 @@
     next();
   }
 
-  // ===== Pending তথ্য সম্পাদনা (উন্নত) =====
+  // ===== Pending Edit info (উন্নত) =====
   // [key, লেবেল, ধরন]  ধরন: num | en | birth | mob | text
   var EDIT_FIELDS = [
-    ['roll', 'রোল নম্বর', 'num'], ['nameEn', 'Student Name (English)', 'en'], ['nameBn', 'শিক্ষার্থীর নাম (বাংলা)', 'text'],
-    ['birthCert', 'জন্ম নিবন্ধন নম্বর', 'birth'], ['dob', 'জন্ম তারিখ', 'text'], ['sex', 'লিঙ্গ', 'text'], ['mobile', 'মোবাইল', 'mob'],
-    ['fathers', 'পিতার নাম', 'text'], ['fathersMobile', 'পিতার মোবাইল', 'mob'],
-    ['mothers', 'মাতার নাম', 'text'], ['mothersMobile', 'মাতার মোবাইল', 'mob']
+    ['roll', 'রোল নম্বর', 'num'], ['nameEn', 'Student Name (English)', 'en'], ['nameBn', 'Student name (Bangla)', 'text'],
+    ['birthCert', 'Birth certificate no.', 'birth'], ['dob', 'Date of birth', 'text'], ['sex', 'Gender', 'text'], ['mobile', 'Mobile', 'mob'],
+    ['fathers', 'Father’s name', 'text'], ['fathersMobile', 'Father’s mobile', 'mob'],
+    ['mothers', 'Mother’s name', 'text'], ['mothersMobile', 'Mother’s mobile', 'mob']
   ];
-  var ED_SEC = { roll: 'শিক্ষার্থীর তথ্য', fathers: 'অভিভাবকের তথ্য' };
+  var ED_SEC = { roll: 'Student info', fathers: 'Guardian info' };
   var editing = null;
   var edOrig = {};
   var lastPend = null;
@@ -5693,16 +5924,16 @@
 
   // ত্রুটি (err) বা সতর্কতা (warn) — server-এর নিয়মের সাথে মিল রাখা হয়েছে
   function edCheck(key, kind, v) {
-    if (key === 'roll' && !v) return { err: 'রোল নম্বর দিন' };
+    if (key === 'roll' && !v) return { err: 'Enter roll number' };
     if (key === 'nameEn') {
-      if (!v) return { err: 'ইংরেজি নাম দিন' };
-      if (!/^[A-Za-z ]+$/.test(v)) return { err: 'শুধু ইংরেজি অক্ষর ও ফাঁকা ব্যবহার করুন' };
+      if (!v) return { err: 'Enter English name' };
+      if (!/^[A-Za-z ]+$/.test(v)) return { err: 'Use English letters and spaces only' };
     }
     if (kind === 'birth' && v) {
-      if (!/^[0-9]+$/.test(v)) return { err: 'শুধু সংখ্যা দিন' };
+      if (!/^[0-9]+$/.test(v)) return { err: 'Digits only' };
       if (v.length !== 17) return { warn: 'সাধারণত ১৭ সংখ্যার হয় (আপনি দিয়েছেন ' + bn(v.length) + ' সংখ্যা)' };
     }
-    if (kind === 'mob' && v && !/^(\+?88)?01[3-9][0-9]{8}$/.test(v)) return { err: 'মোবাইল সঠিক নয় (যেমন: 01712345678)' };
+    if (kind === 'mob' && v && !/^(\+?88)?01[3-9][0-9]{8}$/.test(v)) return { err: 'Invalid mobile (e.g. 01712345678)' };
     return {};
   }
 
@@ -5734,7 +5965,7 @@
     var n = edChangedCount();
     var bad = 0;
     EDIT_FIELDS.forEach(function (f) { if (edCheck(f[0], f[2], edNorm(f[2], $('ed_' + f[0]).value)).err) bad++; });
-    $('edCnt').textContent = bad ? bn(bad) + 'টি ঘরে ভুল আছে' : (n ? bn(n) + 'টি ঘর পরিবর্তিত' : 'কোনো পরিবর্তন নেই');
+    $('edCnt').textContent = bad ? bn(bad) + 'টি ঘরে ভুল আছে' : (n ? bn(n) + 'টি ঘর পরিবর্তিত' : 'No changes');
     $('edSave').disabled = !n || !!bad;
     $('edSaveOk').disabled = !!bad;
   }
@@ -5744,12 +5975,12 @@
     edOrig = {};
     EDIT_FIELDS.forEach(function (f) { edOrig[f[0]] = o[f[0]] || ''; });
 
-    $('edRo').textContent = 'শ্রেণি ' + clsPlain(o.cls) + ' · সেশন ' + o.session + ' (শ্রেণি/শাখা বদলানো যাবে না)';
+    $('edRo').textContent = 'Class ' + clsPlain(o.cls) + ' · Session ' + o.session + ' (class/section cannot be changed)';
     var ph = $('edPh');
     ph.innerHTML = '';
     if (o.photo && o.photo.indexOf('data:image/') === 0) {
       var im = document.createElement('img'); im.src = o.photo; im.alt = ''; ph.appendChild(im);
-    } else { ph.textContent = 'ছবি নেই'; }
+    } else { ph.textContent = 'No photo'; }
 
     var box = $('edForm');
     box.innerHTML = '';
@@ -5782,7 +6013,7 @@
   // force=true হলে পরিবর্তনের সতর্কতা ছাড়াই বন্ধ হবে
   function closeEdit(force) {
     if (editing && force !== true && edChangedCount() &&
-        !confirm('সংরক্ষণ না করা পরিবর্তন মুছে যাবে। বন্ধ করবেন?')) return;
+        !confirm('Unsaved changes will be lost. Close?')) return;
     $('edModal').classList.remove('on');
     document.body.style.overflow = '';
     editing = null;
@@ -5808,27 +6039,27 @@
       data[f[0]] = inp.value;
       if (edValidateOne(f, false) && !firstBad) firstBad = inp;
     });
-    if (firstBad) { firstBad.focus(); toast('লাল চিহ্নিত ঘরগুলো ঠিক করুন', true); return; }
+    if (firstBad) { firstBad.focus(); toast('Fix the fields marked red', true); return; }
 
     var o = editing;
     var changed = edChangedCount() > 0;
     if (!changed) {                              // কিছু বদলায়নি
       closeEdit(true);
       if (thenConfirm) confirmReg(o, false);
-      else toast('কোনো পরিবর্তন নেই', false);
+      else toast('No changes', false);
       return;
     }
 
     $('edSave').disabled = true;
     $('edSaveOk').disabled = true;
-    loading(true, 'সংরক্ষণ হচ্ছে...');
+    loading(true, 'Saving...');
     google.script.run
       .withSuccessHandler(function () {
         loading(false);
         EDIT_FIELDS.forEach(function (f) { o[f[0]] = data[f[0]]; });   // স্ক্রিনের কার্ড সঙ্গে সঙ্গে হালনাগাদ
         closeEdit(true);
-        if (thenConfirm) { toast('তথ্য সংরক্ষিত হয়েছে', false); confirmReg(o, false); return; }
-        toast('তথ্য সংরক্ষিত হয়েছে', false);
+        if (thenConfirm) { toast('Data saved', false); confirmReg(o, false); return; }
+        toast('Data saved', false);
         if (lastPend) renderPending(lastPend);
       })
       .withFailureHandler(function (e) {
@@ -5836,7 +6067,7 @@
         $('edSave').disabled = false;
         $('edSaveOk').disabled = false;
         if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
-        toast('ত্রুটি: ' + friendlyErr(e), true);
+        toast('Error: ' + friendlyErr(e), true);
       })
       .updatePending(TOKEN, o.id, data);
   }
@@ -5855,7 +6086,7 @@
   function regFbar() {
     var fb = $('regFbar');
     fb.innerHTML = '';
-    [['pending', 'অপেক্ষমাণ'], ['confirmed', 'নিশ্চিত (Confirmed)'], ['cancelled', 'বাতিল (Cancelled)']].forEach(function (f) {
+    [['pending', 'Pending'], ['confirmed', 'নিশ্চিত (Confirmed)'], ['cancelled', 'বাতিল (Cancelled)']].forEach(function (f) {
       var b = el('button', 'chipbtn' + (regStatus === f[0] ? ' on' : ''), f[1]);
       b.type = 'button';
       b.onclick = function () { if (regStatus === f[0]) return; regStatus = f[0]; loadPending(); };
@@ -5868,7 +6099,7 @@
     $('regBox').innerHTML = '';
     setNote('rnote', '');
     var id = ++rq.reg;
-    loading(true, 'অপেক্ষমাণ নিবন্ধন লোড হচ্ছে...');
+    loading(true, 'অপেক্ষমাণ নিবন্ধন Loading...');
     google.script.run
       .withSuccessHandler(function (d) {
         if (id !== rq.reg) return;
@@ -5887,11 +6118,11 @@
     if ((d.status || 'pending') !== 'pending') { renderRegHistory(d); return; }
     setRegBadge(d.total);
     if (!d.items.length) {
-      box.appendChild(el('div', 'empty', 'কোনো অপেক্ষমাণ নিবন্ধন নেই'));
+      box.appendChild(el('div', 'empty', 'No pending registrations'));
       return;
     }
-    setNote('rnote', 'অপেক্ষমাণ: ' + bn(d.total) + ' জন' +
-      (d.total > d.items.length ? ' (প্রথম ' + bn(d.items.length) + ' জন দেখানো হচ্ছে)' : ''));
+    setNote('rnote', 'Pending: ' + bn(d.total) + ' students' +
+      (d.total > d.items.length ? ' (প্রথম ' + bn(d.items.length) + ' shown)' : ''));
 
     regSel = {};
     regItems = d.items;
@@ -5899,7 +6130,7 @@
     var bt0 = el('div', 'reg-bk-top');
     var all = document.createElement('input');
     all.type = 'checkbox'; all.id = 'bkAll'; all.className = 'reg-cb';
-    all.setAttribute('aria-label', 'সবাইকে বাছাই করুন');
+    all.setAttribute('aria-label', 'Select everyone');
     all.onchange = function () {
       regSel = {};
       var cbs = document.querySelectorAll('#regBox .reg-card-cb');
@@ -5912,7 +6143,7 @@
       updateBulk();
     };
     bt0.appendChild(all);
-    bt0.appendChild(el('b', null, 'সব বাছাই'));
+    bt0.appendChild(el('b', null, 'Select all'));
     bt0.appendChild(el('span', null, '')).id = 'bkCnt';
     bulk.appendChild(bt0);
     var bb = el('div', 'btn2');
@@ -5933,7 +6164,7 @@
       var top = el('div', 'reg-top');
       var cb = document.createElement('input');
       cb.type = 'checkbox'; cb.className = 'reg-cb reg-card-cb';
-      cb.setAttribute('aria-label', 'বাছাই করুন');
+      cb.setAttribute('aria-label', 'Select');
       cb.onchange = function () {
         if (cb.checked) regSel[o.id] = o; else delete regSel[o.id];
         card.classList.toggle('sel', cb.checked);
@@ -5949,21 +6180,21 @@
       } else {
         ph.className += ' noimg';
         ph.textContent = Array.from(String(o.nameBn || o.nameEn || '?').trim())[0] || '?';
-        ph.setAttribute('aria-label', 'ছবি নেই');
+        ph.setAttribute('aria-label', 'No photo');
       }
       top.appendChild(ph);
 
       var inf = el('div', 'reg-inf');
       inf.appendChild(el('div', 'name', o.nameBn || o.nameEn));
       if (o.nameBn && o.nameEn) inf.appendChild(el('div', 'detail', o.nameEn));
-      inf.appendChild(el('div', 'detail', 'শ্রেণি ' + clsPlain(o.cls) + ' · রোল ' + o.roll));
+      inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
       top.appendChild(inf);
       card.appendChild(top);
 
       var dl = el('div', 'reg-dl');
-      [['জন্ম নিবন্ধন', o.birthCert], ['জন্ম তারিখ', o.dob], ['লিঙ্গ', o.sex], ['মোবাইল', o.mobile],
-       ['পিতা', o.fathers], ['পিতার মোবাইল', o.fathersMobile],
-       ['মাতা', o.mothers], ['মাতার মোবাইল', o.mothersMobile], ['জমার সময়', o.submitted]
+      [['Birth certificate', o.birthCert], ['Date of birth', o.dob], ['Gender', o.sex], ['Mobile', o.mobile],
+       ['Father', o.fathers], ['Father’s mobile', o.fathersMobile],
+       ['Mother', o.mothers], ['Mother’s mobile', o.mothersMobile], ['Submitted at', o.submitted]
       ].forEach(function (r) {
         if (!r[1]) return;
         var ln = el('div', 'reg-ln');
@@ -5980,10 +6211,10 @@
       card.appendChild(ed);
 
       var bt = el('div', 'btn2');
-      var ok = el('button', 'act', 'কনফার্ম করুন');
+      var ok = el('button', 'act', 'Confirm');
       ok.type = 'button';
       ok.onclick = function () { confirmReg(o, false); };
-      var no = el('button', 'act rej', 'বাতিল করুন');
+      var no = el('button', 'act rej', 'Cancel');
       no.type = 'button';
       no.onclick = function () { rejectReg(o); };
       bt.appendChild(ok);
@@ -5997,14 +6228,14 @@
   function renderRegHistory(d) {
     var box = $('regBox');
     var isOk = d.status === 'confirmed';
-    var lbl = isOk ? 'নিশ্চিত' : 'বাতিল';
+    var lbl = isOk ? 'নিশ্চিত' : 'Cancel';
     if (!d.items.length) {
       setNote('rnote', '');
       box.appendChild(el('div', 'empty', 'কোনো ' + lbl + ' নিবন্ধন নেই'));
       return;
     }
-    setNote('rnote', lbl + ': ' + bn(d.total) + ' জন' +
-      (d.total > d.items.length ? ' (সর্বশেষ ' + bn(d.items.length) + ' জন দেখানো হচ্ছে)' : ''));
+    setNote('rnote', lbl + ': ' + bn(d.total) + ' students' +
+      (d.total > d.items.length ? ' (latest ' + bn(d.items.length) + ' shown)' : ''));
 
     d.items.slice().reverse().forEach(function (o) {      // নতুনটি আগে
       var card = el('div', 'card');
@@ -6017,20 +6248,20 @@
       } else {
         ph.className += ' noimg';
         ph.textContent = Array.from(String(o.nameBn || o.nameEn || '?').trim())[0] || '?';
-        ph.setAttribute('aria-label', 'ছবি নেই');
+        ph.setAttribute('aria-label', 'No photo');
       }
       top.appendChild(ph);
       var inf = el('div', 'reg-inf');
       inf.appendChild(el('div', 'name', o.nameBn || o.nameEn));
       if (o.nameBn && o.nameEn) inf.appendChild(el('div', 'detail', o.nameEn));
-      inf.appendChild(el('div', 'detail', 'শ্রেণি ' + clsPlain(o.cls) + ' · রোল ' + o.roll));
+      inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
       inf.appendChild(el('span', 'pchip ' + (isOk ? 'up' : 'warn'), isOk ? 'Confirmed' : 'Cancelled'));
       top.appendChild(inf);
       card.appendChild(top);
 
       var dl = el('div', 'reg-dl');
-      [['জন্ম নিবন্ধন', o.birthCert], ['জন্ম তারিখ', o.dob], ['মোবাইল', o.mobile],
-       ['পিতা', o.fathers], ['মাতা', o.mothers], ['জমার সময়', o.submitted]
+      [['Birth certificate', o.birthCert], ['Date of birth', o.dob], ['Mobile', o.mobile],
+       ['Father', o.fathers], ['Mother', o.mothers], ['Submitted at', o.submitted]
       ].forEach(function (r) {
         if (!r[1]) return;
         var ln = el('div', 'reg-ln');
@@ -6041,7 +6272,7 @@
       card.appendChild(dl);
 
       if (!isOk) {
-        var rb = el('button', 'act alt', '↩️ আবার অপেক্ষমাণ করুন');
+        var rb = el('button', 'act alt', '↩️ Mark pending again');
         rb.type = 'button';
         rb.onclick = function () { restoreReg(o); };
         card.appendChild(rb);
@@ -6051,11 +6282,11 @@
   }
 
   function restoreReg(o) {
-    if (!confirm((o.nameBn || o.nameEn) + ' (রোল ' + o.roll + ')-এর নিবন্ধন আবার অপেক্ষমাণ তালিকায় ফিরিয়ে আনবেন?')) return;
-    loading(true, 'ফিরিয়ে আনা হচ্ছে...');
+    if (!confirm((o.nameBn || o.nameEn) + ' (Roll ' + o.roll + ')’s registration — move back to pending?')) return;
+    loading(true, 'Restoring...');
     google.script.run
       .withSuccessHandler(function (res) {
-        toast('অপেক্ষমাণ তালিকায় ফিরেছে', false);
+        toast('Moved back to pending', false);
         if (res && res.remaining !== undefined) setRegBadge(res.remaining);
         loadPending();
       })
@@ -6064,17 +6295,17 @@
   }
 
   function confirmReg(o, force) {
-    if (!force && !confirm((o.nameBn || o.nameEn) + ' (শ্রেণি ' + clsPlain(o.cls) + ', রোল ' + o.roll + ')\nএই শিক্ষার্থীকে Students তালিকায় যুক্ত করবেন?')) return;
-    loading(true, 'নিশ্চিত করা হচ্ছে...');
+    if (!force && !confirm((o.nameBn || o.nameEn) + ' (class ' + clsPlain(o.cls) + ', রোল ' + o.roll + ')\nAdd this student to the Students list?')) return;
+    loading(true, 'Confirming...');
     google.script.run
       .withSuccessHandler(function (res) {
         loading(false);
         if (res.warn) {
-          if (confirm(res.message + '\n\nতবুও যুক্ত করবেন?')) confirmReg(o, true);
+          if (confirm(res.message + '\n\nAdd anyway?')) confirmReg(o, true);
           return;
         }
         attStale = true;
-        toast((res.name || 'শিক্ষার্থী') + ' — নিশ্চিত হয়েছে', false);
+        toast((res.name || 'Students') + ' — confirmed', false);
         loadPending();
       })
       .withFailureHandler(fail)
@@ -6082,11 +6313,11 @@
   }
 
   function rejectReg(o) {
-    if (!confirm((o.nameBn || o.nameEn) + ' (রোল ' + o.roll + ')-এর নিবন্ধন বাতিল করবেন?\nসারিটি মুছবে না; Status "Cancelled" হিসেবে থাকবে (বাতিল তালিকা থেকে ফিরিয়ে আনা যাবে)।')) return;
-    loading(true, 'বাতিল করা হচ্ছে...');
+    if (!confirm((o.nameBn || o.nameEn) + ' (Roll ' + o.roll + ')’s registration — cancel?\nসারিটি মুছবে না; Status "Cancelled" হিসেবে থাকবে (বাতিল তালিকা থেকে ফিরিয়ে আনা যাবে)।')) return;
+    loading(true, 'Cancelling...');
     google.script.run
       .withSuccessHandler(function () {
-        toast('নিবন্ধন বাতিল হয়েছে', false);
+        toast('Registration cancelled', false);
         loadPending();
       })
       .withFailureHandler(fail)
@@ -6117,9 +6348,9 @@
         var b = document.createElement('div');
         b.id = 'updBar'; b.setAttribute('role', 'status');
         b.style.cssText = 'position:fixed;top:10px;left:12px;right:12px;z-index:100000;max-width:460px;margin:0 auto;background:#0e8f98;color:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);padding:11px 14px;display:flex;align-items:center;gap:10px;font:600 14px/1.4 inherit;font-family:inherit';
-        b.innerHTML = '<span style="flex:1">🔄 নতুন ভার্সন এসেছে</span>' +
-          '<button type="button" id="updGo" style="background:#fff;color:#0e8f98;border:0;border-radius:99px;padding:7px 14px;font:700 13.5px inherit;font-family:inherit;cursor:pointer">আপডেট করুন</button>' +
-          '<button type="button" id="updX" aria-label="বন্ধ" style="background:transparent;color:#fff;border:0;font-size:18px;cursor:pointer;padding:0 4px">✕</button>';
+        b.innerHTML = '<span style="flex:1">🔄 New version available</span>' +
+          '<button type="button" id="updGo" style="background:#fff;color:#0e8f98;border:0;border-radius:99px;padding:7px 14px;font:700 13.5px inherit;font-family:inherit;cursor:pointer">Update</button>' +
+          '<button type="button" id="updX" aria-label="Closed" style="background:transparent;color:#fff;border:0;font-size:18px;cursor:pointer;padding:0 4px">✕</button>';
         document.body.appendChild(b);
         document.getElementById('updGo').onclick = function () {
           if (dirtyNow() && !confirm('আপনার অসংরক্ষিত পরিবর্তন আছে, আপডেট করলে তা হারাবে। তবুও আপডেট করবেন?')) return;
@@ -6130,7 +6361,7 @@
       }
       try { if (sessionStorage.getItem('pwa_updated')) { sessionStorage.removeItem('pwa_updated'); setTimeout(function () { toastOk('✅ অ্যাপ নতুন ভার্সনে আপডেট হয়েছে'); }, 600); } } catch (e) {}
 
-      navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function (reg) {
+      navigator.serviceWorker.register('att-sw.js', { scope: './' }).then(function (reg) {
         function track(w) {
           if (!w) return;
           w.addEventListener('statechange', function () {
@@ -6184,11 +6415,11 @@
           var msg = ios
             ? 'অ্যাপের মতো ব্যবহার করতে নিচের <b>Share</b> বোতাম চেপে <b>"Add to Home Screen"</b> বাছুন।'
             : 'এই সাইটটি অ্যাপ হিসেবে ইনস্টল করবেন? ইনস্টল করলে ফোন/কম্পিউটারে আইকন থাকবে এবং অফলাইনেও চলবে।';
-          bar.innerHTML = '<img src="/icon-192.png" alt="" width="46" height="46" style="border-radius:10px;flex-shrink:0">' +
+          bar.innerHTML = '<img src="icon-192.png" alt="" width="46" height="46" style="border-radius:10px;flex-shrink:0">' +
             '<div style="flex:1;font-size:14px;line-height:1.5"><div style="font-weight:800;color:#4c6b1f;margin-bottom:2px">📲 অ্যাপ ইনস্টল করুন</div>' + msg + '</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">' +
             (ios ? '' : '<button id="pwaYes" type="button" style="background:#4c6b1f;color:#fff;border:0;border-radius:99px;padding:8px 16px;font:700 14px inherit;font-family:inherit;cursor:pointer">ইনস্টল</button>') +
-            '<button id="pwaNo" type="button" style="background:#eee;color:#333;border:0;border-radius:99px;padding:8px 16px;font:600 13px inherit;font-family:inherit;cursor:pointer">' + (ios ? 'বুঝেছি' : 'এখন না') + '</button></div>';
+            '<button id="pwaNo" type="button" style="background:#eee;color:#333;border:0;border-radius:99px;padding:8px 16px;font:600 13px inherit;font-family:inherit;cursor:pointer">' + (ios ? 'Got it' : 'Not now') + '</button></div>';
           document.body.appendChild(bar);
           document.getElementById('pwaNo').onclick = function () { hide(true); };
           var yes = document.getElementById('pwaYes');
