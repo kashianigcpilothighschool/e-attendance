@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="স্মার্ট স্কুল">
-<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://xemvwhqqpbxsdkqcscrg.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <title>শিক্ষার্থী হাজিরা</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1983,8 +1983,9 @@
 
 <script>
   // ===== GitHub Pages সংযোগ: Apps Script Web App-কে API হিসেবে ডাকা =====
-  // নিচের লাইনে Deploy-এর পর পাওয়া Web App URL (/exec দিয়ে শেষ) বসান
-  var API_URL = 'https://script.google.com/macros/s/AKfycbzHiUZZ9Osm5FMxYZfkzgPFFXa78DT3Dl2t1j489jKeCaCnmUMOUk66oOaJ-YGLSVyiDA/exec';
+  // নিচে Supabase Edge Function-এর URL ও Publishable key বসানো আছে
+  var API_URL = 'https://xemvwhqqpbxsdkqcscrg.supabase.co/functions/v1/attendance';
+  var API_KEY = 'sb_publishable_Ecayyqfsteeio6zjLzHAZw_F6I3h_F0';   // Supabase → Project Settings → API Keys → Publishable key (sb_publishable_...)
 
   // নিচের অংশ google.script.run-এর মতো আচরণ করে (সাথে অফলাইন ক্যাশ ও কিউ), তাই বাকি কোড বদলাতে হয়নি
   var google = { script: { run: (function () {
@@ -2024,8 +2025,8 @@
 
     // ----- নেটওয়ার্ক কল -----
     function callApi(fn, args) {
-      if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)) {
-        return Promise.reject(new Error('API_URL ঠিকভাবে বসানো হয়নি। index.html-এ Web App URL বসান।'));
+      if (!/^https:\/\/[a-z0-9]+\.supabase\.co\/functions\/v1\/.+$/.test(API_URL) || !API_KEY || /PASTE_/.test(API_KEY)) {
+        return Promise.reject(new Error('API_KEY বসানো হয়নি। index.html-এ Supabase Publishable key বসান।'));
       }
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         var oe = new Error('offline'); oe.netErr = true;
@@ -2035,13 +2036,13 @@
       var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 120000) : null;
       return fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // preflight এড়াতে text/plain
+        headers: { 'Content-Type': 'application/json', 'apikey': API_KEY },
         body: JSON.stringify({ fn: fn, args: args }),
         redirect: 'follow',
         signal: ctrl ? ctrl.signal : undefined
       }).then(function (res) {
         return res.json().catch(function () {
-          throw new Error('সার্ভার থেকে সঠিক উত্তর আসেনি। Deploy-এ Who has access = Anyone আছে কি না দেখুন।');
+          throw new Error('সার্ভার থেকে সঠিক উত্তর আসেনি। Supabase-এ function-এর Verify JWT বন্ধ আছে কি না দেখুন।');
         });
       }).then(function (out) {
         if (timer) clearTimeout(timer);
@@ -2058,7 +2059,7 @@
     // ----- IndexedDB ক্যাশ -----
     var dbP = new Promise(function (res) {
       try {
-        var r = indexedDB.open('att_cache', 1);
+        var r = indexedDB.open('att_cache_sb', 1);
         r.onupgradeneeded = function () { r.result.createObjectStore('kv'); };
         r.onsuccess = function () { res(r.result); };
         r.onerror = function () { res(null); };
@@ -2177,7 +2178,7 @@
       if (!isNetErr(e)) return e;
       try { console.warn('API সংযোগ ব্যর্থ:', e && e.message, '| online =', navigator.onLine); } catch (x) {}
       if (typeof navigator !== 'undefined' && navigator.onLine === false) return new Error('অফলাইন: এই তথ্য ডিভাইসে সংরক্ষিত নেই। একবার ইন্টারনেট চালু করে খুলুন।');
-      return new Error('ইন্টারনেট আছে, কিন্তু সার্ভারের (Google Apps Script) সাথে যোগাযোগ হয়নি। কিছুক্ষণ পর আবার চেষ্টা করুন; বারবার হলে অ্যাডমিনকে জানান যেন Apps Script-এর Deploy সেটিংয়ে "Who has access = Anyone" আছে কি না দেখেন।');
+      return new Error('ইন্টারনেট আছে, কিন্তু সার্ভারের (Supabase) সাথে যোগাযোগ হয়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।');
     }
 
     // ----- পড়ার কাজ -----
