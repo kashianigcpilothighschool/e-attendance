@@ -1755,13 +1755,21 @@ button:active{transform:scale(.97)}
         <input type="text" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or username">
       </div>
     </div>
-    <div class="lg-gap">
+    <div class="lg-gap" id="lgPassBox">
       <label for="lgPass">Password</label>
       <div class="pw">
         <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
         <input type="password" id="lgPass" autocomplete="current-password" placeholder="Password">
         <button type="button" class="pwbtn" id="pwBtn" onclick="togglePw()" aria-label="Show or hide password">Show</button>
       </div>
+    </div>
+    <div class="lg-gap" id="lgOtpBox" style="display:none">
+      <label for="lgOtp">Verification code</label>
+      <div class="fld">
+        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+        <input type="text" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
+      </div>
+      <div class="note" style="margin-top:8px;display:block">Code sent to your email (valid 5 min). <a href="#" onclick="otpResend();return false;">Resend</a> · <a href="#" onclick="otpBack();return false;">Back</a></div>
     </div>
     <button class="act" id="lgBtn" type="submit">Login</button>
     <div class="note" id="lgNote"></div>
@@ -2493,7 +2501,7 @@ button:active{transform:scale(.97)}
     // ----- অন্য কল (login, logout, প্রোমোশন, নিবন্ধন ইত্যাদি) -----
     function doOther(fn, args, ok, ng) {
       callApi(fn, args).then(function (r) {
-        if (fn === 'login') { try { localStorage.setItem('att_user', String(args[0] || '').trim().toLowerCase()); } catch (e) {} kvClear().then(function () { if (ok) ok(r); }); return; }
+        if (fn === 'login' || fn === 'loginVerify' || (fn === 'loginStart' && r && r.token)) { try { localStorage.setItem('att_user', String(args[0] || '').trim().toLowerCase()); } catch (e) {} kvClear().then(function () { if (ok) ok(r); }); return; }
         if (fn === 'logout' || fn === 'setMySession') { kvClear().then(function () { if (ok) ok(r); }); return; }
         if (ok) ok(r);
       }, function (e) {
@@ -2718,6 +2726,7 @@ button:active{transform:scale(.97)}
     dashPrev = null; dashToday = null; prevReq++;
     $('app').style.display = 'none';
     $('denied').style.display = 'none';
+    LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false);
     $('login').style.display = 'block';
     $('logoutBtn').style.display = 'none';
     $('homeBtn').style.display = 'none';
@@ -2739,7 +2748,32 @@ button:active{transform:scale(.97)}
     try { (LG_OFFICE ? $('lgPass') : $('lgUser')).focus(); } catch (e) {}
   }
 
+  // ===== OTP-সহ লগইন: ধাপ ১ ইমেইল+পাসওয়ার্ড → ধাপ ২ ইমেইলে আসা ৬ ডিজিট কোড =====
+  var LG_STEP = 'pw', LG_EMAIL = '', LG_PASS = '', LG_SENT_AT = 0;
+
+  function lgShowOtp(on) {
+    $('lgOtpBox').style.display = on ? '' : 'none';
+    $('lgPassBox').style.display = on ? 'none' : '';
+    $('lgUserBox').style.display = (on || LG_OFFICE) ? 'none' : '';
+    $('lgBtn').textContent = on ? 'Verify' : 'Login';
+    if (on) { $('lgOtp').value = ''; setTimeout(function () { try { $('lgOtp').focus(); } catch (e) {} }, 50); }
+  }
+  function otpBack() { LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false); setNote('lgNote', ''); }
+
+  function lgDone(token) {
+    TOKEN = token;
+    saveToken(TOKEN);
+    LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false);
+    $('lgPass').value = '';
+    $('lgPass').type = 'password';
+    $('pwBtn').textContent = 'Show';
+    $('lgBtn').disabled = false;
+    loading(true, 'Loading...');
+    google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
+  }
+
   function doLogin() {
+    if (LG_STEP === 'otp') { doVerify(); return; }
     var u = LG_OFFICE ? 'office' : $('lgUser').value.trim(), p = $('lgPass').value;
     if (!u || !p) { setNote('lgNote', LG_OFFICE ? 'Enter the office password.' : 'Enter email and password.', true); return; }
     $('lgBtn').disabled = true;
@@ -2747,21 +2781,46 @@ button:active{transform:scale(.97)}
     loading(true, 'Verifying...');
     google.script.run
       .withSuccessHandler(function (res) {
-        TOKEN = res.token;
-        saveToken(TOKEN);
-        $('lgPass').value = '';
-        $('lgPass').type = 'password';
-        $('pwBtn').textContent = 'Show';
         $('lgBtn').disabled = false;
-        loading(true, 'Loading...');
-        google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
+        if (res && res.token) { lgDone(res.token); return; }   // অফিস/পরীক্ষা মোডে OTP লাগে না
+        loading(false);
+        LG_STEP = 'otp'; LG_EMAIL = u.toLowerCase(); LG_PASS = p; LG_SENT_AT = Date.now();
+        lgShowOtp(true);
+        setNote('lgNote', 'A 6-digit code was sent to your email.');
       })
       .withFailureHandler(function (e) {
         loading(false);
         $('lgBtn').disabled = false;
         setNote('lgNote', friendlyErr(e), true);
       })
-      .login(u, p);
+      .loginStart(u, p);
+  }
+
+  function doVerify() {
+    var code = $('lgOtp').value.replace(/\s/g, '');
+    if (!/^\d{6}$/.test(code)) { setNote('lgNote', 'Enter the 6-digit code.', true); return; }
+    $('lgBtn').disabled = true;
+    setNote('lgNote', '');
+    loading(true, 'Verifying...');
+    google.script.run
+      .withSuccessHandler(function (res) { lgDone(res.token); })
+      .withFailureHandler(function (e) {
+        loading(false);
+        $('lgBtn').disabled = false;
+        setNote('lgNote', friendlyErr(e), true);
+      })
+      .loginVerify(LG_EMAIL, code);
+  }
+
+  function otpResend() {
+    if (LG_STEP !== 'otp' || !LG_PASS) { otpBack(); return; }
+    if (Date.now() - LG_SENT_AT < 30000) { setNote('lgNote', 'Please wait 30 seconds before resending.', true); return; }
+    LG_SENT_AT = Date.now();
+    loading(true, 'Sending...');
+    google.script.run
+      .withSuccessHandler(function () { loading(false); setNote('lgNote', 'Code sent again. Check your inbox/spam.'); })
+      .withFailureHandler(function (e) { loading(false); setNote('lgNote', friendlyErr(e), true); })
+      .loginStart(LG_EMAIL, LG_PASS);
   }
 
   function doLogout() {
@@ -2774,6 +2833,10 @@ button:active{transform:scale(.97)}
 
   // ===== শুরু =====
   window.onload = function () {
+    try {
+      var qt = new URLSearchParams(location.search).get('token');
+      if (qt) { saveToken(qt); history.replaceState(null, '', location.pathname); }
+    } catch (e) {}
     TOKEN = loadToken();
     loading(true, 'Loading...');
     google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
