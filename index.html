@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://xemvwhqqpbxsdkqcscrg.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <title>Student Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
@@ -1654,6 +1655,61 @@
     body:not(.appmode) header { padding-bottom:24px !important; }
   }
   @media (prefers-reduced-motion:reduce) { .act, .chipbtn, .tab { transition:none !important; } }
+
+  /* ===== লগইন: অ্যাডমিন পেজের মতো কাগজি কার্ড ===== */
+  #login.al, body.lgmode #login.al { position:fixed; inset:0; z-index:60; overflow-y:auto; max-width:none; padding:0; margin:0;
+    font-family:'Noto Sans Bengali','Hind Siliguri','Anek Bangla',sans-serif; color:#1F2D50; font-size:14px;
+    background:radial-gradient(circle at 12% 15%, rgba(199,154,71,.16), transparent 45%), radial-gradient(circle at 88% 85%, rgba(63,122,99,.14), transparent 45%), #FAF6EC; }
+  #login .al-bg span { position:fixed; border-radius:50%; border:1.5px solid rgba(31,45,80,.06); animation:alFloat 8s infinite ease-in-out; pointer-events:none; }
+  #login .al-bg span:nth-child(1) { width:260px; height:260px; top:6%; left:6%; }
+  #login .al-bg span:nth-child(2) { width:180px; height:180px; top:72%; right:8%; animation-delay:2.5s; }
+  #login .al-bg span:nth-child(3) { width:120px; height:120px; bottom:15%; left:14%; animation-delay:5s; }
+  @keyframes alFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-16px); } }
+  #login .al-wrap { min-height:100%; display:flex; justify-content:center; align-items:center; padding:24px; position:relative; z-index:1; box-sizing:border-box; }
+  #login .al-card { background:repeating-linear-gradient(to bottom, transparent 0, transparent 38px, #E7DFC8 38px, #E7DFC8 39px), #fff;
+    border:1px solid rgba(31,45,80,.08); padding:40px 36px; border-radius:20px; width:100%; max-width:460px; position:relative; box-sizing:border-box;
+    box-shadow:0 24px 48px rgba(31,45,80,.12), 0 2px 6px rgba(31,45,80,.06); animation:alUp .7s cubic-bezier(.25,.46,.45,.94); }
+  #login .al-card::before { content:''; position:absolute; top:0; left:34px; width:2px; height:100%; background:rgba(180,67,46,.14); border-radius:2px; }
+  @keyframes alUp { from { opacity:0; transform:translateY(40px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  #login .al-header { text-align:center; margin-bottom:32px; }
+  #login .al-badge { display:inline-block; font-size:12px; font-weight:600; letter-spacing:.06em; color:#A87E33; background:rgba(199,154,71,.14); padding:4px 14px; border-radius:999px; margin-bottom:12px; }
+  #login .al-header h2 { font-family:'Noto Serif Bengali','Hind Siliguri',serif; color:#1F2D50; font-size:30px; font-weight:700; margin:0 0 8px; letter-spacing:-.01em; }
+  #login .al-header p { color:#7A8399; font-size:14px; margin:0; }
+  #login form { position:relative; z-index:1; margin:0; padding:0; background:none; border:0; box-shadow:none; }
+  #login .al-group { position:relative; margin:0 0 22px; }
+  #login .al-group input { width:100%; box-sizing:border-box; height:auto; min-height:0; margin:0; padding:15px 18px 15px 45px; border:1.5px solid #E3E1D8; border-radius:11px;
+    font-size:15px; font-family:inherit; color:#1F2D50; background:#fff; box-shadow:none; outline:none; transition:all .25s; -webkit-appearance:none; appearance:none; }
+  #login .al-group input:focus { border-color:#C79A47; box-shadow:0 0 0 3px rgba(199,154,71,.15); background:#fff; }
+  #login .al-group label { position:absolute; top:50%; left:45px; transform:translateY(-50%); color:#7A8399; font-size:15px; margin:0; pointer-events:none; transition:all .25s; background:#fff; font-weight:400; letter-spacing:0; }
+  #login .al-group input:focus + label, #login .al-group input:not(:placeholder-shown) + label { top:-9px; left:14px; font-size:11.5px; color:#A87E33; padding:0 7px; font-weight:600; }
+  #login .al-icon { position:absolute; top:50%; left:15px; transform:translateY(-50%); font-size:16px; color:#B7BCC9; }
+  #login .al-toggle { position:absolute; top:50%; right:14px; transform:translateY(-50%); cursor:pointer; font-size:16px; user-select:none; }
+  #login .al-btn { width:100%; min-height:0; height:auto; margin:6px 0 0; padding:15px; background:linear-gradient(135deg,#1F2D50 0%,#2C3D6B 100%); color:#fff; border:0; border-radius:11px;
+    font-size:15.5px; font-weight:600; font-family:inherit; cursor:pointer; position:relative; overflow:hidden; transition:all .25s; box-shadow:none; }
+  #login .al-btn:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(31,45,80,.28); }
+  #login .al-btn:disabled { opacity:.7; cursor:not-allowed; transform:none; box-shadow:none; }
+  #login .al-btext { display:block; }
+  #login .al-loading { display:none; align-items:center; justify-content:center; gap:10px; background:none; color:#fff; position:static; padding:0; }
+  #login .al-spin { width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top:2px solid #fff; border-radius:50%; animation:alSpin .9s linear infinite; display:inline-block; }
+  @keyframes alSpin { to { transform:rotate(360deg); } }
+  #login .al-error { display:none; background:#FBE7E2; color:#B4432E; padding:12px 16px; border-radius:10px; font-size:13.5px; text-align:center; margin-top:18px; border:1px solid rgba(180,67,46,.25); }
+  #login .al-error.show { display:block; animation:alShake .5s ease-in-out; }
+  @keyframes alShake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+  #login .al-switch { text-align:center; margin-top:16px; font-size:13.5px; }
+  #login .al-switch a, #login .al-resend a { color:#A87E33; font-weight:600; cursor:pointer; }
+  #login .al-switch a:hover { text-decoration:underline; }
+  #login .al-otpinfo { text-align:center; color:#7A8399; font-size:13px; margin-bottom:24px; line-height:1.6; }
+  #login .al-otpinfo b { color:#1F2D50; word-break:break-all; }
+  #login .al-otps { display:flex; justify-content:space-between; gap:8px; margin-bottom:24px; }
+  #login .al-otps input { width:100%; min-width:0; height:auto; min-height:0; margin:0; padding:0; box-sizing:border-box; aspect-ratio:1; text-align:center; font-size:20px; font-weight:700; color:#1F2D50;
+    border:1.5px solid #E3E1D8; border-radius:10px; outline:none; transition:all .25s; font-family:inherit; background:#fff; box-shadow:none; }
+  #login .al-otps input:focus { border-color:#C79A47; box-shadow:0 0 0 3px rgba(199,154,71,.15); }
+  #login .al-resend { text-align:center; margin-top:18px; font-size:13.5px; color:#7A8399; }
+  #login .al-resend a.disabled { color:#C9CDD6; pointer-events:none; }
+  #login .al-back { text-align:center; margin-top:10px; }
+  #login .al-back a { color:#A6ACBB; font-size:12.5px; cursor:pointer; }
+  #login .al-back a:hover { color:#A87E33; }
+  @media (max-width:480px) { #login .al-card { padding:30px 22px; } #login .al-header h2 { font-size:24px; } #login .al-wrap { padding:12px; } }
 </style>
 <style id="pageStyle"></style>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -1734,47 +1790,62 @@ button:active{transform:scale(.97)}
   </div>
 </div>
 
-<div id="login" class="wrap" style="display:none">
-  <div class="lg-orb o1"></div><div class="lg-orb o2"></div><div class="lg-orb o3"></div>
-  <div class="lg-hero">
-    <svg class="flag lg-flag" viewBox="0 0 100 60" role="img" aria-label="National flag of Bangladesh"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
-    <div class="lg-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-    <div class="lg-app" id="lgApp">Student Attendance</div>
-    <div class="lg-sub">Sign in to your account</div>
+<div id="login" class="al" style="display:none">
+  <div class="al-bg"><span></span><span></span><span></span></div>
+  <div class="al-wrap">
+   <div class="al-card">
+    <!-- ধাপ ১: লগইন -->
+    <div id="alStepLogin">
+      <div class="al-header">
+        <span class="al-badge">শিক্ষার্থী হাজিরা সিস্টেম</span>
+        <h2>স্বাগতম</h2>
+        <p>আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
+      </div>
+      <form onsubmit="doLogin(); return false;" autocomplete="on" novalidate>
+        <div class="al-group" id="lgUserBox">
+          <input type="text" id="lgUser" inputmode="email" placeholder=" " autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <label for="lgUser">ইমেইল ঠিকানা</label>
+          <span class="al-icon">✉️</span>
+        </div>
+        <div class="al-group">
+          <input type="password" id="lgPass" placeholder=" " autocomplete="current-password">
+          <label for="lgPass" id="lgPassLbl">পাসওয়ার্ড</label>
+          <span class="al-icon">🔒</span>
+          <span class="al-toggle" id="pwBtn" onclick="togglePw()">👁️</span>
+        </div>
+        <button type="submit" class="al-btn" id="lgBtn">
+          <span class="al-btext">প্রবেশ করুন</span>
+          <div class="al-loading"><span class="al-spin"></span><span>প্রবেশ করা হচ্ছে...</span></div>
+        </button>
+      </form>
+      <div class="al-error" id="lgNote"></div>
+      <div class="al-switch"><a id="lgModeLink" onclick="setLoginMode(LG_OFFICE ? 'teacher' : 'office')">অফিস লগইন</a></div>
+    </div>
+
+    <!-- ধাপ ২: OTP যাচাই -->
+    <div id="alStepOtp" style="display:none">
+      <div class="al-header"><h2>OTP যাচাই করুন</h2><p>আপনার ইমেইলে পাঠানো কোডটি লিখুন</p></div>
+      <div class="al-otpinfo"><b id="alOtpEmail"></b> ঠিকানায় ৬-ডিজিটের একটি কোড পাঠানো হয়েছে।</div>
+      <form onsubmit="doVerify(); return false;">
+        <div class="al-otps">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit" autocomplete="one-time-code">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+        </div>
+        <button type="submit" class="al-btn" id="alOtpBtn">
+          <span class="al-btext">যাচাই করুন</span>
+          <div class="al-loading"><span class="al-spin"></span><span>যাচাই করা হচ্ছে...</span></div>
+        </button>
+      </form>
+      <div class="al-error" id="alOtpErr"></div>
+      <div class="al-resend">নতুন কোড পাননি? <a id="alResend" onclick="otpResend()">আবার পাঠান</a><span id="alResendT"></span></div>
+      <div class="al-back"><a onclick="otpBack()">← ইমেইল পরিবর্তন করুন</a></div>
+    </div>
+   </div>
   </div>
-  <form class="card lg-card" onsubmit="doLogin(); return false;" autocomplete="on">
-    <div class="cls-title">Log in</div>
-    <div class="lg-mode" role="tablist">
-      <button type="button" id="lgmT" class="on" onclick="setLoginMode('teacher')">👤 Teacher</button>
-      <button type="button" id="lgmO" onclick="setLoginMode('office')">🏢 Office</button>
-    </div>
-    <div class="lg-gap" id="lgUserBox">
-      <label for="lgUser">Email</label>
-      <div class="fld">
-        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 8l9 6 9-6"/></svg>
-        <input type="text" id="lgUser" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or username">
-      </div>
-    </div>
-    <div class="lg-gap" id="lgPassBox">
-      <label for="lgPass">Password</label>
-      <div class="pw">
-        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
-        <input type="password" id="lgPass" autocomplete="current-password" placeholder="Password">
-        <button type="button" class="pwbtn" id="pwBtn" onclick="togglePw()" aria-label="Show or hide password">Show</button>
-      </div>
-    </div>
-    <div class="lg-gap" id="lgOtpBox" style="display:none">
-      <label for="lgOtp">Verification code</label>
-      <div class="fld">
-        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
-        <input type="text" id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code">
-      </div>
-      <div class="note" style="margin-top:8px;display:block">Code sent to your email (valid 5 min). <a href="#" onclick="otpResend();return false;">Resend</a> · <a href="#" onclick="otpBack();return false;">Back</a></div>
-    </div>
-    <button class="act" id="lgBtn" type="submit">Login</button>
-    <div class="note" id="lgNote"></div>
-  </form>
-  <div class="lg-foot">Secure login · Authorized teachers only</div>
 </div>
 
 <div id="app" style="display:none">
@@ -2718,7 +2789,7 @@ button:active{transform:scale(.97)}
     var i = $('lgPass'), b = $('pwBtn');
     var show = i.type === 'password';
     i.type = show ? 'text' : 'password';
-    b.textContent = show ? 'লুকান' : 'Show';
+    b.textContent = show ? '🙈' : '👁️';
   }
 
   function showLogin() {
@@ -2737,28 +2808,63 @@ button:active{transform:scale(.97)}
     setTimeout(function () { $('lgUser').focus(); }, 50);
   }
 
-  var LG_OFFICE = false;
+  var LG_OFFICE = false, LG_STEP = 'pw', LG_EMAIL = '', LG_PASS = '', LG_TIMER = null;
+
+  // বিশ্বস্ত ডিভাইস টোকেন (ইমেইল অনুযায়ী, ৩০ দিন): OTP যাচাইয়ের পর সার্ভার দেয়
+  function getDev(em) { try { return (JSON.parse(localStorage.getItem('trusted_devices') || '{}'))[String(em).trim().toLowerCase()] || ''; } catch (e) { return ''; } }
+  function setDev(em, tok) { try { var m = JSON.parse(localStorage.getItem('trusted_devices') || '{}'); m[String(em).trim().toLowerCase()] = tok; localStorage.setItem('trusted_devices', JSON.stringify(m)); } catch (e) {} }
+
+  function alErr(id, msg) { var e = $(id); if (!e) return; e.textContent = msg || ''; e.classList.toggle('show', !!msg); }
+  function alBusy(btn, busy) {
+    btn.disabled = busy;
+    btn.querySelector('.al-btext').style.display = busy ? 'none' : 'block';
+    btn.querySelector('.al-loading').style.display = busy ? 'flex' : 'none';
+  }
+  function alDigits() { return Array.prototype.slice.call(document.querySelectorAll('#login .al-digit')); }
+
   function setLoginMode(m) {
     LG_OFFICE = (m === 'office');
-    $('lgmT').classList.toggle('on', !LG_OFFICE);
-    $('lgmO').classList.toggle('on', LG_OFFICE);
     $('lgUserBox').style.display = LG_OFFICE ? 'none' : '';
-    $('lgPass').placeholder = LG_OFFICE ? 'Office password' : 'Password';
-    setNote('lgNote', '');
+    $('lgPassLbl').textContent = LG_OFFICE ? 'অফিসের পাসওয়ার্ড' : 'পাসওয়ার্ড';
+    $('lgModeLink').textContent = LG_OFFICE ? '← শিক্ষক লগইন' : 'অফিস লগইন';
+    alErr('lgNote', '');
     try { (LG_OFFICE ? $('lgPass') : $('lgUser')).focus(); } catch (e) {}
   }
 
-  // ===== OTP-সহ লগইন: ধাপ ১ ইমেইল+পাসওয়ার্ড → ধাপ ২ ইমেইলে আসা ৬ ডিজিট কোড =====
-  var LG_STEP = 'pw', LG_EMAIL = '', LG_PASS = '', LG_SENT_AT = 0;
-
+  // ধাপ বদল: false = ইমেইল/পাসওয়ার্ড, true = OTP
   function lgShowOtp(on) {
-    $('lgOtpBox').style.display = on ? '' : 'none';
-    $('lgPassBox').style.display = on ? 'none' : '';
-    $('lgUserBox').style.display = (on || LG_OFFICE) ? 'none' : '';
-    $('lgBtn').textContent = on ? 'Verify' : 'Login';
-    if (on) { $('lgOtp').value = ''; setTimeout(function () { try { $('lgOtp').focus(); } catch (e) {} }, 50); }
+    $('alStepLogin').style.display = on ? 'none' : 'block';
+    $('alStepOtp').style.display = on ? 'block' : 'none';
+    alDigits().forEach(function (i) { i.value = ''; });
+    alErr('alOtpErr', '');
+    if (on) { alStartTimer(); setTimeout(function () { try { alDigits()[0].focus(); } catch (e) {} }, 60); }
+    else { clearInterval(LG_TIMER); }
   }
-  function otpBack() { LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false); setNote('lgNote', ''); }
+  function otpBack() { LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false); }
+
+  function alStartTimer() {
+    var s = 30, link = $('alResend'), t = $('alResendT');
+    link.classList.add('disabled'); t.textContent = ' (30s)'; clearInterval(LG_TIMER);
+    LG_TIMER = setInterval(function () {
+      s--; t.textContent = ' (' + s + 's)';
+      if (s <= 0) { clearInterval(LG_TIMER); link.classList.remove('disabled'); t.textContent = ''; }
+    }, 1000);
+  }
+
+  // OTP বক্সের অটো-মুভ ও পেস্ট
+  (function () {
+    var all = alDigits();
+    all.forEach(function (input, idx) {
+      input.addEventListener('input', function () { this.value = this.value.replace(/[^0-9]/g, ''); if (this.value && idx < all.length - 1) all[idx + 1].focus(); });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Backspace' && !this.value && idx > 0) all[idx - 1].focus(); });
+      input.addEventListener('paste', function (e) {
+        e.preventDefault();
+        var p = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/[^0-9]/g, '');
+        p.split('').forEach(function (c, i) { if (all[i]) all[i].value = c; });
+        if (all[p.length]) all[p.length].focus();
+      });
+    });
+  })();
 
   function lgDone(token) {
     TOKEN = token;
@@ -2766,61 +2872,44 @@ button:active{transform:scale(.97)}
     LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false);
     $('lgPass').value = '';
     $('lgPass').type = 'password';
-    $('pwBtn').textContent = 'Show';
-    $('lgBtn').disabled = false;
+    alBusy($('lgBtn'), false); alBusy($('alOtpBtn'), false);
     loading(true, 'Loading...');
     google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
   }
 
   function doLogin() {
-    if (LG_STEP === 'otp') { doVerify(); return; }
     var u = LG_OFFICE ? 'office' : $('lgUser').value.trim(), p = $('lgPass').value;
-    if (!u || !p) { setNote('lgNote', LG_OFFICE ? 'Enter the office password.' : 'Enter email and password.', true); return; }
-    $('lgBtn').disabled = true;
-    setNote('lgNote', '');
-    loading(true, 'Verifying...');
+    if (!u || !p) { alErr('lgNote', LG_OFFICE ? 'অফিসের পাসওয়ার্ড দিন।' : 'ইমেইল ও পাসওয়ার্ড দিন।'); return; }
+    alErr('lgNote', ''); alBusy($('lgBtn'), true);
     google.script.run
       .withSuccessHandler(function (res) {
-        $('lgBtn').disabled = false;
+        alBusy($('lgBtn'), false);
         if (res && res.token) { lgDone(res.token); return; }   // অফিস/পরীক্ষা মোডে OTP লাগে না
-        loading(false);
-        LG_STEP = 'otp'; LG_EMAIL = u.toLowerCase(); LG_PASS = p; LG_SENT_AT = Date.now();
+        LG_STEP = 'otp'; LG_EMAIL = u.toLowerCase(); LG_PASS = p;
+        $('alOtpEmail').textContent = LG_EMAIL;
         lgShowOtp(true);
-        setNote('lgNote', 'A 6-digit code was sent to your email.');
       })
-      .withFailureHandler(function (e) {
-        loading(false);
-        $('lgBtn').disabled = false;
-        setNote('lgNote', friendlyErr(e), true);
-      })
-      .loginStart(u, p);
+      .withFailureHandler(function (e) { alBusy($('lgBtn'), false); alErr('lgNote', friendlyErr(e)); })
+      .loginStart(u, p, getDev(u));
   }
 
   function doVerify() {
-    var code = $('lgOtp').value.replace(/\s/g, '');
-    if (!/^\d{6}$/.test(code)) { setNote('lgNote', 'Enter the 6-digit code.', true); return; }
-    $('lgBtn').disabled = true;
-    setNote('lgNote', '');
-    loading(true, 'Verifying...');
+    var code = alDigits().map(function (i) { return i.value; }).join('');
+    if (code.length !== 6) { alErr('alOtpErr', '৬ ডিজিটের কোডটি সম্পূর্ণ লিখুন।'); return; }
+    alErr('alOtpErr', ''); alBusy($('alOtpBtn'), true);
     google.script.run
-      .withSuccessHandler(function (res) { lgDone(res.token); })
-      .withFailureHandler(function (e) {
-        loading(false);
-        $('lgBtn').disabled = false;
-        setNote('lgNote', friendlyErr(e), true);
-      })
+      .withSuccessHandler(function (res) { if (res.deviceToken) setDev(LG_EMAIL, res.deviceToken); lgDone(res.token); })
+      .withFailureHandler(function (e) { alBusy($('alOtpBtn'), false); alErr('alOtpErr', '❌ ' + friendlyErr(e)); })
       .loginVerify(LG_EMAIL, code);
   }
 
   function otpResend() {
-    if (LG_STEP !== 'otp' || !LG_PASS) { otpBack(); return; }
-    if (Date.now() - LG_SENT_AT < 30000) { setNote('lgNote', 'Please wait 30 seconds before resending.', true); return; }
-    LG_SENT_AT = Date.now();
-    loading(true, 'Sending...');
+    if ($('alResend').classList.contains('disabled')) return;
+    if (!LG_PASS) { otpBack(); return; }
     google.script.run
-      .withSuccessHandler(function () { loading(false); setNote('lgNote', 'Code sent again. Check your inbox/spam.'); })
-      .withFailureHandler(function (e) { loading(false); setNote('lgNote', friendlyErr(e), true); })
-      .loginStart(LG_EMAIL, LG_PASS);
+      .withSuccessHandler(function () { alStartTimer(); alErr('alOtpErr', ''); })
+      .withFailureHandler(function (e) { alErr('alOtpErr', friendlyErr(e)); })
+      .loginStart(LG_EMAIL, LG_PASS, getDev(LG_EMAIL));
   }
 
   function doLogout() {
