@@ -1286,6 +1286,9 @@
   .dlbl .tg.ok { background:var(--p-l); color:var(--p-t); }
   .clschips { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:none; scroll-snap-type:x proximity; }
   .clschips::-webkit-scrollbar { display:none; }
+  #grpChips { margin-top:2px; }
+  #grpChips .cc { min-height:38px; padding:6px 13px; font-size:13px; }
+  .ds-sec { grid-column:1 / -1; margin:10px 2px 0; font-weight:700; font-size:14px; color:var(--mute); }
   .cc { flex:none; scroll-snap-align:start; display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 14px; border-radius:99px; cursor:pointer;
         font:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface); border:1.5px solid var(--line); }
   .cc .st { width:9px; height:9px; border-radius:50%; background:var(--line); flex:none; }
@@ -2774,13 +2777,15 @@ button:active{transform:scale(.97)}
     ['cls', 'mcls', 'proCls'].forEach(function (id) {
       var sel = $(id);
       sel.innerHTML = '<option value="">-- Select --</option>';
-      var grp = null, lastBase = null;
+      var grp = null, lastKey = null;
       meta.forEach(function (m) {
-        if (m.base !== lastBase) {
+        // ৯–১০ম: সেকশন (Boys/Girls) ধরে গ্রুপ; ৬–৮: শ্রেণি ধরে
+        var key = m.group ? m.base + '|' + m.section : m.base;
+        if (key !== lastKey) {
           grp = document.createElement('optgroup');
-          grp.label = 'Class ' + bn(m.base);
+          grp.label = m.group ? 'Class ' + bn(m.base) + ' — ' + secText(m.section) : 'Class ' + bn(m.base);
           sel.appendChild(grp);
-          lastBase = m.base;
+          lastKey = key;
         }
         var o = document.createElement('option');
         o.value = m.label;
@@ -5302,20 +5307,54 @@ button:active{transform:scale(.97)}
   function syncChips() {
     var box = $('clsChips'); if (!box || !cfg) return;
     var tm = takenMap(), now = $('cls').value, opts = [].slice.call($('cls').options).filter(function (o) { return o.value; });
-    box.innerHTML = '';
+    var gb = $('grpChips');
+    if (!gb) { gb = el('div', 'clschips'); gb.id = 'grpChips'; box.parentNode.insertBefore(gb, box.nextSibling); }
+    box.innerHTML = ''; gb.innerHTML = '';
+    var curP = clsParts(now), secs = [], seenS = {};
     opts.forEach(function (o) {
-      var b = el('button', 'cc' + (o.value === now ? ' on' : '')); b.type = 'button';
-      if (tm && tm[o.value] !== undefined) b.appendChild(el('i', 'st ' + (tm[o.value] ? 'ok' : 'wait')));
-      b.appendChild(document.createTextNode('Class ' + clsPlain(o.value)));
+      var p = clsParts(o.value), k = p.group ? p.base + '|' + p.section : o.value;
+      if (!seenS[k]) { seenS[k] = { key: k, members: [] }; secs.push(seenS[k]); }
+      seenS[k].members.push(o.value);
+    });
+    var curKey = curP.group ? curP.base + '|' + curP.section : now;
+    function dot(list) {
+      if (!tm) return null;
+      var any = list.some(function (m) { return tm[m] !== undefined; });
+      if (!any) return null;
+      return el('i', 'st ' + (list.every(function (m) { return tm[m] === true; }) ? 'ok' : 'wait'));
+    }
+    // ১ম সারি: শ্রেণি/সেকশন (Class 9 — Boys, Class 9 — Girls, Class 6 A ...)
+    secs.forEach(function (sg) {
+      var isOn = sg.key === curKey, p0 = clsParts(sg.members[0]);
+      var b = el('button', 'cc' + (isOn ? ' on' : '')); b.type = 'button';
+      var d0 = dot(sg.members); if (d0) b.appendChild(d0);
+      b.appendChild(document.createTextNode(p0.group ? 'Class ' + bn(p0.base) + ' — ' + secText(p0.section) : 'Class ' + clsPlain(sg.members[0])));
       b.onclick = function () {
-        if (o.value === $('cls').value) return;
+        if (isOn) return;
         if (!confirmLeave()) return;
-        $('cls').value = o.value; loadClass();
+        var pick = sg.members[0];   // একই গ্রুপ নতুন সেকশনে থাকলে সেটিই খোলা হবে
+        if (curP.group) sg.members.forEach(function (m) { if (clsParts(m).group === curP.group) pick = m; });
+        $('cls').value = pick; loadClass();
       };
       box.appendChild(b);
-      if (o.value === now && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
+      if (isOn && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
     });
-    box.style.display = opts.length > 1 ? 'flex' : 'none';
+    // ২য় সারি: সেকশনে ঢুকলে তার গ্রুপগুলো আলাদা
+    var cur = seenS[curKey], gmem = cur && curP.group ? cur.members : [];
+    gmem.forEach(function (m) {
+      var b = el('button', 'cc' + (m === now ? ' on' : '')); b.type = 'button';
+      if (tm && tm[m] !== undefined) b.appendChild(el('i', 'st ' + (tm[m] ? 'ok' : 'wait')));
+      b.appendChild(document.createTextNode(grpText(clsParts(m).group)));
+      b.onclick = function () {
+        if (m === $('cls').value) return;
+        if (!confirmLeave()) return;
+        $('cls').value = m; loadClass();
+      };
+      gb.appendChild(b);
+      if (m === now && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
+    });
+    box.style.display = (secs.length > 1 || gmem.length) ? 'flex' : 'none';
+    gb.style.display = gmem.length > 1 ? 'flex' : 'none';
     var d = $('date').value, lb = $('dateLbl'); lb.innerHTML = '';
     if (d) {
       lb.appendChild(document.createTextNode(fmtLong(d)));
@@ -5639,6 +5678,20 @@ button:active{transform:scale(.97)}
     requestAnimationFrame(step);
   }
   // হাজিরা বাকি class আগে, তারপর বাকিগুলো (আগের ক্রম বজায় রেখে)
+  // কার্ড ব্লক: ৯–১০ম-এ একই সেকশনের গ্রুপগুলো একসাথে (শিরোনামসহ); বাকিরা একা। বাকি-থাকা ব্লক আগে
+  function dsBlocks(list) {
+    var blocks = [], seen = {};
+    list.forEach(function (c, i) {
+      var p = clsParts(c.cls), k = p.group ? p.base + '|' + p.section : c.cls;
+      if (!seen[k]) { seen[k] = { head: p.group ? 'Class ' + bn(p.base) + ' — ' + secText(p.section) : '', items: [], i: i }; blocks.push(seen[k]); }
+      seen[k].items.push(c);
+    });
+    blocks.sort(function (a, b) {
+      var pa = a.items.some(function (c) { return !c.taken; }) ? 0 : 1, pb = b.items.some(function (c) { return !c.taken; }) ? 0 : 1;
+      return (pa - pb) || (a.i - b.i);
+    });
+    return blocks;
+  }
   function dsSorted(list) {
     return list.map(function (c, i) { return { c: c, i: i }; })
       .sort(function (a, b) { return ((a.c.taken ? 1 : 0) - (b.c.taken ? 1 : 0)) || (a.i - b.i); })
@@ -5734,7 +5787,13 @@ button:active{transform:scale(.97)}
 
     // class কার্ড
     var g = $('dsGrid'); g.innerHTML = '';
-    dsSorted(d.classes).forEach(function (c) {
+    var dsFlat = [];
+    dsBlocks(d.classes).forEach(function (bl) {
+      if (bl.head) dsFlat.push({ head: bl.head });
+      bl.items.forEach(function (c) { dsFlat.push(c); });
+    });
+    dsFlat.forEach(function (c) {
+      if (c.head) { g.appendChild(el('div', 'ds-sec', c.head)); return; }
       var card = el('button', 'ds-card bc-card' + (c.taken ? '' : ' wait')); card.type = 'button';
       card.onclick = function () { dashPick(c.cls); };
       var l = el('div', 'ds-l');
