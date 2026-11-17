@@ -1230,6 +1230,9 @@
   #t-att .hc b { font-size:19px; min-width:0; line-height:1.15; }
 
   #t-att .abs-line { border-radius:99px; padding:8px 16px; font-size:13px; margin:0 0 10px; }
+  .gtag { display:inline-block; margin-left:8px; padding:1px 8px; border-radius:10px; font-size:11.5px; font-weight:600; vertical-align:middle; }
+  .gtag.gb { background:#e0f0ff; color:#0b5394; }
+  .gtag.gg { background:#ffe3f0; color:#a1235f; }
   #fbar { position:sticky; top:84px; z-index:4; padding:6px 0; }
   #fbar .chipbtn { min-height:36px; padding:6px 13px; font-size:13px; }
 
@@ -2697,6 +2700,7 @@ button:active{transform:scale(.97)}
   var dirty = false;
   var attStale = false;
   var attFilter = '';
+  var attGender = '';   // '', 'Boys', 'Girls'
   var attTaken = false;
   var listOpen = false, listMode = 'edit';   // শিক্ষার্থী তালিকা ডিফল্টে লুকানো; mode: edit | view
   var curTab = 'home';
@@ -3212,7 +3216,7 @@ button:active{transform:scale(.97)}
   function loadClass() {
     var cls = $('cls').value, date = $('date').value;
     cur.date = date; cur.cls = cls;
-    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attTaken = false; listOpen = false; listMode = 'edit';
+    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attGender = ''; attTaken = false; listOpen = false; listMode = 'edit';
     $('q').value = '';
     setNote('note', '');
     renderList();
@@ -3282,7 +3286,9 @@ button:active{transform:scale(.97)}
 
       var who = el('div', 'who');
       who.appendChild(el('div', 'roll', s.roll));
-      who.appendChild(el('div', 'name', s.name));
+      var nm = el('div', 'name', s.name);
+      if (s.gender) { var gt = el('span', 'gtag g' + (s.gender === 'Girls' ? 'g' : 'b'), s.gender === 'Girls' ? 'বালিকা' : 'বালক'); nm.appendChild(gt); }
+      who.appendChild(nm);
       row.appendChild(who);
 
       var btns = el('div', 'btns');
@@ -3310,7 +3316,7 @@ button:active{transform:scale(.97)}
       });
       row.appendChild(btns);
       box.appendChild(row);
-      rowEls.push({ el: row, roll: s.roll, key: (s.roll + ' ' + s.name).toLowerCase() });
+      rowEls.push({ el: row, roll: s.roll, gender: s.gender || '', key: (s.roll + ' ' + s.name).toLowerCase() });
     });
     updateBar();
   }
@@ -3443,7 +3449,8 @@ button:active{transform:scale(.97)}
     rowEls.forEach(function (r) {
       var okQ = !q || r.key.indexOf(q) !== -1;
       var okF = !attFilter || state[r.roll] === attFilter;
-      r.el.style.display = (okQ && okF) ? '' : 'none';
+      var okG = !attGender || r.gender === attGender;
+      r.el.style.display = (okQ && okF && okG) ? '' : 'none';
     });
   }
 
@@ -3528,6 +3535,17 @@ button:active{transform:scale(.97)}
     mk('সব (' + bn(students.length) + ')', '');
     STATUS.forEach(function (st) { if (c[st]) mk(st + ' ' + cfg.labels[st] + ' (' + bn(c[st]) + ')', st); });
     if (attFilter && !c[attFilter]) { attFilter = ''; applySearch(); }
+    // বালক/বালিকা ফিল্টার (শুধু যখন তালিকায় লিঙ্গের তথ্য আছে)
+    var nb = students.filter(function (s) { return s.gender === 'Boys'; }).length,
+        ng = students.filter(function (s) { return s.gender === 'Girls'; }).length;
+    if (nb && ng) {
+      [['সব বালক-বালিকা', ''], ['বালক (' + bn(nb) + ')', 'Boys'], ['বালিকা (' + bn(ng) + ')', 'Girls']].forEach(function (g) {
+        var b = el('button', 'chipbtn' + (attGender === g[1] ? ' on' : ''), g[0]);
+        b.type = 'button';
+        b.onclick = function () { attGender = g[1]; applySearch(); updateBar(); };
+        fb.appendChild(b);
+      });
+    } else if (attGender) { attGender = ''; applySearch(); }
     if (!listOpen) fb.style.display = 'none';
   }
 
@@ -4465,7 +4483,7 @@ button:active{transform:scale(.97)}
   }
 
   function proLabel(base, sec, grp) {
-    var p = [base, sec, grp];
+    var p = (String(base) === '9' || String(base) === '10') ? [base, sec] : [base, sec, grp];
     while (p.length > 1 && !p[p.length - 1]) p.pop();
     return p.join(' | ');
   }
