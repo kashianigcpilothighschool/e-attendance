@@ -1756,6 +1756,43 @@ button:active{transform:scale(.97)}
 .bc-chip.pres{background:var(--p-l);color:var(--p-t)}.bc-chip.abs{background:var(--a-l);color:var(--a-t)}
 .bc-chip.oth{background:var(--l-l);color:var(--l-t)}.bc-chip.pend{background:var(--l-l);color:var(--l-t)}
 </style>
+<style id="stuUI">
+#stuModal .modal-in.su{width:min(660px,100%);padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
+.su-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 12px;background:linear-gradient(135deg,#00382a,#0a8a68);color:#fff}
+.su-head h4{margin:0;font-size:18px}.su-head small{opacity:.85;font-size:12.5px}
+.su-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
+#stuPick,#stuFormWrap{padding:14px 16px 16px;overflow-y:auto;flex:1;position:relative}
+.su-tools{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}
+@media(max-width:480px){.su-tools{grid-template-columns:1fr}}
+.su-stats{display:flex;align-items:center;gap:8px;margin:10px 2px 6px;font-size:13px;color:var(--mute);font-weight:600}
+.su-all{display:none;align-items:center;gap:8px;margin:0 2px 8px;font-size:13.5px;font-weight:600;text-transform:none;cursor:pointer;color:var(--ink)}
+.su-card{display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:6px;border-radius:16px;background:var(--surface);border:1px solid var(--line);transition:border-color .15s,box-shadow .15s,background .15s}
+.su-card:hover{border-color:color-mix(in srgb,var(--pine) 45%,var(--line));box-shadow:var(--shadow-s)}
+.su-card.sel{background:var(--a-l);border-color:color-mix(in srgb,var(--a) 50%,var(--line))}
+.su-av{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:17px;color:var(--p-t);background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--pine) 28%,var(--p-l)))}
+.su-main{flex:1;min-width:0;cursor:pointer}
+.su-main b{display:block;font-size:15.5px;line-height:1.3;word-break:break-word}
+.su-main small{color:var(--mute);font-size:12.5px}
+.su-chev{flex:none;color:var(--mute);font-size:20px;cursor:pointer}
+.su-bulk{position:sticky;bottom:0;display:none;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.su-bulk.on{display:flex}.su-bulk span{flex:1;font-weight:700;font-size:14px}
+.su-bulk .act{min-height:38px;padding:4px 14px;font-size:13px;width:auto}
+.su-danger{margin-top:14px;border:1px dashed color-mix(in srgb,var(--a) 45%,var(--line));border-radius:16px;padding:10px 12px}
+.su-danger summary{cursor:pointer;font-weight:700;color:var(--a-t);font-size:14px}
+.su-danger p{font-size:13px;color:var(--mute);margin:8px 0}
+.su-who{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--pine-l);margin-bottom:12px}
+.su-who .su-av{width:46px;height:46px}.su-who b{display:block}.su-who small{color:var(--mute)}
+.su-sec{margin:14px 0;padding:12px;border-radius:18px;border:1px solid var(--line);background:var(--surface)}
+.su-sec>h5{margin:0 0 10px;font-size:14px;color:var(--pine);display:flex;align-items:center;gap:8px}
+.su-sec>h5::after{content:"";flex:1;height:1px;background:var(--line)}
+.su-sec .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.su-sec .grid2{grid-template-columns:1fr}}
+.su-prev{display:none;margin-top:10px;padding:9px 12px;border-radius:14px;background:var(--l-l);color:var(--l-t);font-weight:600;font-size:13.5px}
+.su-prev.on{display:block}
+.su-foot{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;padding:10px 0 2px;background:var(--surface)}
+.su-foot span{flex:1;font-size:13px;color:var(--mute);font-weight:600}
+.su-foot .act{width:auto;min-height:42px;padding:6px 16px}
+</style>
 </head>
 <body>
 <header>
@@ -1861,7 +1898,7 @@ button:active{transform:scale(.97)}
     <button class="tab" data-t="alr" type="button" onclick="showTab('alr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><span>Alerts</span></button>
     <button class="tab" data-t="reg" id="regTab" type="button" style="display:none" onclick="showTab('reg')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>Registration</span><i class="bdg" id="regBdg"></i></button>
     <button class="tab" data-t="pro" id="proTab" type="button" style="display:none" onclick="showTab('pro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>Promotion</span></button>
-    <button class="tab" data-t="ff" id="ffTab" type="button" style="display:none" title="Form Fill-up" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Fill-up</span></button>
+    <button class="tab" data-t="ff" id="ffTab" type="button" style="display:none" title="Form Fill-Up" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Form Fill-Up</span></button>
   </div></nav>
 
   <section class="wrap" id="dash">
@@ -1880,7 +1917,7 @@ button:active{transform:scale(.97)}
         <button type="button" class="dchip" onclick="showTab('alr')">🔔 Alerts</button>
         <button type="button" class="dchip" id="regChip" style="display:none" onclick="showTab('reg')">🧾 Registration</button>
         <button type="button" class="dchip" id="proChip" style="display:none" onclick="showTab('pro')">🎓 Promotion</button>
-        <button type="button" class="dchip" id="ffChip" style="display:none" onclick="showTab('ff')">📝 Form fill-up</button>
+        <button type="button" class="dchip" id="ffChip" style="display:none" onclick="showTab('ff')">📝 Form Fill-Up</button>
         <button type="button" class="dchip" onclick="openStuEdit()">✏️ Edit info</button>
       </div>
     </div>
@@ -2206,24 +2243,39 @@ button:active{transform:scale(.97)}
 </div>
 
 <div class="modal" id="stuModal" onclick="if (event.target === this) closeStuEdit()">
-  <div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="stuTitle">
-    <h4 id="stuTitle">✏️ শিক্ষার্থীর তথ্য সংশোধন</h4>
-    <div id="stuPick">
-      <label for="stuCls">Class</label>
-      <select id="stuCls" onchange="stuLoad()"></select>
-      <input type="search" id="stuQ" placeholder="Search by name or roll" oninput="stuRender()" style="margin-top:10px">
-      <div id="stuBox" style="margin-top:10px"></div>
-      <button type="button" class="act rej" id="stuDel" style="display:none;margin-top:12px;width:100%" onclick="stuDeleteClass()">🗑 এই class-এর সব শিক্ষার্থী মুছুন</button>
+  <div class="modal-in su" role="dialog" aria-modal="true" aria-labelledby="stuTitle">
+    <div class="su-head">
+      <div><h4 id="stuTitle">✏️ শিক্ষার্থী ব্যবস্থাপনা</h4><small>তথ্য সংশোধন · ট্রান্সফার · মোছা</small></div>
+      <button type="button" class="su-x" onclick="closeStuEdit()" aria-label="Close">✕</button>
     </div>
-    <div id="stuFormWrap" style="display:none">
-      <div class="ed-ro" id="stuRo"></div>
-      <div id="stuForm"></div>
-      <div class="btn2" style="margin-top:12px">
-        <button type="button" class="act" id="stuSave" onclick="stuSave()">Save</button>
-        <button type="button" class="act alt" onclick="stuBack()">← Back</button>
+    <div id="stuPick">
+      <div class="su-tools">
+        <select id="stuCls" onchange="stuLoad()" aria-label="Class"></select>
+        <input type="search" id="stuQ" placeholder="🔍 নাম বা রোল খুঁজুন" oninput="stuRender()">
+      </div>
+      <div class="su-stats" id="stuStats"></div>
+      <label class="su-all" id="stuAllWrap"><input type="checkbox" id="stuAll" class="reg-cb" onchange="stuToggleAll(this.checked)"> সব বাছুন</label>
+      <div id="stuBox"></div>
+      <details class="su-danger" id="stuDanger" style="display:none">
+        <summary>⚠️ বিপজ্জনক কাজ</summary>
+        <p>পুরো class-এর সব শিক্ষার্থী মুছে যাবে। ব্যাকআপ থাকবে, হাজিরার পুরোনো রেকর্ড মুছবে না।</p>
+        <button type="button" class="act rej" id="stuDel" style="width:100%" onclick="stuDeleteClass()">🗑 এই class-এর সব শিক্ষার্থী মুছুন</button>
+      </details>
+      <div class="su-bulk" id="stuBulk">
+        <span id="stuSelCnt"></span>
+        <button type="button" class="act alt" onclick="stuClearSel()">বাতিল</button>
+        <button type="button" class="act rej" id="stuDelSel" onclick="stuDeleteSelected()">🗑 মুছুন</button>
       </div>
     </div>
-    <button type="button" class="act alt" style="margin-top:12px;width:100%" onclick="closeStuEdit()">Close</button>
+    <div id="stuFormWrap" style="display:none">
+      <div class="su-who" id="stuRo"></div>
+      <div id="stuForm"></div>
+      <div class="su-foot">
+        <span id="stuCnt"></span>
+        <button type="button" class="act alt" onclick="stuBack()">← পেছনে</button>
+        <button type="button" class="act" id="stuSave" onclick="stuSave()">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5651,7 +5703,7 @@ button:active{transform:scale(.97)}
     var qs = [['✅', 'Take attendance', 'att'], ['🗓️', 'Reports', 'mon'], ['🔔', 'Alerts', 'alr']];
     if ($('regChip').style.display !== 'none') qs.push(['🧾', 'Registration', 'reg']);
     if ($('proChip').style.display !== 'none') qs.push(['🎓', 'Promotion', 'pro']);
-    if ($('ffChip').style.display !== 'none') qs.push(['📝', 'Form Fill-up', 'ff']);
+    if ($('ffChip').style.display !== 'none') qs.push(['📝', 'Form Fill-Up', 'ff']);
     qs.push(['✏️', 'Edit info', 'stuedit']);
     qs.forEach(function (x) {
       var b = el('button', 'ds-q'); b.type = 'button';
@@ -5945,7 +5997,7 @@ button:active{transform:scale(.97)}
     showTab = function (t) { orig(t); dsSync(); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
   })();
 
-  var PG_TITLES = { home: 'Dashboard', att: 'Attendance', sum: 'Summary', mon: 'Reports', alr: 'Alerts', reg: 'Registration', pro: 'Promotion', ff: 'Form Fill-up' };
+  var PG_TITLES = { home: 'Dashboard', att: 'Attendance', sum: 'Summary', mon: 'Reports', alr: 'Alerts', reg: 'Registration', pro: 'Promotion', ff: 'Form Fill-Up' };
 
   // ===== বাংলা ও হিজরি তারিখ =====
   var HIJRI_ADJ = 0;   // চাঁদ দেখা অনুযায়ী মিলাতে -1 বা +1 দিন
@@ -6499,24 +6551,29 @@ button:active{transform:scale(.97)}
       .rejectRegistration(TOKEN, o.id);
   }
 
-  // ===== ✏️ শিক্ষার্থীর তথ্য সংশোধন (Dashboard) =====
-  var stuList = null, stuCur = null;
-  var STU_FIELDS = [
-    ['nameEn', 'Student Name (English)', 'en'], ['nameBn', 'Student name (Bangla)', 'text'],
-    ['dob', 'Date of birth (YYYY-MM-DD)', 'text'], ['birth', 'Birth certificate no.', 'birth'],
-    ['mobile', 'Mobile', 'mob'], ['father', 'Father’s name', 'text'], ['fatherMobile', 'Father’s mobile', 'mob'],
-    ['mother', 'Mother’s name', 'text'], ['motherMobile', 'Mother’s mobile', 'mob']
+  // ===== ✏️ শিক্ষার্থী ব্যবস্থাপনা (সংশোধন · ট্রান্সফার · মোছা) =====
+  var stuList = null, stuCur = null, stuSel = {}, stuShown = [];
+  var STU_GROUPS = [
+    ['👤 ব্যক্তিগত তথ্য', [['nameEn', 'Student Name (English)', 'en'], ['nameBn', 'Student name (Bangla)', 'text'],
+      ['dob', 'Date of birth (YYYY-MM-DD)', 'text'], ['birth', 'Birth certificate no.', 'birth'], ['mobile', 'Mobile', 'mob']]],
+    ['👪 অভিভাবকের তথ্য', [['father', 'Father’s name', 'text'], ['fatherMobile', 'Father’s mobile', 'mob'],
+      ['mother', 'Mother’s name', 'text'], ['motherMobile', 'Mother’s mobile', 'mob']]]
   ];
+  var STU_FIELDS = [].concat(STU_GROUPS[0][1], STU_GROUPS[1][1]);
 
-  (function () {   // দ্রুত বোতামের 'stuedit' চাপলে modal খুলবে
+  (function () {
     var _s = showTab;
     showTab = function (t) { if (t === 'stuedit') { openStuEdit(); return; } _s(t); };
   })();
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Escape' || !$('stuModal').classList.contains('on')) return;
+    if ($('stuFormWrap').style.display !== 'none') stuBack(); else closeStuEdit();
+  });
 
   function openStuEdit() {
     if (!cfg || !cfg.classes || !cfg.classes.length) { toast('No class found', true); return; }
     var s = $('stuCls');
-    s.innerHTML = '<option value="">-- Select --</option>';
+    s.innerHTML = '<option value="">-- Class বাছুন --</option>';
     cfg.classes.forEach(function (c) {
       var o = document.createElement('option');
       o.value = c; o.textContent = 'Class ' + clsPlain(c);
@@ -6524,7 +6581,7 @@ button:active{transform:scale(.97)}
     });
     if (cfg.classes.length === 1) s.value = cfg.classes[0];
     $('stuQ').value = '';
-    stuList = []; stuCur = null;
+    stuList = []; stuCur = null; stuSel = {};
     stuBack();
     $('stuModal').classList.add('on');
     document.body.style.overflow = 'hidden';
@@ -6539,7 +6596,7 @@ button:active{transform:scale(.97)}
 
   function stuLoad() {
     var cls = $('stuCls').value;
-    stuList = cls ? null : [];          // null = লোড হচ্ছে
+    stuList = cls ? null : []; stuSel = {};
     stuRender();
     if (!cls) return;
     google.script.run
@@ -6551,74 +6608,59 @@ button:active{transform:scale(.97)}
       .getStudentsForEdit(TOKEN, cls);
   }
 
+  function stuInit(n) { return Array.from(String(n || '?').trim())[0] || '?'; }
+
   function stuRender() {
     var box = $('stuBox'); box.innerHTML = '';
-    var db = $('stuDel');
-    if (db) db.style.display = (cfg && cfg.canDeleteClass && $('stuCls').value && stuList && stuList.length) ? 'block' : 'none';
-    if (!$('stuCls').value) { box.appendChild(el('div', 'empty', 'Select class')); return; }
-    if (stuList === null) { box.appendChild(el('div', 'empty', 'Loading...')); return; }
+    var canDel = !!(cfg && cfg.canDeleteClass), has = !!(stuList && stuList.length);
+    $('stuDanger').style.display = (canDel && has && $('stuCls').value) ? '' : 'none';
+    $('stuAllWrap').style.display = (canDel && has) ? 'flex' : 'none';
+    if (!$('stuCls').value) { stuShown = []; $('stuStats').textContent = ''; box.appendChild(el('div', 'empty', 'প্রথমে Class বাছুন')); stuBulkUpdate(); return; }
+    if (stuList === null) { stuShown = []; $('stuStats').textContent = ''; box.appendChild(el('div', 'empty', 'Loading...')); stuBulkUpdate(); return; }
     var q = $('stuQ').value.trim().toLowerCase();
     var list = stuList.filter(function (s) { return !q || (s.roll + ' ' + s.nameBn + ' ' + s.nameEn).toLowerCase().indexOf(q) !== -1; });
-    if (!list.length) { box.appendChild(el('div', 'empty', stuList.length ? 'No match' : 'No students in this class')); return; }
+    stuShown = list;
+    $('stuStats').textContent = 'মোট ' + bn(stuList.length) + ' জন' + (q ? ' · পাওয়া গেছে ' + bn(list.length) + ' জন' : '');
+    if (!list.length) { box.appendChild(el('div', 'empty', stuList.length ? 'কিছু মেলেনি' : 'এই class-এ কোনো শিক্ষার্থী নেই')); stuBulkUpdate(); return; }
     list.forEach(function (s) {
-      var b = el('button', 'row'); b.type = 'button';
-      b.style.cssText = 'width:100%;text-align:left;cursor:pointer;display:block';
-      var who = el('div', 'who'); who.style.marginBottom = '0';
-      who.appendChild(el('div', 'roll', s.roll));
-      who.appendChild(el('div', 'name', s.nameBn || s.nameEn));
-      b.appendChild(who);
-      b.onclick = function () { stuOpen(s); };
-      box.appendChild(b);
+      var card = el('div', 'su-card' + (stuSel[s.id] ? ' sel' : ''));
+      if (canDel) {
+        var cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.className = 'reg-cb'; cb.checked = !!stuSel[s.id];
+        cb.setAttribute('aria-label', 'বাছুন — ' + (s.nameBn || s.nameEn));
+        cb.onchange = function () { if (cb.checked) stuSel[s.id] = true; else delete stuSel[s.id]; card.classList.toggle('sel', cb.checked); stuBulkUpdate(); };
+        card.appendChild(cb);
+      }
+      card.appendChild(el('div', 'su-av', stuInit(s.nameBn || s.nameEn)));
+      var main = el('div', 'su-main');
+      main.appendChild(el('b', null, s.nameBn || s.nameEn));
+      main.appendChild(el('small', null, 'Roll ' + s.roll + (s.mobile ? ' · ' + s.mobile : '')));
+      main.onclick = function () { stuOpen(s); };
+      card.appendChild(main);
+      var ch = el('div', 'su-chev', '›'); ch.onclick = function () { stuOpen(s); };
+      card.appendChild(ch);
+      box.appendChild(card);
     });
+    stuBulkUpdate();
   }
 
-  function stuOpen(s) {
-    stuCur = s;
-    $('stuPick').style.display = 'none';
-    $('stuFormWrap').style.display = 'block';
-    $('stuRo').textContent = 'Class ' + clsPlain($('stuCls').value) + ' · Roll ' + s.roll + ' (রোল ও class এখানে বদলানো যায় না)';
-    var f = $('stuForm'); f.innerHTML = '';
-    STU_FIELDS.forEach(function (x) {
-      var w = el('div', 'ed-f');
-      var lb = el('label', null, x[1]); lb.setAttribute('for', 'st_' + x[0]);
-      var i = document.createElement('input');
-      i.type = 'text'; i.id = 'st_' + x[0]; i.value = s[x[0]] || ''; i.autocomplete = 'off';
-      if (x[2] === 'mob' || x[2] === 'birth') i.setAttribute('inputmode', 'numeric');
-      var er = el('div', 'ferr'); er.id = 'stE_' + x[0];
-      i.oninput = function () { er.textContent = ''; i.classList.remove('bad'); };
-      w.appendChild(lb); w.appendChild(i); w.appendChild(er);
-      f.appendChild(w);
-    });
-    // শ্রেণি/শাখা বদল (ট্রান্সফার) ও রোল সংশোধন
-    f.appendChild(el('div', 'ed-sec', 'ট্রান্সফার ও রোল'));
-    var wc = el('div', 'ed-f');
-    var lc = el('label', null, 'Class / Section'); lc.setAttribute('for', 'st_cls');
-    var sc = document.createElement('select'); sc.id = 'st_cls';
-    cfg.classes.forEach(function (c) {
-      var o = document.createElement('option'); o.value = c; o.textContent = 'Class ' + clsPlain(c);
-      sc.appendChild(o);
-    });
-    sc.value = $('stuCls').value;
-    sc.onchange = function () { $('stuMoveNote').textContent = sc.value !== $('stuCls').value ? '⚠️ ট্রান্সফার হবে। ওই শ্রেণিতে যে রোল খালি, সেটি দিন।' : ''; };
-    wc.appendChild(lc); wc.appendChild(sc); f.appendChild(wc);
-    var wr = el('div', 'ed-f');
-    var lr = el('label', null, 'Roll'); lr.setAttribute('for', 'st_roll');
-    var ir = document.createElement('input');
-    ir.type = 'text'; ir.id = 'st_roll'; ir.value = s.roll; ir.autocomplete = 'off'; ir.setAttribute('inputmode', 'numeric');
-    wr.appendChild(lr); wr.appendChild(ir); f.appendChild(wr);
-    var mn = el('div', 'ferr warn2'); mn.id = 'stuMoveNote'; f.appendChild(mn);
-    f.appendChild(el('div', 'detail', 'রোল/শ্রেণি বদলালে পুরোনো হাজিরা ও ফরম ফিলাপের তথ্যও নতুন রোলে সরে যায়।'));
+  function stuBulkUpdate() {
+    var n = Object.keys(stuSel).length;
+    $('stuBulk').classList.toggle('on', n > 0);
+    $('stuSelCnt').textContent = bn(n) + ' জন বাছাই করা';
+    var a = $('stuAll'), vis = stuShown.length, on = stuShown.filter(function (s) { return stuSel[s.id]; }).length;
+    a.checked = vis > 0 && on === vis; a.indeterminate = on > 0 && on < vis;
   }
-
-  function stuBack() {
-    $('stuPick').style.display = 'block';
-    $('stuFormWrap').style.display = 'none';
-    stuCur = null;
+  function stuToggleAll(on) {
+    stuShown.forEach(function (s) { if (on) stuSel[s.id] = true; else delete stuSel[s.id]; });
+    stuRender();
   }
+  function stuClearSel() { stuSel = {}; stuRender(); }
 
+  // ---------- সংশোধন ফর্ম ----------
   function stuCheck(k, kind, v) {
     if (k === 'nameEn') {
-      if (!v) return 'Enter English name';
+      if (!v) return 'ইংরেজি নাম দিন';
       if (!/^[A-Za-z .'-]+$/.test(v)) return 'ইংরেজি অক্ষর, স্পেস, . ও - ব্যবহার করুন';
     }
     if (!v) return '';
@@ -6627,58 +6669,156 @@ button:active{transform:scale(.97)}
     if (k === 'dob' && !/^\d{4}-\d{2}-\d{2}$/.test(edBn2en(v))) return 'YYYY-MM-DD ফরম্যাটে দিন';
     return '';
   }
+  function stuVal(x) { var v = edNorm(x[2], $('st_' + x[0]).value); return x[0] === 'dob' ? edBn2en(v) : v; }
+
+  function stuDirty() {
+    if (!stuCur) return;
+    var n = 0, bad = 0;
+    STU_FIELDS.forEach(function (x) {
+      var i = $('st_' + x[0]), v = stuVal(x), m = stuCheck(x[0], x[2], v);
+      var chg = v !== edNorm(x[2], stuCur[x[0]] || '');
+      if (chg) n++;
+      if (m) bad++;
+      i.classList.toggle('bad', !!m);
+      $('stE_' + x[0]).textContent = m;
+      i.parentNode.classList.toggle('chg', chg);
+    });
+    var nc = $('st_cls').value, nr = edBn2en($('st_roll').value).trim();
+    var rollBad = !/^\d+$/.test(nr);
+    $('st_roll').classList.toggle('bad', rollBad);
+    var moved = nc !== $('stuCls').value || nr !== String(stuCur.roll);
+    var p = $('stuPrev');
+    p.classList.toggle('on', moved && !rollBad);
+    p.textContent = moved ? '🔀 Class ' + clsPlain($('stuCls').value) + ' · Roll ' + stuCur.roll + '   ➜   Class ' + clsPlain(nc) + ' · Roll ' + nr : '';
+    var tot = n + (moved ? 1 : 0);
+    $('stuCnt').textContent = (bad || rollBad) ? '⚠️ ' + bn(bad + (rollBad ? 1 : 0)) + 'টি ঘরে ভুল আছে' : (tot ? '✏️ ' + bn(tot) + 'টি পরিবর্তন' : 'কোনো পরিবর্তন নেই');
+    $('stuSave').disabled = !tot || !!bad || rollBad;
+  }
+
+  function stuField(x, s, parent) {
+    var w = el('div', 'ed-f');
+    var lb = el('label', null, x[1]); lb.setAttribute('for', 'st_' + x[0]);
+    var i = document.createElement('input');
+    i.type = 'text'; i.id = 'st_' + x[0]; i.value = s[x[0]] || ''; i.autocomplete = 'off';
+    if (x[2] === 'mob' || x[2] === 'birth') i.setAttribute('inputmode', 'numeric');
+    var er = el('div', 'ferr'); er.id = 'stE_' + x[0];
+    i.oninput = stuDirty;
+    w.appendChild(lb); w.appendChild(i); w.appendChild(er);
+    parent.appendChild(w);
+  }
+
+  function stuOpen(s) {
+    stuCur = s;
+    $('stuPick').style.display = 'none';
+    $('stuFormWrap').style.display = 'flex';
+    $('stuFormWrap').style.flexDirection = 'column';
+    var ro = $('stuRo'); ro.innerHTML = '';
+    ro.appendChild(el('div', 'su-av', stuInit(s.nameBn || s.nameEn)));
+    var t = el('div');
+    t.appendChild(el('b', null, s.nameBn || s.nameEn));
+    t.appendChild(el('small', null, 'Class ' + clsPlain($('stuCls').value) + ' · Roll ' + s.roll));
+    ro.appendChild(t);
+    var f = $('stuForm'); f.innerHTML = '';
+    STU_GROUPS.forEach(function (g) {
+      var sec = el('div', 'su-sec'); sec.appendChild(el('h5', null, g[0]));
+      var grid = el('div', 'grid2');
+      g[1].forEach(function (x) { stuField(x, s, grid); });
+      sec.appendChild(grid); f.appendChild(sec);
+    });
+    var sec = el('div', 'su-sec'); sec.appendChild(el('h5', null, '🔀 ট্রান্সফার ও রোল'));
+    var grid = el('div', 'grid2');
+    var wc = el('div', 'ed-f');
+    var lc = el('label', null, 'Class / Section'); lc.setAttribute('for', 'st_cls');
+    var sc = document.createElement('select'); sc.id = 'st_cls';
+    cfg.classes.forEach(function (c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = 'Class ' + clsPlain(c); sc.appendChild(o);
+    });
+    sc.value = $('stuCls').value; sc.onchange = stuDirty;
+    wc.appendChild(lc); wc.appendChild(sc); grid.appendChild(wc);
+    var wr = el('div', 'ed-f');
+    var lr = el('label', null, 'Roll'); lr.setAttribute('for', 'st_roll');
+    var ir = document.createElement('input');
+    ir.type = 'text'; ir.id = 'st_roll'; ir.value = s.roll; ir.autocomplete = 'off'; ir.setAttribute('inputmode', 'numeric');
+    ir.oninput = stuDirty;
+    wr.appendChild(lr); wr.appendChild(ir); grid.appendChild(wr);
+    sec.appendChild(grid);
+    var pv = el('div', 'su-prev'); pv.id = 'stuPrev'; sec.appendChild(pv);
+    sec.appendChild(el('div', 'detail', 'রোল বা class বদলালে পুরোনো হাজিরা ও ফরম ফিলাপের তথ্যও নতুন রোলে সরে যায়। লক্ষ্য রোল ফাঁকা থাকতে হবে।'));
+    f.appendChild(sec);
+    stuDirty();
+    $('stuFormWrap').scrollTop = 0;
+  }
+
+  function stuBack() {
+    $('stuPick').style.display = '';
+    $('stuFormWrap').style.display = 'none';
+    stuCur = null;
+  }
 
   function stuSave() {
-    if (!stuCur) return;
-    var s = stuCur, data = {}, bad = null;
+    if (!stuCur || $('stuSave').disabled) return;
+    var s = stuCur, data = {}, infoChanged = false;
     STU_FIELDS.forEach(function (x) {
-      var i = $('st_' + x[0]), v = edNorm(x[2], i.value);
-      if (x[0] === 'dob') v = edBn2en(v);
-      i.value = v; data[x[0]] = v;
-      var m = stuCheck(x[0], x[2], v);
-      $('stE_' + x[0]).textContent = m;
-      i.classList.toggle('bad', !!m);
-      if (m && !bad) bad = i;
+      var v = stuVal(x); $('st_' + x[0]).value = v; data[x[0]] = v;
+      if (v !== edNorm(x[2], s[x[0]] || '')) infoChanged = true;
     });
-    if (bad) { bad.focus(); toast('লাল ঘরগুলো ঠিক করুন', true); return; }
-    var newCls = $('st_cls').value, newRoll = edBn2en($('st_roll').value).trim();
-    if (!/^\d+$/.test(newRoll)) { $('st_roll').focus(); toast('রোল শুধু সংখ্যায় দিন', true); return; }
-    var moved = newCls !== $('stuCls').value || newRoll !== String(s.roll);
-    if (moved && !confirm('Roll ' + s.roll + ' → ' + (newCls !== $('stuCls').value ? 'Class ' + clsPlain(newCls) + ', ' : '') + 'Roll ' + newRoll + '\nপুরোনো হাজিরা সহ সরানো হবে। চালিয়ে যাবেন?')) return;
+    var oldCls = $('stuCls').value, newCls = $('st_cls').value, newRoll = edBn2en($('st_roll').value).trim();
+    var moved = newCls !== oldCls || newRoll !== String(s.roll);
+    if (moved && !confirm('Roll ' + s.roll + ' ➜ ' + (newCls !== oldCls ? 'Class ' + clsPlain(newCls) + ', ' : '') + 'Roll ' + newRoll +
+                          '\nপুরোনো হাজিরা সহ সরানো হবে। চালিয়ে যাবেন?')) return;
     $('stuSave').disabled = true;
+    function oops(e, partial) {
+      stuDirty();
+      if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+      toast((partial ? 'তথ্য সংরক্ষিত, কিন্তু সরানো যায়নি: ' : 'Error: ') + friendlyErr(e), true);
+    }
     function fin() {
-      $('stuSave').disabled = false;
       STU_FIELDS.forEach(function (x) { s[x[0]] = data[x[0]]; });
       attStale = true; dashData = null;
-      toast(moved ? 'সংরক্ষিত ও সরানো হয়েছে' : 'তথ্য সংরক্ষিত হয়েছে', false);
       if (moved) {
-        if (newCls !== $('stuCls').value) stuList = stuList.filter(function (x) { return x.id !== s.id; });
+        if (newCls !== oldCls) stuList = stuList.filter(function (x) { return x.id !== s.id; });
         else { s.roll = newRoll; sortByRoll(stuList, 'roll'); }
       }
+      toast(moved ? '✅ সংরক্ষিত ও সরানো হয়েছে' : '✅ তথ্য সংরক্ষিত হয়েছে', false);
       stuBack(); stuRender();
       if (moved) loadDash();
     }
-    google.script.run
-      .withSuccessHandler(function () {
-        if (!moved) { fin(); return; }
-        google.script.run
-          .withSuccessHandler(fin)
-          .withFailureHandler(function (e) {
-            $('stuSave').disabled = false;
-            if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
-            toast('তথ্য সংরক্ষিত, কিন্তু সরানো যায়নি: ' + friendlyErr(e), true);
-          })
-          .moveStudent(TOKEN, s.id, newCls, newRoll);
-      })
-      .withFailureHandler(function (e) {
-        $('stuSave').disabled = false;
-        if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
-        toast('Error: ' + friendlyErr(e), true);
-      })
-      .updateStudentInfo(TOKEN, s.id, data);
+    function doMove(partial) {
+      if (!moved) { fin(); return; }
+      google.script.run.withSuccessHandler(fin).withFailureHandler(function (e) { oops(e, partial); })
+        .moveStudent(TOKEN, s.id, newCls, newRoll);
+    }
+    if (infoChanged) {
+      google.script.run.withSuccessHandler(function () { doMove(true); }).withFailureHandler(function (e) { oops(e, false); })
+        .updateStudentInfo(TOKEN, s.id, data);
+    } else doMove(false);
   }
 
-  // ===== 🗑 পুরো class মোছা =====
+  // ---------- মোছা ----------
+  function stuAfterDelete(n) {
+    attStale = true; dashData = null; stuSel = {};
+    toast('🗑 ' + bn(n) + ' জন শিক্ষার্থী মুছে ফেলা হয়েছে', false);
+    loadDash();
+  }
+  function stuDeleteSelected() {
+    var pick = (stuList || []).filter(function (s) { return stuSel[s.id]; });
+    if (!pick.length) return;
+    var names = pick.slice(0, 5).map(function (s) { return s.roll + '. ' + (s.nameBn || s.nameEn); }).join('\n');
+    if (!confirm(bn(pick.length) + ' জন শিক্ষার্থী মুছে যাবে:\n' + names + (pick.length > 5 ? '\n...আরও ' + bn(pick.length - 5) + ' জন' : '') +
+                 '\n\n(ব্যাকআপ থাকবে, হাজিরার পুরোনো রেকর্ড মুছবে না।)\nচালিয়ে যাবেন?')) return;
+    var t = prompt('নিশ্চিত করতে ইংরেজিতে DELETE লিখুন:');
+    if (t !== 'DELETE') { toast('বাতিল করা হয়েছে', true); return; }
+    loading(true, 'মুছে ফেলা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        loading(false);
+        var gone = {}; pick.forEach(function (s) { gone[s.id] = true; });
+        stuList = stuList.filter(function (s) { return !gone[s.id]; });
+        stuAfterDelete(r.deleted); stuRender();
+      })
+      .withFailureHandler(fail)
+      .deleteStudents(TOKEN, pick.map(function (s) { return s.id; }), t);
+  }
   function stuDeleteClass() {
     var cls = $('stuCls').value;
     if (!cls || !stuList || !stuList.length) return;
@@ -6693,10 +6833,8 @@ button:active{transform:scale(.97)}
         cfg.classes = cfg.classes.filter(function (c) { return c !== cls; });
         if (cfg.classMeta) cfg.classMeta = cfg.classMeta.filter(function (m) { return m.label !== cls; });
         fillClassSelects(cfg);
-        attStale = true; dashData = null;
+        stuAfterDelete(r.deleted);
         closeStuEdit();
-        toast(bn(r.deleted) + ' জন শিক্ষার্থী মুছে ফেলা হয়েছে', false);
-        loadDash();
       })
       .withFailureHandler(fail)
       .deleteClassStudents(TOKEN, cls, t);
