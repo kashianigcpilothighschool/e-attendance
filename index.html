@@ -1287,6 +1287,10 @@
   .clschips { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:none; scroll-snap-type:x proximity; }
   .clschips::-webkit-scrollbar { display:none; }
   #grpChips { margin-top:2px; }
+  .ds-grps { margin-top:8px; display:grid; gap:3px; }
+  .ds-g { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:3px 8px; border-radius:8px; background:color-mix(in srgb,var(--line) 35%,transparent); }
+  .ds-g .gn { font-weight:600; } .ds-g .gv { color:var(--mute); white-space:nowrap; }
+  .grphead { margin:14px 4px 4px; padding:6px 12px; border-radius:10px; font-weight:700; font-size:14px; background:color-mix(in srgb,var(--ac1) 14%,transparent); }
   #grpChips .cc { min-height:38px; padding:6px 13px; font-size:13px; }
   .ds-sec { grid-column:1 / -1; margin:10px 2px 0; font-weight:700; font-size:14px; color:var(--mute); }
   .cc { flex:none; scroll-snap-align:start; display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 14px; border-radius:99px; cursor:pointer;
@@ -2698,12 +2702,13 @@ button:active{transform:scale(.97)}
   var STATUS = [];
   var students = [];
   var state = {};
-  var rowEls = [];
+  var rowEls = [], hdrAll = [];
   var blocked = false;
   var dirty = false;
   var attStale = false;
   var attFilter = '';
   var attGender = '';   // '', 'Boys', 'Girls'
+  var attGroup = '';    // '' বা গ্রুপের নাম
   var attTaken = false;
   var listOpen = false, listMode = 'edit';   // শিক্ষার্থী তালিকা ডিফল্টে লুকানো; mode: edit | view
   var curTab = 'home';
@@ -3221,7 +3226,7 @@ button:active{transform:scale(.97)}
   function loadClass() {
     var cls = $('cls').value, date = $('date').value;
     cur.date = date; cur.cls = cls;
-    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attGender = ''; attTaken = false; listOpen = false; listMode = 'edit';
+    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attGender = ''; attGroup = ''; attTaken = false; listOpen = false; listMode = 'edit';
     $('q').value = '';
     setNote('note', '');
     renderList();
@@ -3262,7 +3267,7 @@ button:active{transform:scale(.97)}
   function renderList() {
     var box = $('list');
     box.innerHTML = '';
-    rowEls = [];
+    rowEls = []; hdrAll = [];
     box.classList.toggle('ro', !!(students.length && listOpen && listMode === 'view'));
     $('tools').style.display = (students.length && listOpen) ? 'flex' : 'none';
     $('searchCard').style.display = (students.length > 8 && listOpen) ? 'block' : 'none';
@@ -3285,7 +3290,23 @@ button:active{transform:scale(.97)}
     if (!listOpen) { renderGate(box); updateBar(); return; }
     box.appendChild(listBar());
 
-    students.forEach(function (s, ix) {
+    var hdrEls = [], lastG = null;
+    var hasGroups = students.some(function (s) { return s.group; });
+    var ordered = students;
+    if (hasGroups) {
+      ordered = students.slice().sort(function (a, b) {
+        var ga = a.group || '', gb2 = b.group || '';
+        if (ga !== gb2) return ga < gb2 ? -1 : 1;
+        return 0;   // একই গ্রুপে আগের রোল-ক্রম থাকে (sort স্থিতিশীল)
+      });
+    }
+    ordered.forEach(function (s, ix) {
+      if (hasGroups && (s.group || '') !== lastG) {
+        lastG = s.group || '';
+        var cntG = students.filter(function (x) { return (x.group || '') === lastG; }).length;
+        var hd = el('div', 'grphead', (lastG ? grpText(lastG) : 'গ্রুপ নেই') + ' — ' + bn(cntG) + ' জন');
+        box.appendChild(hd); hdrEls.push({ el: hd, group: lastG });
+      }
       var row = stg(el('div', 'row'), ix);
       row.setAttribute('data-s', String(STATUS.indexOf(state[s.roll])));
 
@@ -3321,8 +3342,10 @@ button:active{transform:scale(.97)}
       });
       row.appendChild(btns);
       box.appendChild(row);
-      rowEls.push({ el: row, roll: s.roll, gender: s.gender || '', key: (s.roll + ' ' + s.name).toLowerCase() });
+      rowEls.push({ el: row, roll: s.roll, gender: s.gender || '', group: s.group || '', key: (s.roll + ' ' + s.name).toLowerCase() });
     });
+    hdrEls.forEach(function (h) { hdrAll.push(h); });
+    applySearch();
     updateBar();
   }
 
@@ -3455,7 +3478,12 @@ button:active{transform:scale(.97)}
       var okQ = !q || r.key.indexOf(q) !== -1;
       var okF = !attFilter || state[r.roll] === attFilter;
       var okG = !attGender || r.gender === attGender;
-      r.el.style.display = (okQ && okF && okG) ? '' : 'none';
+      var okP = !attGroup || r.group === attGroup;
+      r.visible = okQ && okF && okG && okP;
+      r.el.style.display = r.visible ? '' : 'none';
+    });
+    hdrAll.forEach(function (h) {
+      h.el.style.display = rowEls.some(function (r) { return r.group === h.group && r.visible; }) ? '' : 'none';
     });
   }
 
@@ -3540,6 +3568,17 @@ button:active{transform:scale(.97)}
     mk('সব (' + bn(students.length) + ')', '');
     STATUS.forEach(function (st) { if (c[st]) mk(st + ' ' + cfg.labels[st] + ' (' + bn(c[st]) + ')', st); });
     if (attFilter && !c[attFilter]) { attFilter = ''; applySearch(); }
+    // গ্রুপ ফিল্টার (সেকশনে একাধিক গ্রুপ থাকলে)
+    var gset = []; students.forEach(function (s) { if (s.group && gset.indexOf(s.group) < 0) gset.push(s.group); });
+    gset.sort();
+    if (gset.length > 1) {
+      [['সব গ্রুপ', '']].concat(gset.map(function (g) { return [grpText(g), g]; })).forEach(function (g) {
+        var b = el('button', 'chipbtn' + (attGroup === g[1] ? ' on' : ''), g[0]);
+        b.type = 'button';
+        b.onclick = function () { attGroup = g[1]; applySearch(); updateBar(); };
+        fb.appendChild(b);
+      });
+    } else if (attGroup) { attGroup = ''; applySearch(); }
     // বালক/বালিকা ফিল্টার (শুধু যখন তালিকায় লিঙ্গের তথ্য আছে)
     var nb = students.filter(function (s) { return s.gender === 'Boys'; }).length,
         ng = students.filter(function (s) { return s.gender === 'Girls'; }).length;
@@ -4488,7 +4527,7 @@ button:active{transform:scale(.97)}
   }
 
   function proLabel(base, sec, grp) {
-    var p = [base, sec, grp];
+    var p = (String(base) === '9' || String(base) === '10') ? [base, sec] : [base, sec, grp];
     while (p.length > 1 && !p[p.length - 1]) p.pop();
     return p.join(' | ');
   }
@@ -5819,6 +5858,18 @@ button:active{transform:scale(.97)}
         l.appendChild(el('div', 'ds-sub', 'Total ' + bn(c.total) + ' students' + (c.absent.length ? ' · ' + bn(c.absent.length) + ' absent' : '')));
         mini.style.setProperty('--pc', pc); mini.appendChild(el('b', null, bn(pc) + '%'));
         if (pc < cfg.lowPercent) mini.className += ' low';
+      }
+      if (c.groups && c.groups.length) {
+        var gl = el('div', 'ds-grps');
+        c.groups.forEach(function (g) {
+          var gr = el('div', 'ds-g');
+          gr.appendChild(el('span', 'gn', grpText(g.name)));
+          var gn = STATUS.reduce(function (a, x) { return a + (g.counts[x] || 0); }, 0);
+          var gv = bn(g.total) + ' জন · ' + (g.taken ? '✅ ' + bn(gn ? Math.round((g.counts[P] || 0) * 100 / gn) : 0) + '%' : '⏳');
+          gr.appendChild(el('span', 'gv', gv));
+          gl.appendChild(gr);
+        });
+        l.appendChild(gl);
       }
       card.appendChild(l); card.appendChild(mini);
       mini.setAttribute('aria-hidden', 'true');
