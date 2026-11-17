@@ -4483,7 +4483,7 @@ button:active{transform:scale(.97)}
   }
 
   function proLabel(base, sec, grp) {
-    var p = (String(base) === '9' || String(base) === '10') ? [base, sec] : [base, sec, grp];
+    var p = [base, sec, grp];
     while (p.length > 1 && !p[p.length - 1]) p.pop();
     return p.join(' | ');
   }
