@@ -1720,6 +1720,32 @@
   #login .al-back a { color:#A6ACBB; font-size:12.5px; cursor:pointer; }
   #login .al-back a:hover { color:#A87E33; }
   @media (max-width:480px) { #login .al-card { padding:30px 22px; } #login .al-header h2 { font-size:24px; } #login .al-wrap { padding:12px; } }
+
+  /* ক্লাস কার্ডের ভেতরে গ্রুপ-সাবকার্ড */
+  .ds-card.has-grps { grid-column:1 / -1; }
+  .ds-card.has-grps .ds-l { flex:1; }
+  .ds-grps { margin-top:10px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
+  .ds-sc { padding:10px 12px; border-radius:14px; background:color-mix(in srgb,var(--line) 30%,var(--surface)); border:1px solid var(--line); cursor:pointer; transition:transform .15s,border-color .2s; }
+  .ds-sc:hover { transform:translateY(-1px); border-color:var(--pine); }
+  .ds-sc.wait { border-style:dashed; background:color-mix(in srgb,var(--l-l) 50%,var(--surface)); }
+  .ds-sc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .ds-sc-n { font-weight:700; font-size:14px; }
+  .ds-sc-p { font-weight:700; font-size:13px; color:var(--p-t); } .ds-sc-p.low { color:var(--a-t); }
+  .ds-sc-s { font-size:12px; color:var(--mute); font-weight:600; margin-top:2px; }
+  .ds-sc-w { margin-top:6px; font-size:12px; font-weight:600; color:var(--l-t); }
+  .ds-sc .bc-chips { margin:6px 0 0; gap:4px; } .ds-sc .bc-chip { font-size:11px; padding:2px 8px; }
+  /* এক ক্লাস-শাখার একটি কার্ড; ক্লিক করলে ভেতরে গ্রুপ-কার্ড খোলে */
+  .ds-wrap { padding:0; border-radius:20px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--soft); overflow:hidden; }
+  .ds-wrap.wait { border-style:dashed; background:color-mix(in srgb,var(--l-l) 55%,var(--surface)); }
+  .ds-wrap.open { grid-column:1 / -1; }
+  .ds-wrap-t { all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; cursor:pointer; }
+  .ds-wrap-t:focus-visible { outline:3px solid var(--mint); outline-offset:-3px; }
+  .ds-wrap-n { font-size:16px; font-weight:700; }
+  .ds-wrap-s { font-size:12.5px; font-weight:600; color:var(--mute); margin-top:2px; }
+  .ds-wrap-c { font-size:20px; color:var(--mute); transition:transform .2s; }
+  .ds-wrap.open .ds-wrap-c { transform:rotate(180deg); }
+  .ds-wrap-g { display:none; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; padding:0 14px 14px; }
+  .ds-wrap.open .ds-wrap-g { display:grid; }
 </style>
 <style id="pageStyle"></style>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -5826,17 +5852,12 @@ button:active{transform:scale(.97)}
 
     // class কার্ড
     var g = $('dsGrid'); g.innerHTML = '';
-    var dsFlat = [];
-    dsBlocks(d.classes).forEach(function (bl) {
-      if (bl.head) dsFlat.push({ head: bl.head });
-      bl.items.forEach(function (c) { dsFlat.push(c); });
-    });
-    dsFlat.forEach(function (c) {
-      if (c.head) { g.appendChild(el('div', 'ds-sec', c.head)); return; }
+    var dsOpen = window.__dsOpen = window.__dsOpen || {};
+    function buildCard(c, sub) {
       var card = el('button', 'ds-card bc-card' + (c.taken ? '' : ' wait')); card.type = 'button';
       card.onclick = function () { dashPick(c.cls); };
       var l = el('div', 'ds-l');
-      l.appendChild(el('div', 'ds-cn', clsPlain(c.cls)));
+      l.appendChild(el('div', 'ds-cn', sub ? grpText(clsParts(c.cls).group) : clsPlain(c.cls)));
       var mini = el('div', 'ds-mini'), pc = 0;
       var chips = el('div', 'bc-chips');
       if (!c.taken) {
@@ -5862,12 +5883,31 @@ button:active{transform:scale(.97)}
       if (c.groups && c.groups.length) {
         var gl = el('div', 'ds-grps');
         c.groups.forEach(function (g) {
-          var gr = el('div', 'ds-g');
-          gr.appendChild(el('span', 'gn', grpText(g.name)));
+          var sc = el('div', 'ds-sc' + (g.taken ? '' : ' wait'));
+          sc.setAttribute('role', 'button'); sc.tabIndex = 0;
           var gn = STATUS.reduce(function (a, x) { return a + (g.counts[x] || 0); }, 0);
-          var gv = bn(g.total) + ' জন · ' + (g.taken ? '✅ ' + bn(gn ? Math.round((g.counts[P] || 0) * 100 / gn) : 0) + '%' : '⏳');
-          gr.appendChild(el('span', 'gv', gv));
-          gl.appendChild(gr);
+          var gp = gn ? Math.round((g.counts[P] || 0) * 100 / gn) : 0;
+          var top = el('div', 'ds-sc-top');
+          top.appendChild(el('span', 'ds-sc-n', grpText(g.name)));
+          top.appendChild(el('span', 'ds-sc-p' + (g.taken && gp < cfg.lowPercent ? ' low' : ''), g.taken ? bn(gp) + '%' : '⏳'));
+          sc.appendChild(top);
+          sc.appendChild(el('div', 'ds-sc-s', bn(g.total) + ' জন'));
+          if (g.taken) {
+            var gch = el('div', 'bc-chips');
+            STATUS.forEach(function (x) {
+              var kind = x === P ? 'pres' : (x === cfg.absentStatus ? 'abs' : 'oth');
+              gch.appendChild(el('span', 'bc-chip ' + kind, cfg.labels[x] + ' ' + bn(g.counts[x] || 0)));
+            });
+            sc.appendChild(gch);
+          } else sc.appendChild(el('div', 'ds-sc-w', 'Attendance pending'));
+          var go = function (e) {
+            e.stopPropagation();
+            dashPick(c.cls);
+            attGroup = g.name;
+          };
+          sc.onclick = go;
+          sc.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } };
+          gl.appendChild(sc);
         });
         l.appendChild(gl);
       }
@@ -5880,7 +5920,42 @@ button:active{transform:scale(.97)}
           dashLast.mini[key] = to;
         })(mini, c.cls, pc);
       }
-      g.appendChild(card);
+      return card;
+    }
+    function sumItems(items) {
+      var r = { total: 0, taken: 0, counts: {} };
+      STATUS.forEach(function (x) { r.counts[x] = 0; });
+      items.forEach(function (c) {
+        r.total += c.total;
+        if (c.taken) { r.taken++; STATUS.forEach(function (x) { r.counts[x] += c.counts[x] || 0; }); }
+      });
+      return r;
+    }
+    dsBlocks(d.classes).forEach(function (bl) {
+      if (!bl.head) { bl.items.forEach(function (c) { g.appendChild(buildCard(c, false)); }); return; }
+      var sm = sumItems(bl.items);
+      var n = STATUS.reduce(function (a, x) { return a + sm.counts[x]; }, 0);
+      var wp = n ? Math.round(sm.counts[P] * 100 / n) : 0;
+      var wkey = bl.head, isOpen = !!dsOpen[wkey];
+      var wrap = el('div', 'ds-wrap' + (sm.taken < bl.items.length ? ' wait' : '') + (isOpen ? ' open' : ''));
+      var wt = el('button', 'ds-wrap-t'); wt.type = 'button';
+      wt.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      var wl = el('div', 'ds-wrap-l');
+      wl.appendChild(el('div', 'ds-wrap-n', bl.head));
+      wl.appendChild(el('div', 'ds-wrap-s', 'Total ' + bn(sm.total) + ' students · ' + bn(bl.items.length) + ' groups'));
+      wl.appendChild(el('div', 'ds-wrap-s', sm.taken ? bn(wp) + '% present' : '⏳ Attendance pending'));
+      wt.appendChild(wl);
+      wt.appendChild(el('span', 'ds-wrap-c', '▾'));
+      wrap.appendChild(wt);
+      var inner = el('div', 'ds-wrap-g');
+      bl.items.forEach(function (c) { inner.appendChild(buildCard(c, true)); });
+      wrap.appendChild(inner);
+      wt.onclick = function () {
+        var o = !wrap.classList.contains('open');
+        wrap.classList.toggle('open', o); dsOpen[wkey] = o;
+        wt.setAttribute('aria-expanded', o ? 'true' : 'false');
+      };
+      g.appendChild(wrap);
     });
 
     // আজকের অনুপস্থিত — নাম ছাড়া, শুধু classভিত্তিক সংখ্যা (নামসহ তালিকা হাজিরা ট্যাবে)
