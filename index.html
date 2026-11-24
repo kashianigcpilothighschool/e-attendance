@@ -4814,9 +4814,9 @@ button:active{transform:scale(.97)}
       lb.appendChild(el('span', null, text));
       box.appendChild(lb);
     }
-    var nb = el('button', 'chipbtn p', '✅ পরের ১০ জন (ফরম পূরণ)');
-    nb.type = 'button'; nb.id = 'ffNext10';
-    nb.onclick = function () { ffNextN(10); };
+    var nb = el('button', 'chipbtn p', '✅ পরের ৬০ জন (ফরম পূরণ)');
+    nb.type = 'button'; nb.id = 'ffNext60';
+    nb.onclick = function () { ffNextN(60); };
     box.appendChild(nb);
     var rb = el('button', 'chipbtn', '↩️ সবাইকে Form pending');
     rb.type = 'button';
@@ -4871,7 +4871,7 @@ button:active{transform:scale(.97)}
     toast('সবার জন্য প্রয়োগ হয়েছে — সাবমিট করুন', false);
   }
 
-  // এক বারে পরের ১০ জন নতুন (Form pending) শিক্ষার্থীকে ফরম পূরণ হিসেবে চিহ্নিত করে
+  // এক বারে পরের ৬০ জন নতুন (Form pending) শিক্ষার্থীকে ফরম পূরণ হিসেবে চিহ্নিত করে
   function ffNextN(n) {
     if (!ffData) return;
     var picked = [];
@@ -5368,7 +5368,7 @@ button:active{transform:scale(.97)}
       }
       var chunk = keys.slice(pos, pos + size);
       pos += size;
-      loading(true, 'Submitting... ' + bn(Math.min(pos, keys.length)) + '/' + bn(keys.length));
+      loading(true, 'সাবমিট হচ্ছে... সাবমিটেড ' + bn(ok) + '/' + bn(keys.length) + ' জন');
       var items = chunk.map(function (k) {
         var r = ffRec[k];
         return { key: k, regNo: r.regNo, boardRoll: r.boardRoll, fourth: r.fourth, fee: r.fee, paid: r.paid,
@@ -5381,6 +5381,8 @@ button:active{transform:scale(.97)}
           else if (r && r.synced === false) syncBad = r.syncMsg || 'Unknown reason';
           chunk.forEach(function (k) { ffOrig[k] = JSON.stringify(ffRec[k]); delete ffDirty[k]; ffMeta(k); });
           ok += chunk.length;
+          ffStatsUpdate();                                  // লাইভ: নিচের বার ও কার্ড হালনাগাদ
+          toast('✅ সাবমিটেড ' + bn(ok) + '/' + bn(keys.length) + ' জন', false);
           next();
         })
         .withFailureHandler(function (e) { ffStatsUpdate(); fail(e); })
