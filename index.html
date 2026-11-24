@@ -690,6 +690,8 @@
   .ff-bar { display:none; position:fixed; left:10px; right:10px; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:6; }
   .ff-bar .act { width:auto; flex:none; padding:12px 18px; min-height:50px; border-radius:16px; box-shadow:0 6px 14px rgba(0,106,78,.3); }
   .ff-bar .act:disabled { box-shadow:none; }
+  .ff-sec { font-size:13px; font-weight:700; color:var(--mute); margin:14px 0 6px; padding-top:8px; border-top:1px dashed var(--line); }
+  .ff-sec:first-child { margin-top:4px; border-top:0; padding-top:0; }
   @media (min-width:900px) { body.appmode .ff-bar { left:276px; right:16px; bottom:16px; } }
 
   /* ===== অ্যাপ আকর্ষণীয় রূপ (v4) ===== */
@@ -2251,7 +2253,7 @@ button:active{transform:scale(.97)}
     <div class="ff-bar" id="ffBar">
       <div class="pro-bar-in">
         <div class="pro-bar-t" id="ffBarT"></div>
-        <button class="act" id="ffSaveBtn" type="button" onclick="ffSave()" disabled>Save</button>
+        <button class="act" id="ffSaveBtn" type="button" onclick="ffSave()" disabled>সাবমিট</button>
       </div>
     </div>
   </section>
@@ -2365,7 +2367,7 @@ button:active{transform:scale(.97)}
     function msgOf(e) { return String(e && e.message ? e.message : e); }
 
     // ----- নেটওয়ার্ক কল (দুর্বল নেটের জন্য: ছোট timeout, নিজে নিজে পুনরায় চেষ্টা, একসাথে সর্বোচ্চ ৪টি) -----
-    function tmo(fn) { return WRITE_Q[fn] ? 40000 : (/^get/.test(fn) ? 25000 : 60000); }
+    function tmo(fn) { return fn === 'saveFormData' ? 10000 : WRITE_Q[fn] ? 40000 : (/^get/.test(fn) ? 25000 : 60000); }
     function callOnce(fn, args, ms) {
       if (!/^https:\/\/[a-z0-9]+\.supabase\.co\/functions\/v1\/.+$/.test(API_URL) || !API_KEY || /PASTE_/.test(API_KEY)) {
         return Promise.reject(new Error('API_KEY বসানো হয়নি। index.html-এ Supabase Publishable key বসান।'));
@@ -4731,7 +4733,7 @@ button:active{transform:scale(.97)}
   }
   function ffMoney(n) { return '৳' + bn(String(Math.round(n * 100) / 100)); }
   function ffDirtyCount() { return Object.keys(ffDirty).length; }
-  function ffLeaveOk() { return !ffDirtyCount() || confirm('সংরক্ষণ না করা পরিবর্তন মুছে যাবে। চালিয়ে যাবেন?'); }
+  function ffLeaveOk() { return !ffDirtyCount() || confirm('সাবমিট না করা পরিবর্তন মুছে যাবে। চালিয়ে যাবেন?'); }
 
   function ffNormRec(o) {
     o = o || {};
@@ -4812,7 +4814,14 @@ button:active{transform:scale(.97)}
       lb.appendChild(el('span', null, text));
       box.appendChild(lb);
     }
-    mk('ffAllF', 'সবার ফরম পূরণ', 'form');
+    var nb = el('button', 'chipbtn p', '✅ পরের ১০ জন (ফরম পূরণ)');
+    nb.type = 'button'; nb.id = 'ffNext10';
+    nb.onclick = function () { ffNextN(10); };
+    box.appendChild(nb);
+    var rb = el('button', 'chipbtn', '↩️ সবাইকে Form pending');
+    rb.type = 'button';
+    rb.onclick = function () { ffSetAll('form', false); };
+    box.appendChild(rb);
     if (ffIsHigh()) {
       mk('ffAll4', 'সবার ৪র্থ বিষয়', 'fourth');
       var inp = document.createElement('input');
@@ -4845,7 +4854,7 @@ button:active{transform:scale(.97)}
     var list = ffData.students;
     if (what === 'form') {
       var sub = list.filter(function (s) { return ffRec[s.key].status === 'submitted'; }).length;
-      if (!on && sub && !confirm(bn(sub) + ' জন "Submitted to board" অবস্থায় আছে। সবাইকে "Form pending" করবেন?')) { ffAllSync(); return; }
+      if (!on && sub && !confirm(bn(sub) + ' জন "Submitted to Result System" অবস্থায় আছে। সবাইকে "Form pending" করবেন?')) { ffAllSync(); return; }
       list.forEach(function (s) {
         var r = ffRec[s.key];
         r.status = on ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
@@ -4859,7 +4868,25 @@ button:active{transform:scale(.97)}
       if (JSON.stringify(ffRec[s.key]) !== ffOrig[s.key]) ffDirty[s.key] = true; else delete ffDirty[s.key];
     });
     ffRender();
-    toast('সবার জন্য প্রয়োগ হয়েছে — Save', false);
+    toast('সবার জন্য প্রয়োগ হয়েছে — সাবমিট করুন', false);
+  }
+
+  // এক বারে পরের ১০ জন নতুন (Form pending) শিক্ষার্থীকে ফরম পূরণ হিসেবে চিহ্নিত করে
+  function ffNextN(n) {
+    if (!ffData) return;
+    var picked = [];
+    ffData.students.forEach(function (s) {
+      if (picked.length < n && ffRec[s.key].status === 'pending') picked.push(s);
+    });
+    if (!picked.length) { toast('আর কোনো নতুন (Form pending) শিক্ষার্থী নেই', true); return; }
+    picked.forEach(function (s) {
+      ffRec[s.key].status = 'filled';
+      if (JSON.stringify(ffRec[s.key]) !== ffOrig[s.key]) ffDirty[s.key] = true; else delete ffDirty[s.key];
+    });
+    ffRender();
+    var first = ffEls[picked[0].key];
+    if (first && first.card && first.card.scrollIntoView) first.card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    toast(bn(picked.length) + ' জন সিলেক্ট হয়েছে (Roll ' + picked[0].roll + ' – ' + picked[picked.length - 1].roll + ') — সাবমিট করুন', false);
   }
 
   function ffOpen() {
@@ -4869,6 +4896,7 @@ button:active{transform:scale(.97)}
       .withSuccessHandler(function (d) {
         loading(false);
         ffCfg = d;
+        if (d && d.labels) d.labels.submitted = 'Submitted to Result System';
         ffType = d.defaultType || 'annual';
         ffTypeRender();
         var sel = $('ffCls');
@@ -4918,6 +4946,7 @@ button:active{transform:scale(.97)}
         d.students.forEach(function (s) {
           var rec = ffNormRec(s.saved ? s.saved : { fee: s.defFee });
           if (!rec.regNo && s.sid) rec.regNo = s.sid;     // Students ট্যাব থেকে স্বয়ংক্রিয় রেজি. নম্বর
+          rec.sRoll = String(s.roll == null ? '' : s.roll); rec.sNameEn = String(s.nameEn || ''); rec.sFather = String(s.father || ''); rec.sMother = String(s.mother || '');   // পরিচয়ের ঘর (সম্পাদনাযোগ্য)
           ffRec[s.key] = rec;
           ffOrig[s.key] = JSON.stringify(rec);
         });
@@ -4950,7 +4979,7 @@ button:active{transform:scale(.97)}
   function ffFbar() {
     var fb = $('ffFbar');
     fb.innerHTML = '';
-    [['', 'All'], ['due', 'Fee due'], ['paid', 'Fee paid'], ['pending', 'Form pending'], ['submitted', 'Submitted to board']].forEach(function (f) {
+    [['', 'All'], ['due', 'Fee due'], ['paid', 'Fee paid'], ['pending', 'Form pending'], ['submitted', 'Submitted to Result System']].forEach(function (f) {
       var b = el('button', 'chipbtn' + (ffFilter === f[0] ? ' on' : ''), f[1]);
       b.type = 'button';
       b.onclick = function () { ffFilter = f[0]; ffFbar(); ffApplyFilter(); };
@@ -4994,7 +5023,7 @@ button:active{transform:scale(.97)}
     head.appendChild(el('div', 'roll', s.roll));
     var ckF = ffCheck('ফরম', function (cb) {
       var r = ffRec[key];
-      if (!cb.checked && r.status === 'submitted' && !confirm('"Submitted to board" অবস্থা বদলে "Form pending" করবেন?')) { cb.checked = true; return; }
+      if (!cb.checked && r.status === 'submitted' && !confirm('"Submitted to Result System" অবস্থা বদলে "Form pending" করবেন?')) { cb.checked = true; return; }
       r.status = cb.checked ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
       var ee = ffEls[key];
       if (ee && ee.ins && ee.ins.status) ee.ins.status.value = r.status;
@@ -5098,16 +5127,6 @@ button:active{transform:scale(.97)}
     var key = s.key, r = ffRec[key];
     var body = el('div', 'ff-body');
 
-    var dl = el('div', 'reg-dl');
-    [['Student ID', s.sid], ['Name (English)', s.nameEn], ['Birth certificate', s.birth], ['Date of birth', s.dob], ['Group', s.group ? grpText(s.group) : ''], ['Mobile', s.mobile]].forEach(function (x) {
-      if (!x[1]) return;
-      var ln = el('div', 'reg-ln');
-      ln.appendChild(el('span', 'k', x[0]));
-      ln.appendChild(el('span', 'v', x[1]));
-      dl.appendChild(ln);
-    });
-    body.appendChild(dl);
-
     var ins = {};
     function field(f, label, opt) {
       opt = opt || {};
@@ -5142,23 +5161,23 @@ button:active{transform:scale(.97)}
       body.appendChild(g);
     }
 
-    pair(field('regNo', 'Registration number', { int: true }), field('boardRoll', 'Board roll', { int: true }));
+    function sec(t) { body.appendChild(el('div', 'ff-sec', t)); }
+    sec('👤 শিক্ষার্থীর পরিচয়');
+    pair(field('sRoll', 'রোল', { int: true }), field('sNameEn', 'নাম (ইংরেজি)'));
+    pair(field('sFather', 'পিতার নাম'), field('sMother', 'মাতার নাম'));
+    sec('🧾 ব্যক্তিগত');
+    var gw = el('div', 'ed-f');
+    gw.appendChild(el('label', null, 'বিভাগ (group)'));
+    var gi = document.createElement('input');
+    gi.type = 'text'; gi.disabled = true; gi.value = s.group ? grpText(s.group) : '';
+    gw.appendChild(gi);
+    body.appendChild(gw);
+    sec('✍️ পূরণযোগ্য');
     var stOpts = ffCfg.statuses.map(function (x) { return [x, ffCfg.labels[x]]; });
-    if (ffIsHigh()) pair(field('fourth', '4th subject', { list: 'ffFourth' }), field('status', 'Form status', { select: stOpts }));
-    else pair(field('status', 'Form status', { select: stOpts }), el('div'));
-    pair(field('fee', 'Fee set (৳)', { num: true }), field('paid', 'Paid (৳)', { num: true }));
-    pair(field('receipt', 'Receipt no.'), field('paidDate', 'Payment date', { type: 'date' }));
-    body.appendChild(field('remarks', 'Remarks'));
+    pair(field('regNo', 'রেজিস্ট্রেশন নম্বর', { int: true }), field('boardRoll', 'Board roll', { int: true }));
+    if (ffIsHigh()) pair(field('fourth', '৪র্থ বিষয়', { list: 'ffFourth' }), field('status', 'অবস্থা', { select: stOpts }));
+    else pair(field('status', 'অবস্থা', { select: stOpts }), el('div'));
 
-    var btn = el('button', 'act alt', '💰 Full fee paid');
-    btn.type = 'button';
-    btn.style.marginTop = '4px';
-    btn.onclick = function () {
-      r.paid = r.fee; ins.paid.value = r.fee;
-      if (!r.paidDate) { r.paidDate = cfg.today; ins.paidDate.value = cfg.today; }
-      ffTouch(key);
-    };
-    body.appendChild(btn);
     if (ffEls[key]) ffEls[key].ins = ins;
     return body;
   }
@@ -5183,7 +5202,7 @@ button:active{transform:scale(.97)}
     else if (st === 'due') chip('warn', 'ফি বকেয়া ' + ffMoney(due));
     else chip('off', 'Fee not set');
     chip(r.status === 'pending' ? 'todo' : 'up', ffCfg.labels[r.status] || r.status);
-    if (ffDirty[key]) chip('same', '● Unsaved');
+    if (ffDirty[key]) chip('same', '● Not submitted');
     if (e.qpaid) {                                   // দ্রুত-এন্ট্রি ঘর ও ফি-প্রগ্রেস মেলানো
       if (document.activeElement !== e.qpaid) e.qpaid.value = ffNum(r.paid) > 0 ? r.paid : '';
       var fee = ffNum(r.fee), pd = ffNum(r.paid);
@@ -5219,12 +5238,79 @@ button:active{transform:scale(.97)}
     ffBar();
   }
 
+  function ffDoneCount() {
+    var c = 0;
+    if (ffData) ffData.students.forEach(function (s) {
+      var r = ffRec[s.key];
+      if (r && r.status !== 'pending') c++;
+    });
+    return c;
+  }
+
   function ffBar() {
     var n = ffDirtyCount();
-    $('ffBar').style.display = (ffData && ffData.students.length) ? 'block' : 'none';
-    $('ffBarT').textContent = n ? 'অসংরক্ষিত: ' + bn(n) + ' students' : 'সব সংরক্ষিত';
+    var tot = ffData ? ffData.students.length : 0;
+    var ratio = bn(ffDoneCount()) + '/' + bn(tot);
+    $('ffBar').style.display = tot ? 'block' : 'none';
+    $('ffBarT').textContent = (n ? 'সাবমিট বাকি: ' + bn(n) + ' জন' : 'সব সাবমিটেড') + ' • ফরম পূরণ: ' + ratio;
     $('ffSaveBtn').disabled = !n;
-    $('ffSaveBtn').textContent = n ? 'Save (' + bn(n) + ' students)' : 'Save';
+    $('ffSaveBtn').textContent = 'সাবমিট (' + ratio + ')';
+  }
+
+  // ---- পরিচয়ের ঘর (রোল, নাম, পিতা, মাতা): Students ব্যবস্থাপনার একই function দিয়ে সংরক্ষণ ----
+  function ffStuChanged(keys, byKey) {
+    return keys.filter(function (k) {
+      var r = ffRec[k], s = byKey[k];
+      return edBn2en(r.sRoll).trim() !== String(s.roll) || edNorm('en', r.sNameEn) !== String(s.nameEn || '') ||
+             edNorm('text', r.sFather) !== String(s.father || '') || edNorm('text', r.sMother) !== String(s.mother || '');
+    });
+  }
+
+  function ffStuCheck(stuKeys, byKey) {
+    var i, k, r, c, rolls = {};
+    for (i = 0; i < stuKeys.length; i++) {
+      k = stuKeys[i]; r = ffRec[k];
+      c = edCheck('nameEn', 'en', edNorm('en', r.sNameEn));
+      if (c.err) return 'Roll ' + byKey[k].roll + ': নাম — ' + c.err;
+      c = edCheck('roll', 'num', edBn2en(r.sRoll).trim());
+      if (c.err) return 'Roll ' + byKey[k].roll + ': ' + c.err;
+    }
+    for (k in byKey) {
+      var rr = ffRec[k], rl = rr ? edBn2en(rr.sRoll).trim() : String(byKey[k].roll);
+      if (rolls[rl]) return 'রোল ' + rl + ' একাধিক শিক্ষার্থীর জন্য দেওয়া আছে';
+      rolls[rl] = true;
+    }
+    return '';
+  }
+
+  function ffStuSave(stuKeys, byKey, cls, done) {
+    loading(true, 'শিক্ষার্থীর তথ্য সাবমিট হচ্ছে...');
+    function stop(e, msg) {
+      loading(false);
+      if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+      toast((msg || 'শিক্ষার্থীর তথ্য সাবমিট হয়নি: ') + friendlyErr(e), true);
+      loadFf();
+    }
+    google.script.run.withSuccessHandler(function (list) {
+      var i = 0;
+      function one() {
+        if (i >= stuKeys.length) { loading(false); toast('✅ ফরম ফিলাপ ও শিক্ষার্থীর তথ্য সাবমিটেড', false); loadFf(); return; }
+        var k = stuKeys[i++], r = ffRec[k], s = byKey[k];
+        var m = (list || []).filter(function (x) { return String(x.roll) === String(s.roll); })[0];
+        if (!m) { stop('Roll ' + s.roll + ' পাওয়া যায়নি', 'Error: '); return; }
+        var data = {};
+        STU_FIELDS.forEach(function (x) { data[x[0]] = edNorm(x[2], m[x[0]] || ''); });
+        data.nameEn = edNorm('en', r.sNameEn); data.father = edNorm('text', r.sFather); data.mother = edNorm('text', r.sMother);
+        var newRoll = edBn2en(r.sRoll).trim();
+        google.script.run.withSuccessHandler(function () {
+          if (newRoll === String(s.roll)) { one(); return; }
+          google.script.run.withSuccessHandler(one)
+            .withFailureHandler(function (e) { stop(e, 'Roll ' + s.roll + ' সরানো যায়নি: '); })
+            .moveStudent(TOKEN, m.id, cls, newRoll);
+        }).withFailureHandler(function (e) { stop(e, 'Roll ' + s.roll + ': '); }).updateStudentInfo(TOKEN, m.id, data);
+      }
+      one();
+    }).withFailureHandler(function (e) { stop(e); }).getStudentsForEdit(TOKEN, cls);
   }
 
   function ffSave() {
@@ -5248,6 +5334,11 @@ button:active{transform:scale(.97)}
         return;
       }
     }
+    var stuKeys = ffStuChanged(keys, byKey);                  // পরিচয়ের ঘর (রোল/নাম/পিতা/মাতা) বদলেছে এমন শিক্ষার্থী
+    var stuErr = ffStuCheck(stuKeys, byKey);
+    if (stuErr) { toast(stuErr, true); return; }
+    if (stuKeys.some(function (k) { return edBn2en(ffRec[k].sRoll).trim() !== String(byKey[k].roll); }) &&
+        !confirm('রোল বদলালে পুরোনো হাজিরা সহ নতুন রোলে সরানো হবে। চালিয়ে যাবেন?')) return;
     var rcCnt = {};                                           // একই রসিদ নম্বর একাধিকজনে থাকলে নিশ্চিত করা
     ffData.students.forEach(function (s0) {
       var rc = String((ffRec[s0.key] || {}).receipt || '').trim().toLowerCase();
@@ -5258,22 +5349,26 @@ button:active{transform:scale(.97)}
       var rc = String(ffRec[k0].receipt || '').trim().toLowerCase();
       if (!dupRc && rc && rcCnt[rc] > 1) dupRc = String(ffRec[k0].receipt).trim();
     });
-    if (dupRc && !confirm('রসিদ নম্বর "' + dupRc + '" একাধিক জনের জন্য আছে (ভাইবোন হলে ঠিক আছে)। তবুও সংরক্ষণ করবেন?')) return;
-    var cls = ffData.cls, type = ffData.type || ffType, size = 25, pos = 0, ok = 0, syncOk = 0, syncBad = '', qdone = false, both = !!$('ffBoth').checked;
+    if (dupRc && !confirm('রসিদ নম্বর "' + dupRc + '" একাধিক জনের জন্য আছে (ভাইবোন হলে ঠিক আছে)। তবুও সাবমিট করবেন?')) return;
+    var cls = ffData.cls, type = ffData.type || ffType, size = 10, pos = 0, ok = 0, syncOk = 0, syncBad = '', qdone = false, both = !!$('ffBoth').checked;
     $('ffSaveBtn').disabled = true;
 
     function next() {
       if (pos >= keys.length) {
-        loading(false);
-        ffStatsUpdate();
-        if (qdone) toast('📴 Saved offline — will submit automatically when online', false);
-        else if (syncBad) toast(bn(ok) + ' জন সংরক্ষিত, কিন্তু শিটে জমা হয়নি: ' + syncBad, true);
-        else toast(bn(ok) + ' জনের তথ্য সংরক্ষিত' + (syncOk ? ' and submitted to the class sheet' : '') + ' done', false);
+        function finish() {
+          loading(false);
+          ffStatsUpdate();
+          if (qdone) toast('📴 Saved offline — will be submitted automatically when online', false);
+          else if (syncBad) toast(bn(ok) + ' জন সাবমিটেড, কিন্তু শিটে জমা হয়নি: ' + syncBad, true);
+          else toast(bn(ok) + ' জনের তথ্য সাবমিটেড' + (syncOk ? ' (class sheet-এও জমা হয়েছে)' : ''), false);
+        }
+        if (!stuKeys.length || qdone) { finish(); return; }
+        ffStuSave(stuKeys, byKey, cls, finish);
         return;
       }
       var chunk = keys.slice(pos, pos + size);
       pos += size;
-      loading(true, 'Saving... ' + bn(Math.min(pos, keys.length)) + '/' + bn(keys.length));
+      loading(true, 'Submitting... ' + bn(Math.min(pos, keys.length)) + '/' + bn(keys.length));
       var items = chunk.map(function (k) {
         var r = ffRec[k];
         return { key: k, regNo: r.regNo, boardRoll: r.boardRoll, fourth: r.fourth, fee: r.fee, paid: r.paid,
