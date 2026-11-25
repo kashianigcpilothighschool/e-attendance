@@ -1,209 +1,7747 @@
-// স্মার্ট স্কুল — শুধু হাজিরা অ্যাপের (আলাদা Vercel project) Service Worker
-// অটো আপডেট: FILES-এর কোনো ফাইল (পেজ, notice.js, লোগো, আইকন…) বদলালে SW নিজেই ধরে ব্যানার দেখায়; VERSION হাতে বাড়াতে হয় না।
-var VERSION = 'v16';
-var BASE = new URL(self.registration.scope).pathname;   // যে ফোল্ডারে বসানো, সেটিই scope (মূল সাইটের সাথে মেলে না)
-var META = 'att-meta';   // ফাইলের হ্যাশ জমা থাকে (VERSION বদলালেও মোছে না)
-var SHELL = 'att-shell-' + VERSION;
-var RUNTIME = 'att-runtime-' + VERSION;
-var APP = BASE;   // এই project-এ অ্যাপ মূল পথেই থাকে
-var MAX_RUNTIME = 200, MAX_PAGES = 80;
-var FILES = [BASE, BASE + 'manifest.webmanifest', BASE + 'icon-192.png', BASE + 'icon-512.png', BASE + 'maskable-192.png', BASE + 'maskable-512.png'];
-var CORE = {}; CORE[BASE] = 1; CORE[BASE + 'manifest.webmanifest'] = 1; CORE[BASE + 'icon-192.png'] = 1; CORE[BASE + 'icon-512.png'] = 1;
-
-var OFFLINE_HTML = '<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>অফলাইন</title>' +
-  '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#4c6b1f;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px}' +
-  'h1{font-size:22px;margin:8px 0}p{opacity:.92;line-height:1.7}a,button{display:inline-block;margin:6px;padding:12px 20px;border-radius:99px;border:0;font-size:16px;font-weight:600;text-decoration:none;cursor:pointer}' +
-  'a{background:#fff;color:#4c6b1f}button{background:#c8102e;color:#fff}</style></head><body><div style="max-width:360px"><div style="font-size:48px">📴</div><h1>আপনি এখন অফলাইনে আছেন</h1>' +
-  '<p>এই পেজটি আগে খোলা হয়নি, তাই ফোনে জমা নেই। ইন্টারনেট চালু করে আবার চেষ্টা করুন।</p>' +
-  '<button onclick="location.reload()">আবার চেষ্টা করুন</button><a href="' + BASE + '">হাজিরা অ্যাপ</a></div></body></html>';
-
-// দুর্বল নেটে fetch যেন ঝুলে না থাকে
-function fetchT(url, opt, ms) {
-  opt = opt || {};
-  if (typeof AbortController === 'undefined') return fetch(url, opt);
-  var c = new AbortController(), t = setTimeout(function () { c.abort(); }, ms || 15000);
-  opt.signal = c.signal;
-  return fetch(url, opt).then(function (r) { clearTimeout(t); return r; }, function (e) { clearTimeout(t); throw e; });
-}
-function offlinePage() {
-  return new Response(OFFLINE_HTML, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-}
-function clean(res) {
-  if (res && res.redirected) return new Response(res.body, { status: 200, statusText: 'OK', headers: res.headers });
-  return res;
-}
-function isApp(url) { return url.pathname === BASE || url.pathname === BASE + 'index.html'; }
-function isHome(url) { return isApp(url); }
-function watched(url) { return isApp(url) || isHome(url); }
-function cacheKey(url) {
-  var p = url.pathname;
-  if (p === BASE + 'index.html') p = BASE;
-  return new Request(url.origin + p);
-}
-function digest(res) {
-  return res.clone().arrayBuffer().then(function (b) { return crypto.subtle.digest('SHA-1', b); }).then(function (h) {
-    return Array.prototype.map.call(new Uint8Array(h), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
-  });
-}
-function notifyUpdated() {
-  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (cs) {
-    cs.forEach(function (c) { c.postMessage({ type: 'CONTENT_UPDATED' }); });
-  });
-}
-function changed(oldRes, newRes) {
-  if (!oldRes || !newRes) return Promise.resolve();
-  return Promise.all([digest(oldRes), digest(newRes)]).then(function (h) {
-    if (h[0] !== h[1]) return notifyUpdated();
-  }).catch(function () {});
-}
-function trim(cache, max, keepCore) {
-  return cache.keys().then(function (keys) {
-    var extra = keys.length - max;
-    if (extra <= 0) return;
-    var del = [];
-    for (var i = 0; i < keys.length && del.length < extra; i++) {
-      var p = new URL(keys[i].url).pathname;
-      if (keepCore && CORE[p]) continue;
-      del.push(keys[i]);
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<base target="_top">
+<script>try { var _t = localStorage.getItem('att_theme'); if (_t) document.documentElement.setAttribute('data-theme', _t); } catch (e) {}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#004d38">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" href="icon-192.png" as="image">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Smart School">
+<link rel="preconnect" href="https://xemvwhqqpbxsdkqcscrg.supabase.co" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Student Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg:#f4f6f5; --surface:#ffffff; --ink:#101c1a; --mute:#5d6e6a; --line:#e2e9e7; --veil:rgba(244,246,245,.88);
+    --pine:#006a4e; --pine-d:#004d38; --pine-l:#dff1ea; --mint:#5fe0b4; --on-pine:#ffffff;
+    --p:#12995a; --p-l:#e1f4ea; --p-t:#0f6c3f;
+    --a:#e8273d; --a-l:#fde8ea; --a-t:#a4162a;
+    --l:#c98a00; --l-l:#fff1cc; --l-t:#7a5600;
+    --t:#3569d6; --t-l:#e5edfd; --t-t:#1d4a9c;
+    --shadow:0 8px 28px rgba(8,56,47,.16);
+  }
+  @media (prefers-color-scheme:dark) {
+    :root {
+      --bg:#0b1312; --surface:#142120; --ink:#e7f0ed; --mute:#92a6a1; --line:#243633; --veil:rgba(11,19,18,.86);
+      --pine:#3fc9a0; --pine-d:#0a2a24; --pine-l:#173029; --on-pine:#06201a;
+      --p:#22b46f; --p-l:#12301f; --p-t:#6fdca0;
+      --a:#ec5a54; --a-l:#3a1816; --a-t:#ff9b95;
+      --l:#d99a10; --l-l:#3a2c0a; --l-t:#f0c866;
+      --t:#5b8cf0; --t-l:#172a4d; --t-t:#a3c0ff;
+      --shadow:0 8px 28px rgba(0,0,0,.5);
     }
-    return Promise.all(del.map(function (k) { return cache.delete(k); }));
-  });
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); padding-bottom:170px;
+         font-family:"Anek Bangla","Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif; font-size:16px; line-height:1.5; }
+  body.nobar { padding-bottom:32px; }
+  body.nobar .bar { display:none; }
+  button, input, select { font-family:inherit; color:inherit; }
+  button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible { outline:3px solid var(--mint); outline-offset:2px; }
+
+  /* ===== শীর্ষ অংশ ===== */
+  header { background:var(--pine-d); color:#fff; padding:calc(20px + env(safe-area-inset-top)) 18px 56px; border-radius:0 0 26px 26px; }
+  .head-in { max-width:720px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  header #title { font-size:23px; font-weight:700; line-height:1.2; }
+  header small { display:block; font-size:14px; color:var(--mint); margin-top:3px; }
+  .today { font-size:12px; text-align:right; color:#b9e6d8; white-space:nowrap; border-left:2px solid rgba(255,255,255,.18); padding-left:12px; }
+  .today b { display:block; font-size:18px; font-weight:600; color:#fff; }
+
+  .tabs { position:sticky; top:8px; z-index:5; margin:-34px 12px 0; }
+  .tabs-in { max-width:696px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:2px; padding:4px;
+             background:var(--surface); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); }
+  .tab { display:flex; flex-direction:column; align-items:center; gap:1px; padding:8px 0 6px; font-size:12.5px; font-weight:500;
+         border:none; background:none; color:var(--mute); border-radius:14px; cursor:pointer; transition:background .15s,color .15s; }
+  .tab svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .tab.on { background:var(--pine-d); color:#fff; font-weight:600; }
+  @media (prefers-color-scheme:dark) { .tab.on { background:var(--pine); color:var(--on-pine); } }
+
+  .wrap { padding:16px 14px 0; max-width:720px; margin:0 auto; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:16px; margin-bottom:12px; }
+  label { display:block; font-size:13px; font-weight:500; color:var(--mute); margin-bottom:6px; }
+  select, input[type=date], input[type=month], input[type=search] {
+    width:100%; padding:11px 14px; font-size:16px; border:1.5px solid var(--line); border-radius:12px;
+    background:var(--bg); color:var(--ink); min-height:48px; appearance:none; -webkit-appearance:none; }
+  select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23889a96' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+           background-repeat:no-repeat; background-position:right 14px center; padding-right:38px; }
+  select:focus, input:focus { border-color:var(--pine); background-color:var(--surface); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .note { font-size:14px; color:var(--l-t); background:var(--l-l); border-radius:12px; padding:9px 12px; margin-top:12px; }
+  .note:empty { display:none; }
+  .note.err { color:var(--a-t); background:var(--a-l); font-weight:600; }
+
+  /* ===== হাজিরার সারসংক্ষেপ ===== */
+  .hero { display:flex; align-items:center; gap:18px; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:16px; margin-bottom:12px; }
+  .ring { --pc:0; flex:none; width:92px; height:92px; border-radius:50%; position:relative;
+          background:conic-gradient(var(--pine) calc(var(--pc) * 1%), var(--line) 0); }
+  .ring::after { content:""; position:absolute; inset:9px; border-radius:50%; background:var(--surface); }
+  .ring b { position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+            font-size:22px; font-weight:700; line-height:1.05; }
+  .ring b small { font-size:11px; font-weight:400; color:var(--mute); margin-top:2px; }
+  .hcount { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+  .hc { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--mute); }
+  .hc i { width:9px; height:9px; border-radius:50%; flex:none; }
+  .hc b { font-size:20px; color:var(--ink); font-weight:700; min-width:24px; }
+  .hc.s0 i { background:var(--p); } .hc.s1 i { background:var(--a); }
+  .hc.s2 i { background:var(--l); } .hc.s3 i { background:var(--t); }
+
+  /* ===== হাজিরা তালিকা ===== */
+  .tools { display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .tools::-webkit-scrollbar { display:none; }
+  .chipbtn { flex:none; padding:9px 15px; font-size:14px; font-weight:600; border-radius:99px; cursor:pointer;
+             border:1px solid var(--line); background:var(--surface); color:var(--pine); min-height:42px; }
+  .chipbtn.p { color:var(--p-t); background:var(--p-l); border-color:transparent; }
+  .chipbtn.a { color:var(--a-t); background:var(--a-l); border-color:transparent; }
+  .row { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:8px; position:relative;
+         transition:background .15s, box-shadow .15s; }
+  .row[data-s="1"] { background:var(--a-l); box-shadow:inset 4px 0 0 var(--a); }
+  .row[data-s="2"] { background:var(--l-l); box-shadow:inset 4px 0 0 var(--l); }
+  .row[data-s="3"] { background:var(--t-l); box-shadow:inset 4px 0 0 var(--t); }
+  .who { display:flex; align-items:center; gap:12px; margin-bottom:10px; min-width:0; }
+  .roll { min-width:38px; height:38px; padding:0 8px; border-radius:50%; background:var(--pine-l); color:var(--pine);
+          font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; flex:none; }
+  .name { font-size:17px; font-weight:600; line-height:1.3; }
+  .detail { font-size:14px; color:var(--mute); margin-bottom:10px; }
+  .btns { display:grid; gap:2px; padding:3px; background:var(--bg); border-radius:13px; }
+  .row[data-s="1"] .btns, .row[data-s="2"] .btns, .row[data-s="3"] .btns { background:rgba(127,127,127,.12); }
+  .sb { padding:6px 0 5px; border:none; border-radius:10px; background:transparent; color:var(--mute);
+        display:flex; flex-direction:column; align-items:center; line-height:1.2; cursor:pointer; min-height:48px;
+        transition:transform .1s, background .15s; }
+  .sb:active { transform:scale(.95); }
+  .sb .sc { font-size:16px; font-weight:700; }
+  .sb .sl { font-size:11.5px; }
+  .sb.on.s0 { background:var(--p); color:#fff; }
+  .sb.on.s1 { background:var(--a); color:#fff; }
+  .sb.on.s2 { background:var(--l); color:#fff; }
+  .sb.on.s3 { background:var(--t); color:#fff; }
+  @media (min-width:560px) {
+    .row:has(.btns) { display:flex; align-items:center; gap:14px; }
+    .row:has(.btns) .who { flex:1; margin-bottom:0; }
+    .row:has(.btns) .btns { width:300px; flex:none; }
+  }
+  .legend { font-size:13px; color:var(--mute); margin:-4px 0 12px; line-height:1.6; }
+
+  /* ===== নিচের ভাসমান জমা বার ===== */
+  .bar { position:fixed; left:10px; right:10px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:6; }
+  .bar-in { max-width:700px; margin:0 auto; background:var(--veil); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+            border:1px solid var(--line); border-radius:22px; padding:12px; box-shadow:var(--shadow); }
+  .meter { display:flex; height:5px; border-radius:3px; overflow:hidden; background:var(--line); margin-bottom:8px; gap:2px; }
+  .meter span { display:block; height:100%; transition:width .25s; }
+  .meter .m0 { background:var(--p); } .meter .m1 { background:var(--a); }
+  .meter .m2 { background:var(--l); } .meter .m3 { background:var(--t); }
+  .sum { font-size:14px; color:var(--mute); margin-bottom:9px; text-align:center; }
+  .save, .act { width:100%; padding:14px; font-size:17px; font-weight:700; border:none; border-radius:14px; cursor:pointer;
+                background:var(--pine-d); color:#fff; min-height:52px; }
+  @media (prefers-color-scheme:dark) { .save, .act { background:var(--pine); color:var(--on-pine); } }
+  .save:active, .act:active { opacity:.88; }
+  .save:disabled, .act:disabled { background:var(--line); color:var(--mute); cursor:default; }
+  .act { font-size:15px; padding:12px; }
+  .act.alt { background:var(--pine-l); color:var(--pine); }
+  .btn2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .empty { text-align:center; color:var(--mute); padding:34px 14px; background:var(--surface); border:1px dashed var(--line); border-radius:16px; }
+  .empty b { display:block; color:var(--ink); font-size:16px; margin-bottom:6px; }
+  .empty ul { text-align:left; margin:8px auto 0; padding-left:20px; max-width:420px; font-size:14px; line-height:1.7; }
+  .toast { position:fixed; left:50%; top:calc(14px + env(safe-area-inset-top)); transform:translateX(-50%); background:var(--pine-d); color:#fff;
+           padding:12px 20px; border-radius:14px; font-size:15px; font-weight:500; z-index:30; max-width:90%;
+           display:none; text-align:center; box-shadow:var(--shadow); }
+  .toast.err { background:var(--a); }
+  .loading { position:fixed; inset:0; background:var(--veil); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); z-index:20; display:none;
+             align-items:center; justify-content:center; flex-direction:column; gap:12px; font-size:16px; color:var(--ink); }
+  .spin { width:34px; height:34px; border-radius:50%; border:4px solid var(--line); border-top-color:var(--pine); animation:sp .8s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce) {
+    .spin { animation-duration:3s; } .meter span, .sb, .row, .tab { transition:none; } html { scroll-behavior:auto; }
+  }
+
+  /* ===== সারাংশ ===== */
+  .chips { display:grid; grid-template-columns:repeat(auto-fit,minmax(70px,1fr)); gap:8px; }
+  .chip { border-radius:14px; padding:10px 4px; text-align:center; font-size:12px; color:#fff; }
+  .chip b { display:block; font-size:24px; line-height:1.2; }
+  .chip.s0 { background:var(--p); } .chip.s1 { background:var(--a); }
+  .chip.s2 { background:var(--l); } .chip.s3 { background:var(--t); }
+  .cls-title { font-size:17px; font-weight:700; margin-bottom:8px; }
+  .pill { display:inline-block; font-size:13px; font-weight:500; padding:4px 11px; border-radius:99px; margin:0 6px 6px 0; }
+  .pill.s0 { background:var(--p-l); color:var(--p-t); } .pill.s1 { background:var(--a-l); color:var(--a-t); }
+  .pill.s2 { background:var(--l-l); color:var(--l-t); } .pill.s3 { background:var(--t-l); color:var(--t-t); }
+  .warn { color:var(--l-t); font-size:14px; font-weight:500; }
+  .abs { font-size:14px; color:var(--ink); line-height:1.7; }
+
+  /* ===== মাসিক ছক ===== */
+  .tw { overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:16px; margin-bottom:12px; }
+  table.mt { border-collapse:separate; border-spacing:0; font-size:13px; width:max-content; min-width:100%; }
+  .mt th, .mt td { padding:9px 6px; border-bottom:1px solid var(--line); text-align:center; white-space:nowrap; background:var(--surface); }
+  .mt th { background:var(--pine-l); color:var(--pine); font-weight:600; }
+  .mt .c1 { position:sticky; left:0; z-index:2; width:44px; min-width:44px; max-width:44px; }
+  .mt .c2 { position:sticky; left:44px; z-index:2; text-align:left; white-space:normal; min-width:110px; max-width:140px;
+            border-right:1px solid var(--line); }
+  .mt tr.low td.c1, .mt tr.low td.c2, .mt tr.low td.pc { background:var(--a-l); }
+  .mt td.m0 { background:var(--p-l); color:var(--p-t); }
+  .mt td.m1 { background:var(--a-l); color:var(--a-t); font-weight:700; }
+  .mt td.m2 { background:var(--l-l); color:var(--l-t); }
+  .mt td.m3 { background:var(--t-l); color:var(--t-t); }
+  .mt td.pc { font-weight:700; }
+  .exp { display:none; margin-top:12px; font-size:15px; color:var(--pine); font-weight:600; }
+
+  /* ===== সতর্কতা ===== */
+  .acts { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .abtn { display:inline-block; padding:9px 16px; font-size:14px; font-weight:600; border-radius:99px; border:none; cursor:pointer;
+          background:var(--p); color:#fff; text-decoration:none; min-height:40px; line-height:22px; }
+  .abtn.alt { background:var(--pine-l); color:var(--pine); }
+  .ph { font-size:13px; color:var(--mute); }
+  h3 { font-size:16px; margin:20px 2px 10px; color:var(--pine); }
+  #printArea { display:none; }
+
+  /* ===== আধুনিক রূপ (v3) ===== */
+  body { padding-bottom:250px; }
+  body.nobar { padding-bottom:110px; }
+
+  header { position:relative; overflow:hidden; border-radius:0 0 34px 34px; padding:calc(22px + env(safe-area-inset-top)) 20px 34px;
+           background:radial-gradient(circle at 88% -10%, rgba(79,214,168,.38), transparent 46%),
+                      radial-gradient(circle at -5% 115%, rgba(79,214,168,.18), transparent 42%), var(--pine-d); }
+  header #title { font-size:26px; letter-spacing:-.3px; }
+  header small { font-size:14px; }
+  .today { border:none; padding:9px 15px; text-align:center; background:rgba(255,255,255,.1); border-radius:18px;
+           -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  .today b { font-size:16px; line-height:1.35; }
+  .today { white-space:normal; max-width:190px; }
+
+  /* নিচের নেভিগেশন (অ্যাপের মতো) */
+  .tabs { position:fixed; top:auto; left:0; right:0; bottom:0; margin:0; z-index:8; padding:0 10px calc(8px + env(safe-area-inset-bottom)); pointer-events:none; }
+  .tabs-in { pointer-events:auto; background:var(--veil); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+             border-radius:24px; padding:5px; }
+  .tab { padding:7px 0 6px; font-size:12px; }
+  .tab svg { width:24px; height:24px; }
+  .tab.on { background:var(--pine-l); color:var(--pine); font-weight:700; }
+  .bar { bottom:calc(86px + env(safe-area-inset-bottom)); }
+
+  .wrap { padding-top:18px; }
+  .card { border-radius:22px; }
+  select, input[type=date], input[type=month], input[type=search] { background:var(--surface); border-radius:14px; min-height:50px; }
+  select:focus, input:focus { box-shadow:0 0 0 4px var(--pine-l); }
+
+  /* হিরো রিং */
+  .hero { background:linear-gradient(135deg, var(--pine-l), var(--surface) 70%); border-radius:24px; padding:18px; }
+  .ring { width:106px; height:106px; background:conic-gradient(from 0deg, var(--pine), var(--mint) calc(var(--pc) * 1%), var(--line) 0); }
+  .ring::after { inset:10px; }
+  .ring b { font-size:25px; }
+  .hc b { font-size:22px; }
+
+  .chipbtn { box-shadow:0 1px 2px rgba(0,0,0,.06); }
+
+  /* সারি */
+  .row { border-radius:18px; padding:13px 14px; }
+  .roll { width:42px; height:42px; min-width:42px; font-size:16px; transition:background .15s,color .15s; }
+  .row[data-s="0"] .roll { background:var(--p-l); color:var(--p-t); }
+  .row[data-s="1"] .roll { background:var(--a); color:#fff; }
+  .row[data-s="2"] .roll { background:var(--l); color:#fff; }
+  .row[data-s="3"] .roll { background:var(--t); color:#fff; }
+  .btns { border-radius:15px; padding:4px; }
+  .sb { border-radius:12px; min-height:50px; }
+  .sb.on { box-shadow:0 3px 10px rgba(0,0,0,.2); animation:pop .18s ease-out; }
+  @keyframes pop { from { transform:scale(.9); } to { transform:scale(1); } }
+
+  /* জমা বার */
+  .bar-in { border-radius:24px; }
+  .save { min-height:56px; border-radius:16px; font-size:18px; background:linear-gradient(135deg,var(--pine-d),var(--pine)); color:#fff;
+          box-shadow:0 6px 16px rgba(13,92,75,.35); }
+  .save:disabled { background:var(--line); box-shadow:none; }
+
+  .cls-title { display:flex; align-items:center; gap:9px; }
+  .cls-title::before { content:""; width:5px; height:20px; border-radius:3px; background:var(--pine); flex:none; }
+  .chip { border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .act { border-radius:16px; }
+
+  @media (prefers-color-scheme:dark) {
+    .save { background:var(--pine); color:var(--on-pine); box-shadow:none; }
+    .row[data-s="0"] .roll { color:var(--p-t); }
+  }
+  @media (prefers-reduced-motion:reduce) { .sb.on { animation:none; } }
+
+  /* ===== আরও স্পষ্ট বোতাম (v4) ===== */
+  .sb { min-height:54px; }
+  .sb .sc { font-size:17px; }
+  .sb .sl { font-size:12px; }
+  .sb:not(.on) { border:1.5px solid transparent; }
+  .sb:not(.on):hover { background:rgba(127,127,127,.12); }
+  .sb.on { font-weight:700; }
+  .save { min-height:58px; letter-spacing:.2px; }
+  .chipbtn { min-height:44px; }
+
+  /* ===== লগইন ===== */
+  input[type=text], input[type=password], input[type=email] {
+    width:100%; padding:11px 14px; font-size:16px; border:1.5px solid var(--line); border-radius:14px;
+    background:var(--surface); color:var(--ink); min-height:50px; appearance:none; -webkit-appearance:none; }
+  input[type=text]:focus, input[type=password]:focus, input[type=email]:focus { border-color:var(--pine); box-shadow:0 0 0 4px var(--pine-l); }
+  .lg-gap { margin-bottom:12px; }
+  .pw { position:relative; }
+  .pw input { padding-right:84px; }
+  .pwbtn { position:absolute; right:6px; top:50%; transform:translateY(-50%); padding:7px 12px; font-size:13px; font-weight:600;
+           border:none; border-radius:10px; cursor:pointer; background:var(--pine-l); color:var(--pine); min-height:38px; }
+  .hright { display:flex; flex-direction:column; align-items:flex-end; gap:8px; min-width:0; }
+  .userbar { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; margin-top:0; text-align:right; }
+  .userbar small { margin-top:0; }
+  .logout { margin-top:0; padding:5px 14px; font-size:13px; font-weight:600; border-radius:99px; cursor:pointer;
+            border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.1); color:#fff; }
+
+  /* ===== লগইন: কমলা-লাল মোবাইল-ওয়ালেট ধাঁচ ===== */
+  .lg-hero { display:none; }
+  body.lgmode { background:linear-gradient(165deg,#f7931e 0%,#ee4023 52%,#cf2417 100%); background-attachment:fixed;
+                min-height:100vh; padding-bottom:28px; }
+  body.lgmode header { display:none; }
+  body.lgmode #login { padding-top:calc(8px + env(safe-area-inset-top)); }
+  body.lgmode .lg-hero { display:block; text-align:center; color:#fff; padding:40px 0 24px; }
+  .lg-logo { width:80px; height:80px; border-radius:26px; background:#fff; margin:0 auto 16px; display:flex;
+             align-items:center; justify-content:center; box-shadow:0 12px 28px rgba(110,15,0,.35); }
+  .lg-logo svg { width:42px; height:42px; fill:none; stroke:#ee4023; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
+  .lg-app { font-size:26px; font-weight:700; letter-spacing:-.2px; }
+  .lg-sub { font-size:15px; opacity:.92; margin-top:4px; }
+  body.lgmode .lg-card { border:none; border-radius:30px; padding:24px 20px 22px; box-shadow:0 22px 48px rgba(100,12,0,.38); }
+  body.lgmode .lg-card .cls-title { font-size:19px; margin-bottom:16px; }
+  body.lgmode .lg-card .cls-title::before { background:#ee4023; }
+  body.lgmode .lg-card label { font-weight:600; color:var(--mute); }
+  body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] {
+    border-radius:16px; min-height:54px; font-size:17px; background:var(--bg); border-color:transparent; }
+  body.lgmode .lg-card input:focus { border-color:#ee4023; background:var(--surface); box-shadow:0 0 0 4px rgba(238,64,35,.16); }
+  body.lgmode .pwbtn { background:#ffe9df; color:#cf2417; border-radius:12px; }
+  body.lgmode #lgBtn { background:linear-gradient(135deg,#f7931e,#ee4023); color:#fff; border-radius:99px; min-height:58px; font-size:18px;
+                       box-shadow:0 10px 22px rgba(238,64,35,.42); margin-top:6px; }
+  body.lgmode #lgBtn:disabled { opacity:.65; box-shadow:none; }
+  body.lgmode .lg-card .note { text-align:center; }
+  .lg-foot { display:none; }
+  body.lgmode .lg-foot { display:block; text-align:center; color:rgba(255,255,255,.9); font-size:13px; margin:18px 0 6px; }
+  body.lgmode .loading { background:rgba(120,20,0,.35); color:#fff; }
+  body.lgmode .spin { border-color:rgba(255,255,255,.35); border-top-color:#fff; }
+
+  /* ===== লগইন: আরও জমকালো রূপ ===== */
+  #login { position:relative; z-index:1; }
+  .lg-orb { display:none; position:fixed; border-radius:50%; pointer-events:none; z-index:0; }
+  body.lgmode .lg-orb { display:block; }
+  .lg-orb.o1 { width:300px; height:300px; top:-90px; right:-80px; background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.32), rgba(255,255,255,.04) 70%); animation:floaty 9s ease-in-out infinite alternate; }
+  .lg-orb.o2 { width:220px; height:220px; bottom:12%; left:-90px; background:radial-gradient(circle at 60% 40%, rgba(255,214,150,.38), rgba(255,214,150,.03) 70%); animation:floaty 11s ease-in-out -3s infinite alternate; }
+  .lg-orb.o3 { width:130px; height:130px; top:38%; right:-40px; background:radial-gradient(circle at 40% 40%, rgba(255,255,255,.25), rgba(255,255,255,0) 70%); animation:floaty 8s ease-in-out -5s infinite alternate; }
+  @keyframes floaty { from { transform:translate(0,0) scale(1); } to { transform:translate(-18px,26px) scale(1.08); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } }
+  @keyframes ring { 0% { transform:scale(.9); opacity:.7; } 100% { transform:scale(1.55); opacity:0; } }
+  @keyframes shine { 0% { left:-60%; } 60%,100% { left:130%; } }
+
+  body.lgmode .lg-hero { animation:fadeUp .6s ease-out both; }
+  body.lgmode .lg-card { animation:fadeUp .6s .12s ease-out both; background:rgba(255,255,255,.97); }
+  body.lgmode .lg-foot { animation:fadeUp .6s .24s ease-out both; }
+  @media (prefers-color-scheme:dark) { body.lgmode .lg-card { background:rgba(24,34,33,.96); } }
+
+  .lg-logo { position:relative; }
+  .lg-logo::after { content:""; position:absolute; inset:0; border-radius:26px; border:2px solid rgba(255,255,255,.7); animation:ring 2.4s ease-out infinite; }
+  .lg-logo svg { width:44px; height:44px; }
+  .lg-app { text-shadow:0 2px 12px rgba(110,15,0,.35); }
+  .lg-sub { letter-spacing:.2px; }
+
+  .fld { position:relative; }
+  .fi { position:absolute; left:16px; top:50%; transform:translateY(-50%); width:21px; height:21px; fill:none; stroke:#ee4023; stroke-width:2;
+        stroke-linecap:round; stroke-linejoin:round; pointer-events:none; z-index:1; opacity:.85; }
+  body.lgmode .lg-card .fld input, body.lgmode .lg-card .pw input { padding-left:48px; }
+  body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] {
+    background:#f6f2ef; box-shadow:inset 0 1px 2px rgba(0,0,0,.05); }
+  @media (prefers-color-scheme:dark) {
+    body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] { background:#1d2c2a; }
+  }
+
+  body.lgmode #lgBtn { position:relative; overflow:hidden; letter-spacing:.3px; transition:transform .12s, box-shadow .2s; }
+  body.lgmode #lgBtn::after { content:""; position:absolute; top:0; bottom:0; width:40%; left:-60%;
+                              background:linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform:skewX(-18deg);
+                              animation:shine 3.4s ease-in-out infinite; }
+  body.lgmode #lgBtn:active { transform:scale(.975); box-shadow:0 5px 12px rgba(238,64,35,.4); }
+  body.lgmode .lg-foot { font-weight:500; letter-spacing:.2px; }
+
+  @media (prefers-reduced-motion:reduce) {
+    .lg-orb, .lg-logo::after, body.lgmode #lgBtn::after, body.lgmode .lg-hero, body.lgmode .lg-card, body.lgmode .lg-foot { animation:none !important; }
+  }
+
+  /* ===== পতাকার রঙ: সবুজ #006a4e ও লাল #f42a41 ===== */
+  header { border-bottom:4px solid #f42a41; }
+  .save { box-shadow:0 6px 16px rgba(0,106,78,.35); }
+
+  body.lgmode { background:linear-gradient(165deg,#00845f 0%,#006a4e 50%,#00402e 100%); background-attachment:fixed; }
+  body.lgmode .lg-logo { box-shadow:0 12px 28px rgba(0,35,25,.45); }
+  body.lgmode .lg-logo svg { stroke:#006a4e; }
+  body.lgmode .lg-app { text-shadow:0 2px 12px rgba(0,35,25,.4); }
+  body.lgmode .lg-card { box-shadow:0 22px 48px rgba(0,35,25,.42); }
+  body.lgmode .lg-card .cls-title::before { background:#f42a41; }
+  body.lgmode .lg-card input:focus { border-color:#006a4e; box-shadow:0 0 0 4px rgba(0,106,78,.18); }
+  body.lgmode .pwbtn { background:#dff1ea; color:#006a4e; }
+  body.lgmode #lgBtn { background:linear-gradient(135deg,#ff4d5f,#f42a41 55%,#d41830); box-shadow:0 10px 22px rgba(244,42,65,.42); }
+  body.lgmode #lgBtn:active { box-shadow:0 5px 12px rgba(244,42,65,.4); }
+  body.lgmode .loading { background:rgba(0,50,35,.4); }
+  .fi { stroke:#006a4e; }
+  .lg-orb.o1 { background:radial-gradient(circle at 30% 30%, rgba(244,42,65,.42), rgba(244,42,65,.04) 70%); }
+  .lg-orb.o2 { background:radial-gradient(circle at 60% 40%, rgba(120,235,185,.32), rgba(120,235,185,.03) 70%); }
+
+  /* ===== লগইন: ছোট ও সংক্ষিপ্ত রূপ ===== */
+  body.lgmode #login { max-width:400px; }
+  body.lgmode .lg-hero { padding:14px 0 12px; }
+  body.lgmode .lg-flag { width:72px; height:43px; margin:0 auto 12px; border-radius:5px; }
+  body.lgmode .lg-logo { width:54px; height:54px; border-radius:18px; margin:0 auto 10px; }
+  body.lgmode .lg-logo::after { border-radius:18px; }
+  body.lgmode .lg-logo svg { width:30px; height:30px; }
+  body.lgmode .lg-app { font-size:21px; }
+  body.lgmode .lg-sub { font-size:13px; margin-top:2px; }
+  body.lgmode .lg-card { padding:16px 16px 16px; border-radius:24px; }
+  body.lgmode .lg-card .cls-title { font-size:16px; margin-bottom:10px; }
+  body.lgmode .lg-card .cls-title::before { height:16px; }
+  body.lgmode .lg-card label { font-size:12px; margin-bottom:4px; }
+  body.lgmode .lg-gap { margin-bottom:8px; }
+  body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] {
+    min-height:44px; font-size:15px; padding-top:8px; padding-bottom:8px; border-radius:14px; }
+  body.lgmode .fi { width:19px; height:19px; left:14px; }
+  body.lgmode .lg-card .fld input, body.lgmode .lg-card .pw input { padding-left:42px; }
+  body.lgmode .pwbtn { min-height:30px; padding:4px 10px; font-size:12px; }
+  body.lgmode .lg-card .pw input { padding-right:72px; }
+  body.lgmode #lgBtn { min-height:46px; font-size:16px; margin-top:4px; }
+  body.lgmode .lg-foot { font-size:12px; margin:10px 0 2px; }
+
+  /* ===== জাতীয় পতাকা ===== */
+  .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+  .flag { width:48px; height:29px; flex:none; border-radius:4px; display:block;
+          box-shadow:0 0 0 1.5px rgba(255,255,255,.65), 0 4px 12px rgba(0,0,0,.35);
+          transform-origin:left center; animation:wave 3.2s ease-in-out infinite alternate; }
+  .lg-flag { width:104px; height:62px; margin:0 auto 20px; border-radius:6px; }
+  @keyframes wave {
+    from { transform:perspective(220px) rotateY(-11deg) skewY(-2deg); }
+    to   { transform:perspective(220px) rotateY(9deg) skewY(2deg); }
+  }
+  @media (prefers-reduced-motion:reduce) { .flag { animation:none; } }
+
+  /* ===== print ===== */
+  @media print {
+    html, body { background:#fff !important; padding:0 !important; margin:0 !important; }
+    body > *:not(#printArea) { display:none !important; }
+    #printArea { display:block; color:#000; background:#fff; font-size:12px; font-family:"Hind Siliguri","Noto Sans Bengali","Kalpurush",system-ui,sans-serif; }
+    .pr-head { text-align:center; margin-bottom:12px; padding-bottom:8px; border-bottom:3px double #000; }
+    .pr-school { font-size:21px; font-weight:700; letter-spacing:.3px; }
+    .pr-title { display:inline-block; font-size:15px; font-weight:700; margin-top:6px; padding:3px 22px; border:1.5px solid #000; border-radius:4px; }
+    .pr-meta { font-size:12px; margin-top:4px; }
+    .pr-foot { margin-top:14px; padding-top:5px; border-top:1px solid #000; font-size:10.5px; text-align:center; color:#333; }
+    .pr-sign small { display:block; font-size:10.5px; font-weight:400; color:#333; }
+    table.pt { border-collapse:collapse; width:100%; font-size:12px; }
+    .pt th, .pt td { border:1px solid #000; padding:4px 5px; text-align:center; }
+    .pt td.l { text-align:left; }
+    .pt th { background:#e8e8e8 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .pt tr { page-break-inside:avoid; }
+    .pt thead { display:table-header-group; }
+    .pt td.ab { font-weight:700; }
+    .pt td.bx { height:22px; }
+    .pt tr.tot td { font-weight:700; background:#f2f2f2 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .pt.dense { font-size:9px; }
+    .pt.dense th, .pt.dense td { padding:2px 1px; }
+    .pr-note { font-size:11px; margin-top:8px; line-height:1.5; }
+    .pr-sign { display:flex; justify-content:space-between; margin-top:56px; font-size:12px; page-break-inside:avoid; }
+    .pr-sign div { border-top:1px solid #000; padding-top:4px; min-width:150px; text-align:center; }
+  }
+  /* ===== নিবন্ধন ট্যাব ===== */
+  .tabs-in { grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:1fr; }
+  .tab { position:relative; }
+  .bdg { position:absolute; top:1px; left:calc(50% + 6px); min-width:18px; height:18px; padding:0 5px; border-radius:9px;
+         background:var(--a); color:#fff; font-size:11px; font-weight:700; line-height:18px; text-align:center; display:none; }
+  .reg-top { display:flex; gap:12px; align-items:center; margin-bottom:10px; }
+  .reg-ph { width:72px; height:88px; flex:none; border-radius:12px; background:var(--bg); border:1px solid var(--line);
+            display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--mute); overflow:hidden; text-align:center; }
+  .reg-ph img { width:100%; height:100%; object-fit:cover; display:block; }
+  .reg-inf { min-width:0; }
+  .reg-dl { margin-bottom:12px; }
+  .reg-ln { display:flex; gap:10px; font-size:14px; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .reg-ln .k { color:var(--mute); min-width:96px; flex:none; }
+  .reg-ln .v { word-break:break-word; }
+  .act.rej { background:var(--a-l); color:var(--a-t); }
+  .modal { position:fixed; inset:0; z-index:25; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.45); }
+  .modal.on { display:flex; }
+  .modal-in { background:var(--surface); width:min(560px,100%); max-height:92vh; overflow-y:auto; border-radius:22px 22px 0 0; padding:18px 16px 20px; }
+  @media (min-width:700px) { .modal { align-items:center; } .modal-in { border-radius:22px; } }
+  .modal-in h4 { margin:0 0 12px; font-size:18px; }
+  .ed-f { margin-bottom:10px; }
+  .ed-f label { margin-bottom:4px; }
+  .ed-ro { font-size:13px; color:var(--mute); background:var(--bg); border-radius:12px; padding:8px 12px; margin-bottom:12px; }
+  .reg-cb { width:24px; height:24px; flex:none; accent-color:var(--pine); cursor:pointer; }
+  .reg-bulk { position:sticky; top:8px; z-index:4; }
+  .reg-bk-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:15px; font-weight:600; }
+  .reg-bk-top span { font-weight:500; color:var(--mute); font-size:14px; }
+  /* ===== ড্যাশবোর্ড ধাঁচ (v5): সাইডবার, হিরো ব্যানার, শীর্ষ বার ===== */
+  :root[data-theme="dark"] { color-scheme:dark;
+    --bg:#0b1312; --surface:#142120; --ink:#e7f0ed; --mute:#92a6a1; --line:#243633; --veil:rgba(11,19,18,.86);
+    --pine:#3fc9a0; --pine-d:#0a2a24; --pine-l:#173029; --on-pine:#06201a;
+    --p:#22b46f; --p-l:#12301f; --p-t:#6fdca0; --a:#ec5a54; --a-l:#3a1816; --a-t:#ff9b95;
+    --l:#d99a10; --l-l:#3a2c0a; --l-t:#f0c866; --t:#5b8cf0; --t-l:#172a4d; --t-t:#a3c0ff;
+    --shadow:0 8px 28px rgba(0,0,0,.5); }
+  :root[data-theme="light"] { color-scheme:light;
+    --bg:#f4f6f5; --surface:#ffffff; --ink:#101c1a; --mute:#5d6e6a; --line:#e2e9e7; --veil:rgba(244,246,245,.88);
+    --pine:#006a4e; --pine-d:#004d38; --pine-l:#dff1ea; --mint:#5fe0b4; --on-pine:#ffffff;
+    --p:#12995a; --p-l:#e1f4ea; --p-t:#0f6c3f; --a:#e8273d; --a-l:#fde8ea; --a-t:#a4162a;
+    --l:#c98a00; --l-l:#fff1cc; --l-t:#7a5600; --t:#3569d6; --t-l:#e5edfd; --t-t:#1d4a9c;
+    --shadow:0 8px 28px rgba(8,56,47,.16); }
+  :root[data-theme="dark"] .tab.on { background:var(--pine); color:var(--on-pine); }
+  :root[data-theme="dark"] .save, :root[data-theme="dark"] .act:not(.alt):not(.rej) { background:var(--pine); color:var(--on-pine); box-shadow:none; }
+  :root[data-theme="dark"] .row[data-s="0"] .roll { color:var(--p-t); }
+
+  .card, .row { box-shadow:0 2px 10px rgba(8,56,47,.06); }
+  :root[data-theme="dark"] .card, :root[data-theme="dark"] .row { box-shadow:none; }
+
+  .side-brand { display:none; }
+  .pgt { display:none; }
+  #hbtns { display:none; gap:8px; align-items:center; }
+  .hbtn { padding:5px 12px; font-size:13px; font-weight:600; border-radius:99px; cursor:pointer; min-height:30px;
+          border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.1); color:#fff; }
+
+  a.hbtn { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; line-height:1; }
+  #homeBtn { font-size:16px; padding:5px 11px; }
+
+  /* হিরো ব্যানার */
+  #dash { padding-bottom:0; }
+  .dhero { position:relative; overflow:hidden; border-radius:26px; padding:20px 18px; color:#fff;
+           background:linear-gradient(135deg,#006a4e 0%,#0b8a62 55%,#1aa57a 100%); box-shadow:0 14px 30px rgba(0,106,78,.26); }
+  .dhero::before { content:""; position:absolute; width:220px; height:220px; border-radius:50%; right:-60px; top:-80px; background:rgba(255,255,255,.12); }
+  .dhero::after { content:""; position:absolute; width:150px; height:150px; border-radius:50%; right:60px; bottom:-90px; background:rgba(244,42,65,.28); }
+  .dh-t { position:relative; z-index:1; font-size:23px; font-weight:700; line-height:1.3; }
+  .dh-d { position:relative; z-index:1; font-size:14px; opacity:.9; margin-top:2px; }
+  .dh-chips { position:relative; z-index:1; display:flex; flex-wrap:nowrap; gap:6px; margin-top:14px; overflow-x:auto; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.5) transparent; padding-bottom:4px; }
+  .dh-chips::-webkit-scrollbar { height:4px; }
+  .dh-chips::-webkit-scrollbar-thumb { background:rgba(255,255,255,.5); border-radius:4px; }
+  .dchip { flex:1 0 auto; white-space:nowrap; justify-content:center; padding:9px 10px; font-size:13px; font-weight:600; border-radius:14px; cursor:pointer; color:#fff;
+           border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.16); min-height:42px; }
+  a.dchip { display:inline-flex; align-items:center; text-decoration:none; }
+  .dchip:active { background:rgba(255,255,255,.28); }
+  .pendb { width:100%; text-align:left; margin-top:12px; padding:12px 16px; border-radius:14px; cursor:pointer;
+           border:1px solid rgba(201,138,0,.35); background:var(--l-l); color:var(--l-t); font-weight:600; font-size:15px; }
+
+  /* ===== সম্পাদনা ফর্ম (উন্নত) ===== */
+  .ed-top { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+  .ed-top .ed-ro { flex:1; margin-bottom:0; }
+  .ed-f input.bad { border-color:var(--a); background:var(--a-l); }
+  .ed-f.chg input:not(.bad) { border-color:var(--l); }
+  .ed-f .ferr { font-size:12.5px; color:var(--a-t); margin-top:4px; }
+  .ed-f .ferr.warn2 { color:var(--l-t); }
+  .ed-f .ferr:empty { display:none; }
+  .ed-sec { font-size:13px; font-weight:700; color:var(--pine); margin:16px 0 8px; padding-bottom:4px; border-bottom:1px dashed var(--line); }
+  .ed-foot { position:sticky; bottom:-20px; background:var(--surface); padding:10px 0 2px; margin-top:8px; display:grid; gap:10px; }
+  .ed-cnt { font-size:13px; color:var(--mute); text-align:center; }
+
+  /* ===== প্রোমোশন পেজ ===== */
+  .pro-main { display:flex; align-items:center; gap:10px; }
+  .pro-old { flex:none; text-align:center; }
+  .pro-old small, .pro-new small { display:block; font-size:10.5px; color:var(--mute); margin-bottom:2px; line-height:1.2; }
+  .pro-old .roll { width:auto; min-width:42px; padding:0 10px; border-radius:21px; margin:0 auto; background:var(--bg); color:var(--ink); }
+  .pro-nm { flex:1; min-width:0; }
+  .pro-arrow { flex:none; color:var(--pine); font-weight:700; font-size:20px; }
+  .pro-new { flex:none; width:88px; text-align:center; }
+  .pro-new small { color:var(--pine); font-weight:600; }
+  .pro-new input { text-align:center; font-weight:700; font-size:18px; padding:6px; min-height:46px; }
+  .pro-new input.dup { border-color:var(--a); background:var(--a-l); }
+  .pro-sub { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .pro-sub .detail { margin:0; flex:1; min-width:0; }
+  .pro-sub select { width:auto; flex:none; max-width:58%; min-height:42px; font-size:14px; }
+  .pro-prev { margin-top:12px; padding:10px 12px; border-radius:12px; background:var(--pine-l); font-size:14px; line-height:1.7; }
+  .pro-prev:empty { display:none; }
+  .pro-prev b { color:var(--pine); }
+  .pro-prev .pw2 { color:var(--a-t); font-weight:700; }
+  /* ===== প্রোমোশন ফর্ম (আধুনিক) ===== */
+  #t-pro { padding-bottom:150px; }
+  .pro-step { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .pro-step i { flex:none; width:32px; height:32px; border-radius:50%; background:var(--pine); color:var(--on-pine); font-style:normal;
+                font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .pro-step b { display:block; font-size:16px; line-height:1.25; }
+  .pro-step small { color:var(--mute); font-size:12.5px; }
+  .pro-hero { display:flex; align-items:stretch; gap:10px; margin-bottom:12px; }
+  .pf-box { flex:1; min-width:0; border-radius:20px; padding:12px 14px; background:var(--surface); border:1px solid var(--line); }
+  .pf-box.to { background:linear-gradient(135deg,#006a4e,#0b8a62); color:#fff; border-color:transparent; box-shadow:0 10px 22px rgba(0,106,78,.25); }
+  .pf-box small { display:block; font-size:11.5px; opacity:.75; }
+  .pf-box b { display:block; font-size:15.5px; line-height:1.35; margin:2px 0; }
+  .pf-box span { font-size:12.5px; opacity:.85; }
+  .pf-arrow { align-self:center; font-size:22px; color:var(--pine); font-weight:700; }
+  .pro-set { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .pro-prev { background:none; padding:0; margin-top:14px; }
+  .pchip { display:inline-block; padding:5px 12px; border-radius:99px; font-size:13px; font-weight:600; margin:0 6px 6px 0; }
+  .pchip.up { background:var(--p-l); color:var(--p-t); }
+  .pchip.same { background:var(--l-l); color:var(--l-t); }
+  .pchip.off { background:var(--line); color:var(--mute); }
+  .pchip.todo { background:var(--t-l); color:var(--t-t); }
+  .pchip.warn { background:var(--a-l); color:var(--a-t); }
+  .row.pro { padding:14px; }
+  .row.pro[data-a="up"] { box-shadow:inset 4px 0 0 var(--p); }
+  .row.pro[data-a="same"] { box-shadow:inset 4px 0 0 var(--l); }
+  .row.pro[data-a="off"] { box-shadow:inset 4px 0 0 var(--line); }
+  .pro-att { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:12.5px; color:var(--mute); }
+  .pro-track { flex:1; max-width:110px; height:5px; border-radius:3px; background:var(--line); overflow:hidden; }
+  .pro-track i { display:block; height:100%; background:var(--p); }
+  .pro-track i.low { background:var(--a); }
+  .seg { display:grid; grid-template-columns:1fr 1fr; gap:3px; padding:3px; margin-top:12px; background:var(--bg); border-radius:14px; }
+  .seg.one { grid-template-columns:1fr; }
+  .seg button { border:none; border-radius:11px; min-height:40px; font-size:13.5px; font-weight:600; background:transparent; color:var(--mute); cursor:pointer; }
+  .seg button.on.up { background:var(--p); color:#fff; box-shadow:0 3px 8px rgba(0,0,0,.18); }
+  .seg button.on.same { background:var(--l); color:#fff; box-shadow:0 3px 8px rgba(0,0,0,.18); }
+  .pro-bar { display:none; position:fixed; left:10px; right:10px; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:6; }
+  .pro-bar-in { max-width:700px; margin:0 auto; display:flex; align-items:center; gap:12px; padding:10px 12px;
+                background:var(--veil); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+                border:1px solid var(--line); border-radius:22px; box-shadow:var(--shadow); }
+  .pro-bar-t { flex:1; min-width:0; font-size:13px; color:var(--mute); line-height:1.5; }
+  .pro-bar .act { width:auto; flex:none; padding:12px 18px; min-height:50px; border-radius:16px; box-shadow:0 6px 14px rgba(0,106,78,.3); }
+  .pro-bar .act:disabled { box-shadow:none; }
+  @media (min-width:900px) { body.appmode .pro-bar { left:276px; right:16px; bottom:16px; } }
+  /* ===== হাজিরা (উন্নত) ===== */
+  .datenav { display:flex; gap:8px; margin-top:12px; overflow-x:auto; scrollbar-width:none; }
+  .datenav::-webkit-scrollbar { display:none; }
+  .chipbtn.on { background:var(--pine); color:var(--on-pine); border-color:transparent; }
+  .abs-line { font-size:14px; font-weight:600; color:var(--a-t); background:var(--a-l); border-radius:14px; padding:9px 14px; margin:-4px 0 12px; line-height:1.6; }
+  .abs-line:empty { display:none; }
+  .dot-un { color:var(--l-t); font-weight:700; }
+  /* বড় পর্দা: বাঁ সাইডবার + শীর্ষ বার */
+  @media (min-width:900px) {
+    body.appmode header, body.appmode #app { margin-left:260px; }
+    body.appmode header { background:var(--surface); color:var(--ink); border-radius:0; border-bottom:1px solid var(--line);
+                          padding:16px 28px; overflow:visible; }
+    body.appmode header .flag { display:none; }
+    body.appmode .pgt { display:block; font-size:24px; font-weight:700; line-height:1.2; }
+    body.appmode header #title { font-size:14px; font-weight:500; color:var(--mute); }
+    body.appmode header small, body.appmode #sess { color:var(--mute); display:inline !important; font-size:13px; margin-left:6px; }
+    body.appmode .today { display:none; }
+    body.appmode .head-in { max-width:none; }
+    body.appmode .hright { flex-direction:row; align-items:center; gap:14px; }
+    body.appmode .userbar { flex-wrap:nowrap; }
+    body.appmode .hbtn, body.appmode .logout { color:var(--ink); background:var(--surface); border:1px solid var(--line);
+                                               border-radius:12px; padding:8px 14px; font-size:14px; min-height:40px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    body.appmode .logout { color:var(--a-t); background:var(--a-l); border-color:transparent; }
+
+    body.appmode .tabs { top:0; bottom:0; left:0; right:auto; width:260px; margin:0; padding:20px 14px; overflow-y:auto;
+                         background:var(--surface); border-right:1px solid var(--line); }
+    body.appmode .tabs-in { display:flex; flex-direction:column; gap:6px; padding:0; max-width:none; margin:0;
+                            background:none; border:none; box-shadow:none; border-radius:0; -webkit-backdrop-filter:none; backdrop-filter:none; }
+    body.appmode .side-brand { display:flex; align-items:center; gap:12px; padding:2px 6px 16px; margin-bottom:12px; border-bottom:1px dashed var(--line); }
+    body.appmode .side-brand .flag { display:block; width:46px; height:28px; animation:none; }
+    body.appmode .sb-t { font-size:18px; font-weight:700; line-height:1.25; }
+    body.appmode .sb-s { font-size:13px; color:var(--mute); }
+    body.appmode .tab { flex-direction:row; justify-content:flex-start; gap:12px; width:100%; padding:9px 12px; font-size:16px; font-weight:500; border-radius:16px; }
+    body.appmode .tab svg { width:38px; height:38px; padding:8px; border-radius:12px; background:var(--bg); flex:none; }
+    body.appmode .tab.on { background:var(--pine-l); color:var(--pine); font-weight:700; }
+    body.appmode .tab.on svg { background:linear-gradient(135deg,var(--pine),var(--pine-d)); stroke:#fff; }
+    body.appmode .bdg { left:auto; right:12px; top:50%; transform:translateY(-50%); }
+
+    body.appmode .bar { left:276px; right:16px; bottom:16px; }
+    body { padding-bottom:230px; }
+    body.nobar { padding-bottom:40px; }
+    body.appmode .wrap { max-width:920px; }
+    .dhero { padding:26px 28px; }
+    .dh-t { font-size:28px; }
+  }
+
+  /* ===== হিরো ব্যানারের ডান পাশের তারিখ ===== */
+  .dh-row { position:relative; z-index:1; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .dh-row .dh-t { flex:1; min-width:0; }
+  .dh-dates { flex:none; max-width:52%; text-align:right; padding:8px 12px; border-radius:16px;
+              background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); font-size:13px; line-height:1.55; }
+  .dh-dates .dd-en { font-weight:700; font-size:14px; }
+  .dh-dates div:empty { display:none; }
+  @media (max-width:480px) { .dh-dates { font-size:12px; max-width:56%; } .dh-row .dh-t { font-size:20px; } }
+
+  /* ===== অফলাইন ব্যানার ===== */
+  #netBar { position:fixed; left:50%; top:calc(6px + env(safe-area-inset-top)); transform:translateX(-50%); z-index:28; display:none;
+            padding:5px 14px; border-radius:99px; font-size:13px; font-weight:600; background:var(--pine-d); color:#fff;
+            box-shadow:var(--shadow); white-space:nowrap; max-width:94%; overflow:hidden; text-overflow:ellipsis; }
+  #netBar.on { display:block; }
+  #netBar.off { background:var(--l); }
+  @media print { #netBar { display:none !important; } }
+
+  /* ===== ফরম ফিলাপ ===== */
+  #t-ff { padding-bottom:150px; }
+  .row.ff { padding:12px 14px; }
+  .row.ff[data-f="paid"] { box-shadow:inset 4px 0 0 var(--p); }
+  .row.ff[data-f="part"] { box-shadow:inset 4px 0 0 var(--l); }
+  .row.ff[data-f="due"] { box-shadow:inset 4px 0 0 var(--a); }
+  .ff-ck { flex:none; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11px; color:var(--mute); cursor:pointer; user-select:none; }
+  .ff-ck input { width:24px; height:24px; margin:0; accent-color:var(--p); cursor:pointer; }
+  .ff-head { display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .ff-nm { flex:1; min-width:0; }
+  .ff-sub { font-size:13px; color:var(--mute); }
+  .ff-meta { margin-top:6px; }
+  .ff-meta .pchip { font-size:12px; padding:3px 10px; margin:0 5px 4px 0; }
+  .ff-caret { flex:none; color:var(--mute); font-size:18px; transition:transform .15s; }
+  .row.ff.open .ff-caret { transform:rotate(180deg); }
+  .ff-body { display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+  .row.ff.open .ff-body { display:block; }
+  .ff-body .grid { margin-bottom:10px; }
+  .ff-all { display:none; flex-wrap:wrap; align-items:center; gap:10px 18px; padding:10px 14px; margin:0 0 10px; background:var(--bg); border:1px solid var(--line); border-radius:14px; }
+  .ff-allck { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; user-select:none; }
+  .ff-allck input { width:22px; height:22px; margin:0; accent-color:var(--p); cursor:pointer; }
+  #ffAllSubj { flex:1 1 150px; min-width:130px; max-width:240px; }
+  .ff-both { display:flex; align-items:flex-start; gap:8px; margin:10px 0 0; font-size:14px; cursor:pointer; }
+  .ff-both input { width:20px; height:20px; margin-top:2px; accent-color:var(--p); flex:none; }
+  .ff-both small { display:block; color:var(--mute); font-size:12px; }
+  .seg.ft { margin:0 0 12px; }
+  .seg.ft button.on { background:var(--p); color:#fff; box-shadow:0 3px 8px rgba(0,0,0,.18); }
+  .ff-bar { display:none; position:fixed; left:10px; right:10px; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:6; }
+  .ff-bar .act { width:auto; flex:none; padding:12px 18px; min-height:50px; border-radius:16px; box-shadow:0 6px 14px rgba(0,106,78,.3); }
+  .ff-bar .act:disabled { box-shadow:none; }
+  .ff-sec { font-size:13px; font-weight:700; color:var(--mute); margin:14px 0 6px; padding-top:8px; border-top:1px dashed var(--line); }
+  .ff-sec:first-child { margin-top:4px; border-top:0; padding-top:0; }
+  @media (min-width:900px) { body.appmode .ff-bar { left:276px; right:16px; bottom:16px; } }
+
+  /* ===== অ্যাপ আকর্ষণীয় রূপ (v4) ===== */
+  @keyframes riseIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+  @keyframes sheen { from { background-position:-120% 0; } to { background-position:220% 0; } }
+  body { background:radial-gradient(120% 40% at 50% 0, var(--pine-l), transparent 70%), var(--bg); background-attachment:fixed; }
+  body.appmode .card, body.appmode .dhero { animation:riseIn .45s cubic-bezier(.2,.7,.2,1) both; }
+  body.appmode .row { animation:riseIn .4s cubic-bezier(.2,.7,.2,1) both; }
+  body.appmode .row:nth-child(2) { animation-delay:.04s; } body.appmode .row:nth-child(3) { animation-delay:.08s; }
+  body.appmode .row:nth-child(4) { animation-delay:.12s; } body.appmode .row:nth-child(5) { animation-delay:.16s; }
+  body.appmode .row:nth-child(n+6) { animation-delay:.2s; }
+  .card, .row { border-color:color-mix(in srgb, var(--line) 70%, transparent); box-shadow:0 1px 2px rgba(8,56,47,.05), 0 10px 26px -14px rgba(8,56,47,.28); }
+  :root[data-theme="dark"] .card, :root[data-theme="dark"] .row { box-shadow:none; }
+  .row { transition:transform .15s, box-shadow .2s; }
+  .row:active { transform:scale(.992); }
+  button, .sb, .dchip, .hbtn, .act, .save { -webkit-tap-highlight-color:transparent; }
+  .sb:active, .dchip:active, .hbtn:active, .act:active, .save:active { transform:scale(.96); }
+  .sb, .dchip, .hbtn, .act, .save, .tab { transition:transform .12s, background .2s, color .2s, box-shadow .2s; }
+
+  /* হেডার */
+  header { background:radial-gradient(circle at 90% -20%, rgba(95,224,180,.5), transparent 48%),
+                      radial-gradient(circle at -8% 120%, rgba(244,42,65,.22), transparent 40%),
+                      linear-gradient(160deg, #007a58 0%, var(--pine-d) 70%); box-shadow:0 10px 30px -12px rgba(0,77,56,.55); }
+  header .flag { box-shadow:0 3px 10px rgba(0,0,0,.28); outline:1.5px solid rgba(255,255,255,.75); outline-offset:0; }
+  .hbtn, .logout { border-radius:12px; }
+  .logout { background:rgba(244,42,65,.9); color:#fff; border:none; font-weight:700; padding:8px 14px; box-shadow:0 4px 12px -4px rgba(244,42,65,.6); }
+
+  /* হিরো কার্ড */
+  .dhero { background:linear-gradient(135deg, #00785a 0%, #0fa077 55%, #24b98a 100%); box-shadow:0 18px 36px -18px rgba(0,106,78,.7); }
+  .dchip { background:rgba(255,255,255,.17); border:1px solid rgba(255,255,255,.25); }
+
+  /* ট্যাব/নেভ */
+  .tab.on { background:linear-gradient(135deg, var(--pine), #0b8f68); color:#fff; box-shadow:0 6px 14px -6px rgba(0,106,78,.7); }
+  .tab.on svg { stroke:#fff; }
+
+  /* জমা বাটন */
+  .save, .act:not(.alt):not(.rej) { background:linear-gradient(135deg, #007a58, #004d38); box-shadow:0 10px 22px -10px rgba(0,77,56,.8); letter-spacing:.2px; }
+  .save:not(:disabled) { background-size:220% 100%; }
+
+  /* হাজিরা বাটনের রং */
+  .sb.on { box-shadow:0 5px 12px -5px rgba(0,0,0,.35); }
+
+  /* মোবাইলে ছোট ও গোছানো হেডার */
+  @media (max-width:899px) {
+    header { padding:calc(14px + env(safe-area-inset-top)) 16px 26px; border-radius:0 0 28px 28px; }
+    .head-in { flex-direction:column; align-items:stretch; gap:10px; }
+    header #title { font-size:19px; }
+    header small { font-size:12px; margin-top:1px; }
+    header .flag { width:40px; height:24px; }
+    .hright { flex-direction:row; justify-content:space-between; align-items:center; width:100%; gap:8px; }
+    .today { max-width:none; padding:6px 12px; border-radius:14px; font-size:12px; text-align:left; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .today b { font-size:13px; }
+    .userbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+    .userbar small { display:none !important; }
+    .dhero { padding:16px 16px; border-radius:24px; }
+  }
+
+  /* ===== আধুনিক UI স্তর (v8) — মুছে ফেললেই আগের চেহারা ফিরবে; HTML/JS অপরিবর্তিত ===== */
+  :root { --ac1:#004d38; --ac2:#0a9070; --glow:rgba(0,106,78,.28); --soft:0 1px 2px rgba(8,56,47,.06), 0 10px 30px -12px rgba(8,56,47,.18); --r:22px; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --ac1:#27a883; --ac2:#4fd6ae; --glow:rgba(63,201,160,.25); --soft:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6); } }
+  :root[data-theme="dark"] { --ac1:#27a883; --ac2:#4fd6ae; --glow:rgba(63,201,160,.25); --soft:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6); }
+
+  body { background:
+    radial-gradient(900px 380px at 12% -80px, color-mix(in srgb, var(--ac2) 16%, transparent), transparent 70%),
+    radial-gradient(700px 320px at 100% 0, color-mix(in srgb, var(--ac1) 12%, transparent), transparent 70%),
+    var(--bg); background-attachment:fixed; letter-spacing:.1px; }
+
+  header { position:relative; overflow:hidden; border-radius:0 0 32px 32px;
+           background:linear-gradient(135deg,#00382a 0%,#005a42 55%,#0a8a68 130%); box-shadow:0 14px 34px -14px rgba(0,56,42,.55); }
+  header::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+           background:radial-gradient(260px 160px at 88% 10%, rgba(95,224,180,.35), transparent 70%), radial-gradient(200px 140px at 0 100%, rgba(255,255,255,.12), transparent 70%); }
+  .head-in { position:relative; }
+  header #title { font-size:24px; letter-spacing:.2px; }
+  header small { display:inline-block; background:rgba(255,255,255,.14); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+           padding:3px 11px; border-radius:99px; color:#d9fff1; font-weight:600; font-size:13px; margin-top:7px; }
+  .today { border-left:none; background:rgba(255,255,255,.12); padding:8px 13px; border-radius:16px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+
+  .tabs-in { border:1px solid color-mix(in srgb, var(--line) 70%, transparent); background:color-mix(in srgb, var(--surface) 82%, transparent);
+           -webkit-backdrop-filter:blur(16px) saturate(1.4); backdrop-filter:blur(16px) saturate(1.4); border-radius:22px; box-shadow:var(--soft); padding:5px; gap:4px; }
+  .tab { border-radius:17px; transition:background .25s, color .25s, transform .15s, box-shadow .25s; }
+  .tab:active { transform:scale(.95); }
+  .tab.on, :root[data-theme="dark"] .tab.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; box-shadow:0 8px 18px -6px var(--glow); }
+  @media (prefers-color-scheme:dark) { .tab.on { color:#05201a; } }
+  :root[data-theme="dark"] .tab.on { color:#05201a; }
+  :root[data-theme="light"] .tab.on { color:#fff; }
+
+  .card, .hero, .row { border:1px solid color-mix(in srgb, var(--line) 60%, transparent); border-radius:var(--r); box-shadow:var(--soft); }
+  .card { padding:18px; }
+  label { text-transform:none; letter-spacing:.2px; font-weight:600; font-size:12.5px; }
+  select, input[type=date], input[type=month], input[type=search] { border-radius:14px; border:1.5px solid transparent; background-color:color-mix(in srgb, var(--ink) 5%, var(--surface));
+           transition:border-color .2s, box-shadow .2s, background-color .2s; }
+  select:focus, input:focus { border-color:var(--ac2); box-shadow:0 0 0 4px var(--glow); outline:none; }
+  .note { border-radius:14px; border:1px solid color-mix(in srgb, var(--l) 25%, transparent); }
+
+  .hero { padding:18px; gap:20px; background:linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--pine-l) 55%, var(--surface))); }
+  .ring { width:100px; height:100px; background:conic-gradient(from -90deg, var(--ac1), var(--ac2) calc(var(--pc) * 1%), color-mix(in srgb, var(--ink) 8%, transparent) 0);
+          filter:drop-shadow(0 6px 10px var(--glow)); transition:background .6s; }
+  .ring::after { inset:11px; }
+  .ring b { font-size:24px; }
+  .hc { background:color-mix(in srgb, var(--ink) 4%, transparent); border-radius:14px; padding:8px 10px; }
+  .hc i { box-shadow:0 0 0 3px color-mix(in srgb, currentColor 0%, transparent); width:10px; height:10px; }
+
+  .chipbtn { border:none; box-shadow:var(--soft); font-weight:600; transition:transform .15s, box-shadow .2s; }
+  .chipbtn:active { transform:scale(.96); }
+  .row { padding:14px 15px; transition:background .25s, box-shadow .25s, transform .2s; }
+  .row[data-s="1"] { box-shadow:inset 4px 0 0 var(--a), var(--soft); }
+  .row[data-s="2"] { box-shadow:inset 4px 0 0 var(--l), var(--soft); }
+  .row[data-s="3"] { box-shadow:inset 4px 0 0 var(--t), var(--soft); }
+  .roll { width:42px; min-width:42px; height:42px; background:linear-gradient(145deg, var(--pine-l), color-mix(in srgb, var(--ac2) 28%, var(--pine-l))); color:var(--pine-d); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ac2) 30%, transparent); }
+  @media (prefers-color-scheme:dark) { .roll { color:var(--pine); } }
+  .btns { background:color-mix(in srgb, var(--ink) 6%, transparent); border-radius:16px; padding:4px; gap:4px; }
+  .sb { border-radius:12px; transition:background .2s, color .2s, transform .12s, box-shadow .2s; }
+  .sb.on { box-shadow:0 6px 14px -5px rgba(0,0,0,.35); }
+  .sb.on.s0 { background:linear-gradient(135deg,#0f8a50,#27c47c); }
+  .sb.on.s1 { background:linear-gradient(135deg,#d41f35,#f05a6a); }
+  .sb.on.s2 { background:linear-gradient(135deg,#b97b00,#e3a824); }
+  .sb.on.s3 { background:linear-gradient(135deg,#2b5bc4,#5b8cf0); }
+
+  .bar-in { border-radius:26px; border:1px solid color-mix(in srgb, var(--line) 60%, transparent); box-shadow:0 18px 40px -14px rgba(8,56,47,.4), var(--soft);
+           -webkit-backdrop-filter:blur(18px) saturate(1.5); backdrop-filter:blur(18px) saturate(1.5); }
+  .save, .act { border-radius:18px; letter-spacing:.2px; transition:transform .15s, box-shadow .25s, filter .2s; }
+  .save:not(:disabled), .act:not(.alt):not(.rej):not(:disabled) { background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 12px 24px -10px var(--glow); }
+  @media (prefers-color-scheme:dark) { .save:not(:disabled) { color:#05201a; } }
+  :root[data-theme="dark"] .save:not(:disabled) { color:#05201a; }
+  :root[data-theme="light"] .save:not(:disabled) { color:#fff; }
+  .save:not(:disabled):hover { filter:brightness(1.06); }
+  .save:active, .act:active { transform:scale(.98); }
+
+  @keyframes upIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  .card, .hero, .row { animation:upIn .35s cubic-bezier(.2,.7,.2,1) both; }
+  .row:nth-child(-n+8) { animation-delay:calc(var(--i, 0) * 0ms); }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:color-mix(in srgb, var(--ink) 18%, transparent); border-radius:99px; border:3px solid transparent; background-clip:padding-box; }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+  /* ===== আধুনিক লগইন (v8) — মুছে ফেললেই আগের লগইন চেহারা ফিরবে ===== */
+  body.lgmode { background:
+      radial-gradient(520px 380px at 85% -6%, rgba(95,224,180,.42), transparent 70%),
+      radial-gradient(460px 360px at -8% 92%, rgba(10,144,112,.55), transparent 70%),
+      radial-gradient(300px 240px at 60% 55%, rgba(244,42,65,.14), transparent 70%),
+      linear-gradient(165deg,#00362a 0%,#00503c 48%,#003326 100%); background-attachment:fixed; }
+  body.lgmode .lg-orb.o1 { background:radial-gradient(circle at 30% 30%, rgba(95,224,180,.38), rgba(95,224,180,0) 70%); filter:blur(6px); }
+  body.lgmode .lg-orb.o2 { background:radial-gradient(circle at 60% 40%, rgba(255,255,255,.16), rgba(255,255,255,0) 70%); filter:blur(4px); }
+  body.lgmode .lg-orb.o3 { background:radial-gradient(circle at 40% 40%, rgba(244,42,65,.28), rgba(244,42,65,0) 70%); filter:blur(8px); }
+
+  body.lgmode .lg-hero { padding:44px 0 26px; }
+  body.lgmode .lg-logo { width:88px; height:88px; border-radius:30px; background:linear-gradient(145deg,#ffffff,#d4f7ea);
+        box-shadow:0 18px 38px -10px rgba(0,25,18,.6), inset 0 -3px 0 rgba(0,106,78,.12); }
+  body.lgmode .lg-logo::after { border-radius:30px; border-color:rgba(95,224,180,.75); }
+  body.lgmode .lg-logo svg { width:46px; height:46px; stroke:#00704f; stroke-width:2.4; }
+  body.lgmode .lg-app { font-size:29px; font-weight:700; letter-spacing:.2px; text-shadow:0 4px 20px rgba(0,25,18,.5); }
+  body.lgmode .lg-sub { color:#bff3df; opacity:1; font-size:15px; }
+
+  body.lgmode .lg-card { border-radius:32px; padding:26px 22px 24px; background:rgba(255,255,255,.86);
+        border:1px solid rgba(255,255,255,.65); -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
+        box-shadow:0 30px 60px -18px rgba(0,22,16,.65), 0 2px 0 rgba(255,255,255,.5) inset; }
+  body.lgmode .lg-card .cls-title { font-size:20px; font-weight:700; }
+  body.lgmode .lg-card label { font-weight:600; letter-spacing:.2px; }
+  body.lgmode .lg-card input[type=email], body.lgmode .lg-card input[type=password], body.lgmode .lg-card input[type=text] {
+        border-radius:16px; border:1.5px solid transparent; background:rgba(0,70,50,.055); box-shadow:none; transition:border-color .2s, box-shadow .2s, background .2s; }
+  body.lgmode .lg-card input:focus { background:#fff; border-color:#0a9070; box-shadow:0 0 0 4px rgba(10,144,112,.2); }
+  body.lgmode .fi { stroke:#0a8a68; transition:stroke .2s; }
+  body.lgmode .fld:focus-within .fi, body.lgmode .pw:focus-within .fi { stroke:#004d38; opacity:1; }
+  body.lgmode .pwbtn { background:rgba(10,144,112,.12); color:#00704f; border-radius:99px; font-weight:600; }
+  body.lgmode #lgBtn { background:linear-gradient(135deg,#00583f 0%,#0a9070 100%); color:#fff; border-radius:18px;
+        box-shadow:0 16px 28px -10px rgba(0,106,78,.65); }
+  body.lgmode #lgBtn:not(:disabled):hover { filter:brightness(1.07); }
+  body.lgmode #lgBtn:active { box-shadow:0 6px 14px -6px rgba(0,106,78,.6); }
+  body.lgmode .lg-foot { display:table; margin:20px auto 8px; padding:7px 16px; border-radius:99px; background:rgba(255,255,255,.12);
+        border:1px solid rgba(255,255,255,.18); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); color:#dcfff2; font-size:12.5px; }
+
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) body.lgmode .lg-card,
+    :root:not([data-theme="light"]) body.lgmode .lg-card { background:rgba(14,26,24,.8); border-color:rgba(255,255,255,.09); }
+    :root:not([data-theme="light"]) body.lgmode .lg-card input[type=email], :root:not([data-theme="light"]) body.lgmode .lg-card input[type=password], :root:not([data-theme="light"]) body.lgmode .lg-card input[type=text] { background:rgba(255,255,255,.07); }
+    :root:not([data-theme="light"]) body.lgmode .lg-card input:focus { background:rgba(255,255,255,.1); border-color:#4fd6ae; box-shadow:0 0 0 4px rgba(79,214,174,.22); }
+    :root:not([data-theme="light"]) body.lgmode .fi { stroke:#4fd6ae; }
+    :root:not([data-theme="light"]) body.lgmode .pwbtn { background:rgba(79,214,174,.16); color:#7ee8c4; } }
+  :root[data-theme="dark"] body.lgmode .lg-card { background:rgba(14,26,24,.8); border-color:rgba(255,255,255,.09); }
+  :root[data-theme="dark"] body.lgmode .lg-card input[type=email], :root[data-theme="dark"] body.lgmode .lg-card input[type=password], :root[data-theme="dark"] body.lgmode .lg-card input[type=text] { background:rgba(255,255,255,.07); }
+  :root[data-theme="dark"] body.lgmode .lg-card input:focus { background:rgba(255,255,255,.1); border-color:#4fd6ae; box-shadow:0 0 0 4px rgba(79,214,174,.22); }
+  :root[data-theme="dark"] body.lgmode .fi { stroke:#4fd6ae; }
+  :root[data-theme="dark"] body.lgmode .pwbtn { background:rgba(79,214,174,.16); color:#7ee8c4; }
+
+  /* ===== আধুনিক জমা বোতাম (v8) — মুছে ফেললেই আগের বার ফিরবে ===== */
+  .bar-in { display:grid; grid-template-columns:1fr; gap:10px; padding:12px 12px 12px 16px; }
+  .bar-in .meter { height:6px; margin:0; border-radius:99px; background:color-mix(in srgb, var(--ink) 8%, transparent); }
+  .bar-in .meter span { border-radius:99px; }
+  .bar-in .sum { margin:0; text-align:left; font-size:13px; font-weight:600; line-height:1.45; color:var(--mute); }
+  .bar-in .save { position:relative; width:100%; min-height:54px; padding:0 22px; border-radius:99px; display:flex; align-items:center; justify-content:center; gap:10px;
+        font-size:17px; font-weight:700; letter-spacing:.2px; color:#fff; border:1px solid rgba(255,255,255,.22);
+        background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 14px 26px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.35);
+        transition:transform .15s, box-shadow .25s, filter .2s, background .3s; }
+  .bar-in .save::before { content:""; flex:none; width:22px; height:22px; background:currentColor;
+        -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
+        mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat; }
+  .bar-in .save:not(:disabled):hover { filter:brightness(1.07); box-shadow:0 18px 30px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,.35); }
+  .bar-in .save:not(:disabled):active { transform:scale(.97); }
+  .bar-in .save:disabled { background:color-mix(in srgb, var(--ink) 10%, transparent); color:var(--mute); box-shadow:none; border-color:transparent; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .bar-in .save:not(:disabled) { color:#05201a; } }
+  :root[data-theme="dark"] .bar-in .save:not(:disabled) { color:#05201a; }
+  @media (min-width:480px) {
+    .bar-in { grid-template-columns:1fr auto; align-items:center; column-gap:14px; }
+    .bar-in .meter { grid-column:1 / -1; }
+    .bar-in .save { width:auto; min-width:230px; }
+  }
+
+  /* ===== পতাকা শুধু ব্যাকগ্রাউন্ডে (v8) — মুছে ফেললেই আগের পতাকা-আইকন ফিরবে ===== */
+  .flag, .lg-flag, header .flag, body.appmode .side-brand .flag, body.lgmode .lg-flag { display:none !important; }
+  body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.075;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Crect width='100' height='60' fill='%23006a4e'/%3E%3Ccircle cx='45' cy='30' r='20' fill='%23f42a41'/%3E%3C/svg%3E") center center / cover no-repeat;
+    -webkit-mask:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%); mask:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%); }
+  body.lgmode::before { opacity:.2; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) body::before { opacity:.12; } :root:not([data-theme="light"]) body.lgmode::before { opacity:.22; } }
+  :root[data-theme="dark"] body::before { opacity:.12; }
+  :root[data-theme="dark"] body.lgmode::before { opacity:.22; }
+
+  /* ===== লগইনের ওপরের পতাকা ও লোগো-চিহ্ন সরানো (v8) ===== */
+  .lg-hero .flag, .lg-hero .lg-flag, .lg-hero .lg-logo, body.lgmode .lg-logo, body.lgmode .lg-flag { display:none !important; }
+  body.lgmode .lg-hero { padding:56px 0 24px; }
+
+  /* ===== জমা বার: শুধু একটি ভাসমান বোতাম (v8) ===== */
+  .bar-in { display:block; max-width:420px; padding:0; background:transparent; border:none; box-shadow:none; border-radius:0;
+            -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .bar-in .meter, .bar-in .sum { display:none; }
+  .bar-in .save { width:100%; min-width:0; min-height:58px; box-shadow:0 16px 30px -10px var(--glow), 0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
+  .bar-in .save:disabled { background:var(--surface); color:var(--mute); border:1px solid var(--line); }
+
+  /* ===== জমা বোতাম: শিক্ষার্থী তালিকা লোড হলে তালিকার শেষেই বসবে (v8) ===== */
+  body .bar { position:static; left:auto; right:auto; bottom:auto; z-index:auto; margin:18px 0 6px; display:none; }
+  #list:has(.row) + .bar { display:block; }
+  body.nobar #list + .bar { display:none; }
+  .bar-in { margin:0 auto; }
+
+  /* ===== আরও উন্নত UI (v9) — মুছে ফেললেই v8 ফিরবে ===== */
+  .cls-title { font-weight:700; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+  .name { letter-spacing:.1px; }
+  .row:hover { transform:translateY(-1px); }
+  .row[data-s="0"] .roll { background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--p) 30%,var(--p-l))); color:var(--p-t); }
+  .row[data-s="1"] .roll { background:linear-gradient(145deg,#fff,var(--a-l)); color:var(--a-t); }
+  .row[data-s="2"] .roll { background:linear-gradient(145deg,#fff,var(--l-l)); color:var(--l-t); }
+  .row[data-s="3"] .roll { background:linear-gradient(145deg,#fff,var(--t-l)); color:var(--t-t); }
+  .sb:not(.on):hover { background:color-mix(in srgb,var(--ink) 7%,transparent); }
+  .sb .sc { letter-spacing:.3px; }
+
+  .chip, .pill { border-radius:99px; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .chipbtn, .abtn, .btn2, .act.alt { border-radius:99px; }
+  .act.alt, .abtn.alt, .btn2 { background:color-mix(in srgb,var(--surface) 90%,transparent); border:1px solid var(--line); box-shadow:var(--soft); }
+  .abtn, .btn2 { transition:transform .15s, box-shadow .2s; } .abtn:active, .btn2:active { transform:scale(.96); }
+
+  .empty { border:1.5px dashed color-mix(in srgb,var(--ink) 18%,transparent); border-radius:22px; background:color-mix(in srgb,var(--surface) 70%,transparent);
+           padding:26px 18px; text-align:center; }
+  .empty b { font-size:17px; }
+
+  .tw { border-radius:20px; border:1px solid color-mix(in srgb,var(--line) 70%,transparent); box-shadow:var(--soft); background:var(--surface); overflow:auto; }
+  table.mt { border-collapse:separate; border-spacing:0; }
+  .mt th { position:sticky; top:0; z-index:2; background:color-mix(in srgb,var(--pine-l) 80%,var(--surface)); font-weight:700; }
+  .mt tbody tr:nth-child(even) td { background-image:linear-gradient(color-mix(in srgb,var(--ink) 3%,transparent),color-mix(in srgb,var(--ink) 3%,transparent)); }
+  .mt tbody tr { transition:background .15s; } .mt tbody tr:hover td { background-image:linear-gradient(var(--glow),var(--glow)); }
+
+  .toast { border-radius:99px; padding:12px 20px; font-weight:600; box-shadow:0 18px 40px -12px rgba(0,0,0,.5);
+           -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.18); }
+  .loading { -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .spin { border-width:4px; filter:drop-shadow(0 4px 10px var(--glow)); }
+
+  .logout, .hbtn { border-radius:99px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .userbar { border-radius:99px; }
+  .modal > * { border-radius:26px; box-shadow:0 30px 70px -20px rgba(0,0,0,.55); }
+  .modal { -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  input[type=text], input[type=password], input[type=email], input[type=tel], input[type=number], textarea { border-radius:14px; transition:border-color .2s, box-shadow .2s; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, input[type=number]:focus, textarea:focus { border-color:var(--ac2); box-shadow:0 0 0 4px var(--glow); outline:none; }
+  h3 { letter-spacing:.2px; }
+  .legend { background:color-mix(in srgb,var(--ink) 4%,transparent); border-radius:14px; padding:8px 12px; margin:0 0 12px; }
+  ::selection { background:var(--glow); }
+
+  /* ===== রিপোর্ট ট্যাব: print বোতাম গ্রিড ===== */
+  .rp-h { font-size:13px; font-weight:700; color:var(--mute); margin:16px 0 8px; letter-spacing:.2px; }
+  .rp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .rp-grid .act { min-height:52px; font-size:15px; padding:10px 12px; }
+  @media (max-width:360px) { .rp-grid { grid-template-columns:1fr; } }
+
+  /* ===== আধুনিক রিপোর্ট ট্যাব (v10) ===== */
+  .rp-tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+  .rp-tile { padding:14px 10px; border-radius:20px; text-align:center; background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--pine-l) 60%,var(--surface)));
+             border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .rp-tile b { display:block; font-size:21px; font-weight:700; line-height:1.2; }
+  .rp-tile span { display:block; font-size:12px; color:var(--mute); margin-top:3px; font-weight:600; }
+  .rp-tile.good b { color:var(--p-t); } .rp-tile.bad { background:linear-gradient(160deg,var(--surface),var(--a-l)); } .rp-tile.bad b { color:var(--a-t); }
+  @media (max-width:520px) { .rp-tiles { grid-template-columns:1fr 1fr; } }
+
+  .tw .mt tbody tr td.pc { font-weight:700; background-image:linear-gradient(90deg,color-mix(in srgb,var(--p) 26%,transparent) var(--w,0%),transparent 0); }
+  .tw .mt tbody tr.low td.pc { background-image:linear-gradient(90deg,color-mix(in srgb,var(--a) 30%,transparent) var(--w,0%),transparent 0); }
+  .mt td.m0 { border-radius:0; }
+
+  #t-mon .card { overflow:hidden; }
+  #t-mon .cls-title { font-size:17px; }
+  .rp-h { display:flex; align-items:center; gap:8px; text-transform:none; }
+  .rp-h::after { content:""; flex:1; height:1px; background:var(--line); }
+  .rp-grid .act.alt { justify-content:flex-start; text-align:left; gap:10px; min-height:58px; border-radius:18px; font-weight:600;
+                      background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--pine-l) 45%,var(--surface))); }
+  .rp-grid .act.alt:hover { border-color:var(--ac2); box-shadow:0 10px 22px -12px var(--glow); }
+  #t-mon .btn2 .act { border-radius:99px; }
+  #t-mon .exp { display:inline-block; margin:6px 0 0; font-weight:600; }
+
+  /* ===== ড্যাশবোর্ডে সারাংশ কার্ড (v11) ===== */
+  #dashSum { margin-top:14px; }
+  .ds-head { display:flex; align-items:center; gap:10px; margin:0 2px 10px; }
+  .ds-head b { font-size:17px; font-weight:700; }
+  .ds-head span { flex:1; font-size:12.5px; color:var(--mute); font-weight:600; }
+  .ds-ref { width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:18px; box-shadow:var(--soft); cursor:pointer; }
+  .ds-hol { padding:10px 14px; border-radius:16px; margin-bottom:10px; background:var(--l-l); color:var(--l-t); font-weight:600; }
+  .ds-tot { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px; }
+  .ds-tile { padding:12px 6px; border-radius:18px; text-align:center; background:var(--surface); border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .ds-tile b { display:block; font-size:22px; font-weight:700; line-height:1.2; }
+  .ds-tile span { display:block; font-size:11.5px; color:var(--mute); font-weight:600; margin-top:2px; }
+  .ds-tile.s0 b { color:var(--p-t); } .ds-tile.s1 b { color:var(--a-t); } .ds-tile.s2 b { color:var(--l-t); }
+  .ds-tile.s1 { background:linear-gradient(160deg,var(--surface),var(--a-l)); }
+  .ds-tile.pc { background:linear-gradient(135deg,var(--ac1),var(--ac2)); border-color:transparent; }
+  .ds-tile.pc b, .ds-tile.pc span { color:#fff; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .ds-tile.pc b, :root:not([data-theme="light"]) .ds-tile.pc span { color:#05201a; } }
+  :root[data-theme="dark"] .ds-tile.pc b, :root[data-theme="dark"] .ds-tile.pc span { color:#05201a; }
+  .ds-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:10px; }
+  .ds-card { text-align:left; font:inherit; color:inherit; padding:14px; border-radius:20px; cursor:pointer; background:var(--surface);
+             border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); transition:transform .15s, box-shadow .2s; }
+  .ds-card:hover { transform:translateY(-2px); } .ds-card:active { transform:scale(.97); }
+  .ds-card.wait { border-style:dashed; background:color-mix(in srgb,var(--l-l) 55%,var(--surface)); }
+  .ds-cn { font-weight:700; font-size:16px; }
+  .ds-st { margin-top:4px; font-size:13px; font-weight:700; color:var(--l-t); } .ds-st.ok { color:var(--p-t); }
+  .ds-bar { height:7px; border-radius:99px; background:color-mix(in srgb,var(--ink) 9%,transparent); margin:8px 0 6px; overflow:hidden; }
+  .ds-bar i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--ac1),var(--ac2)); }
+  .ds-sub { font-size:12px; color:var(--mute); font-weight:600; }
+  @media (max-width:420px) { .ds-tot { grid-template-columns:repeat(3,1fr); } }
+
+  /* ===== মাসিক রিপোর্ট: টাইল ও সর্বমোট সারি ===== */
+  .rp-tiles { grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); }
+  @media (max-width:520px) { .rp-tiles { grid-template-columns:repeat(2,1fr); } }
+  .mt tfoot td { position:sticky; bottom:0; z-index:1; font-weight:700; background:color-mix(in srgb,var(--pine-l) 80%,var(--surface)); border-top:2px solid var(--ac2); }
+
+  /* ===== আকর্ষণীয় ড্যাশবোর্ড (v12) ===== */
+  body.on-home .dh-chips { display:none; }
+  .dhero { padding:22px 18px 20px; }
+  .dh-t { font-size:22px; font-weight:700; }
+  .ds-quick { display:grid; grid-template-columns:repeat(auto-fit,minmax(86px,1fr)); gap:10px; margin-bottom:16px; }
+  .ds-q { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px; border-radius:22px; cursor:pointer; font:inherit; color:var(--ink);
+          background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--pine-l) 55%,var(--surface))); border:1px solid color-mix(in srgb,var(--line) 60%,transparent);
+          box-shadow:var(--soft); transition:transform .15s, box-shadow .2s; }
+  .ds-q:hover { transform:translateY(-2px); box-shadow:0 14px 26px -12px var(--glow); } .ds-q:active { transform:scale(.95); }
+  .ds-q .qi { font-size:26px; line-height:1; width:48px; height:48px; display:grid; place-items:center; border-radius:16px; background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 10px 18px -8px var(--glow); }
+  .ds-q .qt { font-size:13px; font-weight:700; }
+  .ds-sec { margin:20px 2px 10px; font-size:15px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  .ds-sec::after { content:""; flex:1; height:1px; background:var(--line); }
+  .ds-ov { display:flex; align-items:center; gap:18px; padding:18px; border-radius:28px; color:#fff; position:relative; overflow:hidden;
+           background:linear-gradient(135deg,#003d2e,#00704f 60%,#0aa07a); box-shadow:0 22px 40px -18px rgba(0,80,58,.7); }
+  .ds-ov::before { content:""; position:absolute; right:-40px; top:-50px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.2),transparent 70%); }
+  .ds-ring { position:relative; flex:none; width:118px; height:118px; border-radius:50%; display:grid; place-content:center; text-align:center;
+             background:conic-gradient(#7ff0c7 calc(var(--pc) * 1%), rgba(255,255,255,.18) 0); filter:drop-shadow(0 8px 14px rgba(0,0,0,.3)); transition:background .6s; }
+  .ds-ring::after { content:""; position:absolute; inset:11px; border-radius:50%; background:#00513b; }
+  .ds-ring b, .ds-ring span { position:relative; z-index:1; } .ds-ring b { font-size:26px; line-height:1.1; } .ds-ring span { font-size:12px; opacity:.85; }
+  .ds-ovr { flex:1; min-width:0; position:relative; }
+  .ds-ovt { font-size:14px; font-weight:600; opacity:.9; margin-bottom:8px; }
+  .ds-ovrow { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:14.5px; }
+  .ds-ovrow span { flex:1; opacity:.92; } .ds-ovrow b { font-size:18px; }
+  .ds-ovrow i { width:10px; height:10px; border-radius:50%; background:#7ff0c7; } .ds-ovrow.s1 i { background:#ff7b8a; } .ds-ovrow.s2 i { background:#ffcf5c; }
+  .ds-prog { margin-top:10px; } .ds-pt { font-size:12.5px; opacity:.9; font-weight:600; }
+  .ds-ov .ds-bar { background:rgba(255,255,255,.2); margin:6px 0 0; } .ds-ov .ds-bar i { background:#7ff0c7; }
+  .ds-card { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .ds-l { min-width:0; }
+  .ds-mini { flex:none; position:relative; width:54px; height:54px; border-radius:50%; display:grid; place-items:center;
+             background:conic-gradient(var(--ac2) calc(var(--pc) * 1%), color-mix(in srgb,var(--ink) 9%,transparent) 0); }
+  .ds-mini::after { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--surface); }
+  .ds-mini b { position:relative; z-index:1; font-size:12.5px; }
+  .ds-card.wait .ds-mini b { font-size:20px; color:var(--l-t); }
+  .ds-grid { grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+  .ds-abs { display:grid; gap:8px; }
+  .ds-ab { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:18px; background:var(--surface);
+           border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); border-left:4px solid var(--a); }
+  .ds-ar { flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-weight:700; background:var(--a-l); color:var(--a-t); }
+  .ds-am { flex:1; min-width:0; } .ds-am b { display:block; font-size:15px; } .ds-am small { color:var(--mute); font-weight:600; }
+  .ds-call { flex:none; padding:8px 12px; border-radius:99px; font-size:13px; font-weight:700; text-decoration:none; color:#fff; background:linear-gradient(135deg,var(--ac1),var(--ac2)); }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .ds-call { color:#05201a; } }
+  :root[data-theme="dark"] .ds-call { color:#05201a; }
+  .ds-more { text-align:center; font-size:13px; color:var(--mute); padding:6px; }
+  @media (max-width:380px) { .ds-ring { width:96px; height:96px; } .ds-ring::after { inset:9px; } .ds-ring b { font-size:21px; } }
+
+  /* ===== তথ্যবহুল সারাংশ কার্ড (v13) ===== */
+  .ds-kpi { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+  .ds-k { display:flex; align-items:center; gap:10px; padding:12px; border-radius:20px; background:var(--surface);
+          border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .ds-k .ki { flex:none; width:40px; height:40px; display:grid; place-items:center; font-size:20px; border-radius:14px; background:color-mix(in srgb,var(--ink) 6%,transparent); }
+  .ds-k .kt { min-width:0; } .ds-k b { display:block; font-size:19px; line-height:1.2; } .ds-k small { display:block; font-size:11.5px; color:var(--mute); font-weight:600; line-height:1.25; }
+  .ds-k.good .ki { background:var(--p-l); } .ds-k.good b { color:var(--p-t); }
+  .ds-k.bad .ki { background:var(--a-l); } .ds-k.bad b { color:var(--a-t); }
+  .ds-k.warn .ki { background:var(--l-l); } .ds-k.warn b { color:var(--l-t); }
+  .ds-stack { display:flex; gap:3px; height:8px; margin:8px 0 6px; border-radius:99px; overflow:hidden; min-width:90px; }
+  .ds-stack i { display:block; border-radius:99px; background:var(--p); } .ds-stack i.s1 { background:var(--a); } .ds-stack i.s2 { background:var(--l); }
+  .ds-mini.low { background:conic-gradient(var(--a) calc(var(--pc) * 1%), color-mix(in srgb,var(--ink) 9%,transparent) 0); }
+  .ds-mini.low b { color:var(--a-t); }
+  .ds-ab.w { border-left-color:var(--l); } .ds-ab.w .ds-ar { background:var(--l-l); color:var(--l-t); font-size:12.5px; }
+  .ds-call:empty { display:none; }
+  .ds-ab .ds-call { min-width:42px; text-align:center; }
+  .ds-card { position:relative; overflow:hidden; }
+  .ds-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,var(--ac1),var(--ac2)); }
+  .ds-card.wait::before { background:var(--l); }
+
+  /* ===== ড্যাশবোর্ড v15: skeleton, ত্রুটি, রিং কার্ড, প্রগ্রেস ===== */
+  .ds-skel { display:grid; gap:12px; margin-top:14px; }
+  .ds-skel i { display:block; border-radius:24px; background-size:220% 100%; animation:dsShim 1.3s linear infinite;
+               background-image:linear-gradient(100deg,color-mix(in srgb,var(--ink) 6%,transparent) 30%,color-mix(in srgb,var(--ink) 13%,transparent) 50%,color-mix(in srgb,var(--ink) 6%,transparent) 70%); }
+  .ds-skel .k1 { height:150px; } .ds-skel .k2 { height:78px; } .ds-skel .k3 { height:96px; }
+  @keyframes dsShim { from { background-position:220% 0; } to { background-position:-220% 0; } }
+  .ds-err { margin-top:14px; padding:18px 16px; border-radius:22px; text-align:center; font-weight:600; background:var(--a-l); color:var(--a-t); }
+  .ds-err button { margin-top:12px; padding:10px 22px; border:0; border-radius:99px; font:inherit; font-weight:700; cursor:pointer; color:#fff; background:var(--a); }
+  .ds-ref.spin { animation:dsSpin .8s linear infinite; }
+  @keyframes dsSpin { to { transform:rotate(360deg); } }
+  .ds-bar i { transition:width .7s cubic-bezier(.2,.8,.2,1); }
+  .ds-go { margin-top:12px; width:100%; padding:10px 14px; border:0; border-radius:99px; font:inherit; font-weight:700; font-size:14px; line-height:1.35;
+           cursor:pointer; color:#003d2e; background:#7ff0c7; box-shadow:0 8px 18px -8px rgba(0,0,0,.45); transition:transform .15s; }
+  .ds-go:active { transform:scale(.97); }
+  @media (max-width:360px) { .ds-ov { flex-direction:column; align-items:stretch; } .ds-ring { align-self:center; } }
+
+  /* ===== কার্ড v16: সব ট্যাবের কার্ড ===== */
+  /* ক্রমান্বয়ে (stagger) প্রবেশ — --i বসানো কার্ডে */
+  .row[style*="--i"], .card[style*="--i"] { animation-delay:calc(var(--i) * 24ms); }
+
+  /* ফিলাপ: দ্রুত ফি এন্ট্রি + ফি প্রগ্রেস */
+  .ff-qk { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .ff-qk .q-in { flex:1; min-width:0; display:flex; align-items:center; gap:6px; margin:0; padding:0 10px; min-height:42px;
+                 border:1.5px solid var(--line); border-radius:12px; background:var(--surface); cursor:text; }
+  .ff-qk .q-in:focus-within { border-color:var(--ac2); box-shadow:0 0 0 3px color-mix(in srgb,var(--ac2) 25%,transparent); }
+  .ff-qk .q-in span { color:var(--mute); font-weight:700; }
+  .ff-qk .q-in input { flex:1; min-width:0; width:100%; margin:0; padding:6px 0; min-height:0; border:0; outline:0; box-shadow:none; background:transparent; font-size:16px; font-weight:600; }
+  .ff-qk .q-full { flex:none; min-height:42px; padding:0 14px; border:0; border-radius:12px; font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+                   color:#fff; background:linear-gradient(135deg,var(--ac1),var(--ac2)); }
+  .ff-qk .q-full:disabled { opacity:.4; cursor:default; }
+  .ff-qk .q-full:active:not(:disabled) { transform:scale(.96); }
+  .ff-fee { height:5px; border-radius:99px; background:color-mix(in srgb,var(--ink) 9%,transparent); margin-top:8px; overflow:hidden; }
+  .ff-fee i { display:block; height:100%; width:0; border-radius:99px; background:var(--p); transition:width .45s cubic-bezier(.2,.8,.2,1); }
+  .row.ff[data-f="part"] .ff-fee i { background:var(--l); }
+  .row.ff[data-f="due"] .ff-fee i { background:var(--a); }
+  button.ff-caret { background:none; border:0; padding:0; min-width:40px; min-height:40px; display:grid; place-items:center; cursor:pointer; border-radius:12px; }
+  button.ff-caret:focus-visible { outline:3px solid var(--mint); outline-offset:1px; }
+
+  /* নিবন্ধন: বাছাই-করা কার্ড, ছবি ছাড়া অক্ষর-অবতার, চওড়া পর্দায় দুই-কলাম তথ্য */
+  .card.sel { border-color:var(--ac2); box-shadow:0 0 0 2px color-mix(in srgb,var(--ac2) 45%,transparent), var(--soft); }
+  .reg-top { cursor:pointer; }
+  .reg-ph.noimg { display:grid; place-items:center; font-size:32px; font-weight:700; color:var(--p-t);
+                  background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--ac2) 35%,var(--p-l))); }
+  .reg-dl { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); column-gap:24px; }
+
+  /* সতর্কতা কার্ড */
+  .row.al { padding:14px; }
+  .al-top { display:flex; align-items:center; gap:12px; }
+  .al-bd { flex:none; min-width:52px; height:52px; padding:0 8px; border-radius:16px; display:grid; place-content:center; text-align:center;
+           font-weight:700; font-size:17px; line-height:1.1; background:color-mix(in srgb,var(--surface) 82%,transparent); color:var(--a-t); }
+  .al-bd small { display:block; font-size:10.5px; font-weight:600; }
+  .row.al[data-s="2"] .al-bd { color:var(--l-t); }
+  .al-in { flex:1; min-width:0; }
+  .al-in .name { font-weight:700; }
+  .al-bar { height:6px; border-radius:99px; background:color-mix(in srgb,var(--ink) 10%,transparent); margin:10px 0 2px; overflow:hidden; }
+  .al-bar i { display:block; height:100%; border-radius:99px; background:var(--l); }
+  .row.al .acts { margin-top:10px; flex-wrap:wrap; }
+  .abtn.wa { background:#128c7e; color:#fff; border-color:transparent; }
+
+  /* ===== v17: রিপোর্ট গোছানো + ড্যাশবোর্ডে মাসিক সারাংশ ও নামহীন তালিকা ===== */
+  #t-mon .pro-step { margin:20px 2px 10px; }
+  #t-mon > .pro-step:first-child { margin-top:2px; }
+  #t-mon .rp-grid.three { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  #t-mon .card > .rp-h:first-child { margin-top:2px; }
+  details.rp-det > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:9px; font-size:17px; font-weight:700; }
+  details.rp-det > summary::-webkit-details-marker { display:none; }
+  details.rp-det > summary::after { content:"▾"; margin-left:auto; color:var(--mute); transition:transform .15s; }
+  details.rp-det[open] > summary { margin-bottom:12px; }
+  details.rp-det[open] > summary::after { transform:rotate(180deg); }
+
+  .ds-prt { flex:none; height:38px; padding:0 14px; border-radius:99px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+            font:inherit; font-size:13px; font-weight:700; box-shadow:var(--soft); cursor:pointer; }
+  .ds-prt:active { transform:scale(.96); }
+  .ds-mon { margin-top:14px; padding:14px; border-radius:24px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--soft); }
+  .ds-mon-h { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .ds-mon-h b { font-size:16px; }
+  .ds-mon-h span { flex:1; font-size:12.5px; color:var(--mute); font-weight:600; }
+  .ds-mon-h .ds-ref { width:34px; height:34px; font-size:16px; }
+  .ds-mon .rp-tiles { margin-bottom:10px; }
+  .ds-mon-note { font-size:13px; color:var(--mute); padding:6px 2px; line-height:1.6; }
+  .ds-mon-note.bad { color:var(--a-t); font-weight:600; }
+  .ds-mrow { display:flex; align-items:center; gap:10px; width:100%; padding:8px 6px; border:0; background:none; font:inherit; color:inherit;
+             text-align:left; cursor:pointer; border-radius:12px; }
+  .ds-mrow:hover { background:color-mix(in srgb,var(--ink) 5%,transparent); }
+  .ds-mrow .mn { flex:none; width:92px; font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ds-mrow .mb { flex:1; height:8px; border-radius:99px; background:color-mix(in srgb,var(--ink) 9%,transparent); overflow:hidden; }
+  .ds-mrow .mb i { display:block; height:100%; border-radius:99px; background:var(--p); transition:width .6s cubic-bezier(.2,.8,.2,1); }
+  .ds-mrow.low .mb i { background:var(--a); }
+  .ds-mrow .mv { flex:none; min-width:46px; text-align:right; font-size:13px; font-weight:700; }
+  .ds-mrow .mw { flex:none; min-width:40px; font-size:11.5px; color:var(--a-t); font-weight:700; }
+  .ds-cg { display:flex; flex-wrap:wrap; gap:8px; }
+  .ds-cgc { display:inline-flex; align-items:center; gap:8px; padding:7px 8px 7px 14px; border:1px solid var(--line); border-radius:99px; background:var(--surface);
+            font:inherit; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; box-shadow:var(--soft); }
+  .ds-cgc:active { transform:scale(.97); }
+  .ds-cgc b { min-width:24px; height:24px; padding:0 7px; border-radius:99px; display:inline-grid; place-items:center; font-size:12.5px; background:var(--a-l); color:var(--a-t); }
+  .ds-cgc.w b { background:var(--l-l); color:var(--l-t); }
+
+  /* ===== v18: হেডারের Session ড্রপডাউন — গাঢ় ও হালকা দুই হেডারেই পড়া যায় ===== */
+  #sess .sess-sel { display:inline-block; width:auto; min-width:0; height:auto; min-height:0; margin:0 0 0 4px; padding:2px 8px;
+                    font:inherit; font-size:13px; font-weight:700; cursor:pointer; border-radius:10px;
+                    background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.45); }
+  #sess .sess-sel option { background:var(--surface); color:var(--ink); }   /* খোলা তালিকা সব থিমে পরিষ্কার */
+  @media (min-width:900px) {
+    body.appmode #sess { background:transparent; padding:0; color:var(--mute); }
+    body.appmode #sess .sess-sel { background:var(--bg); color:var(--ink); border:1px solid var(--line); }
+  }
+
+  /* ===== আগের দিনের তুলনা ও জন্মদিন কার্ড ===== */
+  .ds-cmp { margin-top:12px; padding:12px 14px; border-radius:20px; background:var(--surface); border:1px solid color-mix(in srgb,var(--line) 60%,transparent); box-shadow:var(--soft); }
+  .ds-cmp-m { font-size:15px; font-weight:600; }
+  .ds-cmp-m b { font-size:20px; margin-right:4px; }
+  .ds-cmp-m.up b { color:var(--p-t); } .ds-cmp-m.down b { color:var(--a-t); } .ds-cmp-m.same b { color:var(--l-t); }
+  .ds-cmp-t { margin-top:4px; font-size:12.5px; color:var(--mute); font-weight:600; line-height:1.6; }
+  .ds-bd { margin-top:12px; padding:12px 14px; border-radius:20px; border:1px solid color-mix(in srgb,var(--l) 30%,transparent);
+           background:linear-gradient(160deg,var(--l-l),var(--surface)); box-shadow:var(--soft); }
+  .ds-bd-h { font-size:15px; font-weight:700; color:var(--l-t); margin-bottom:8px; }
+  .ds-bd-l { display:flex; flex-wrap:wrap; gap:8px; }
+  .ds-bd-c { padding:8px 12px; border-radius:14px; background:var(--surface); border:1px solid var(--line); }
+  .ds-bd-c b { display:block; font-size:14.5px; }
+  .ds-bd-c small { display:block; font-size:12px; color:var(--mute); font-weight:600; }
+
+  /* ===== হাজিরা সিট আধুনিক (v14) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  #t-att > .card:first-child { padding:14px; border-radius:24px; }
+  #t-att .datenav .chipbtn { min-height:38px; padding:7px 14px; font-size:13px; }
+
+  #t-att .hero { position:sticky; top:8px; z-index:5; padding:10px 14px; gap:12px; border-radius:20px;
+    background:color-mix(in srgb, var(--surface) 90%, transparent);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+  #t-att .ring { width:58px; height:58px; filter:none; transition:none; }
+  #t-att .ring::after { inset:6px; }
+  #t-att .ring b { font-size:14px; }
+  #t-att .ring b small { display:none; }
+  #t-att .hcount { grid-template-columns:repeat(auto-fit,minmax(64px,1fr)); gap:6px; }
+  #t-att .hc { flex-direction:column; align-items:flex-start; gap:0; padding:5px 9px; font-size:11px; line-height:1.25; border-radius:12px; position:relative; }
+  #t-att .hc i { position:absolute; top:9px; right:9px; width:8px; height:8px; }
+  #t-att .hc b { font-size:19px; min-width:0; line-height:1.15; }
+
+  #t-att .abs-line { border-radius:99px; padding:8px 16px; font-size:13px; margin:0 0 10px; }
+  .gtag { display:inline-block; margin-left:8px; padding:1px 8px; border-radius:10px; font-size:11.5px; font-weight:600; vertical-align:middle; }
+  .gtag.gb { background:#e0f0ff; color:#0b5394; }
+  .gtag.gg { background:#ffe3f0; color:#a1235f; }
+  #fbar { position:sticky; top:84px; z-index:4; padding:6px 0; }
+  #fbar .chipbtn { min-height:36px; padding:6px 13px; font-size:13px; }
+
+  #list .row { padding:10px 12px; margin-bottom:6px; border-radius:18px; }
+  #list .who { margin-bottom:8px; gap:10px; }
+  #list .roll { width:38px; min-width:38px; height:38px; font-size:15px; border-radius:12px; }
+  #list .name { font-size:16px; font-weight:600; }
+  #list .btns { gap:6px; padding:4px; border-radius:16px; }
+  #list .sb { min-height:48px; border-radius:13px; flex-direction:row; justify-content:center; gap:6px;
+    background:color-mix(in srgb, var(--surface) 90%, transparent); border:1.5px solid var(--line); }
+  #list .sb .sc { font-size:16px; }
+  #list .sb .sl { font-size:12.5px; }
+  #list .sb.on { border-color:transparent; transform:scale(1.02); }
+  #list .sb.on::after { content:"✓"; font-size:14px; font-weight:700; }
+  @media (max-width:380px) { #list .sb .sl { display:none; } }
+
+  @media (min-width:900px) {
+    /* দুই কলাম, কিন্তু ক্রম ওপর থেকে নিচে: বামে ১..মাঝ, ডানে মাঝ+১..শেষ */
+    #list { display:block; column-count:2; column-gap:8px; }
+    #list .row { margin:0 0 8px; break-inside:avoid; -webkit-column-break-inside:avoid; }
+    #list .empty, #list .gate, #list .listbar { column-span:all; }
+    #list .row:has(.btns) { display:block; }
+    #list .row:has(.btns) .who { margin-bottom:8px; }
+    #list .row:has(.btns) .btns { width:auto; }
+  }
+
+  .bar { position:sticky !important; bottom:calc(92px + env(safe-area-inset-bottom)) !important; z-index:7 !important; margin:14px 0 0 !important; }
+  @media (min-width:900px) { .bar { bottom:16px !important; } }
+
+  /* ===== সুপার ফাস্ট টিউনিং: বড় তালিকায় শুধু দৃশ্যমান সারি আঁকা হবে ===== */
+  #list .row, #ffBox .row, #regBox .card, #proBox .row { content-visibility:auto; contain-intrinsic-size:auto 118px; animation:none !important; }
+  #list .row:hover { transform:none; }
+  .sb, .row, .tab, .chipbtn, .save, .act { transition-duration:.1s !important; }
+  html { scroll-behavior:auto; }
+  body::before { position:absolute; height:100vh; }
+  body { background-attachment:scroll; }
+  .tabs-in, .bar-in, .modal, .loading, .toast { -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .tabs-in { background:var(--surface); }
+  .loading { background:var(--veil); }
+
+  @media print {
+    .pt tbody tr:nth-child(even) td { background:#f6f6f6 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .pt th { background:#dfe9e5 !important; }
+    .pt td.ab { color:#b00020; }
+    .pr-school { letter-spacing:.3px; }
+  }
+
+  /* ===== স্মার্ট তারিখ ও Select class (v15) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  .dlbl { margin-top:10px; font-size:13.5px; font-weight:600; color:var(--mute); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .dlbl .tg { font-size:12px; padding:2px 10px; border-radius:99px; background:var(--l-l); color:var(--l-t); }
+  .dlbl .tg.ok { background:var(--p-l); color:var(--p-t); }
+  .clschips { display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:none; scroll-snap-type:x proximity; }
+  .clschips::-webkit-scrollbar { display:none; }
+  #grpChips { margin-top:2px; }
+  .ds-grps { margin-top:8px; display:grid; gap:3px; }
+  .ds-g { display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:3px 8px; border-radius:8px; background:color-mix(in srgb,var(--line) 35%,transparent); }
+  .ds-g .gn { font-weight:600; } .ds-g .gv { color:var(--mute); white-space:nowrap; }
+  .grphead { margin:14px 4px 4px; padding:6px 12px; border-radius:10px; font-weight:700; font-size:14px; background:color-mix(in srgb,var(--ac1) 14%,transparent); }
+  #grpChips .cc { min-height:38px; padding:6px 13px; font-size:13px; }
+  .ds-sec { grid-column:1 / -1; margin:10px 2px 0; font-weight:700; font-size:14px; color:var(--mute); }
+  .cc { flex:none; scroll-snap-align:start; display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 14px; border-radius:99px; cursor:pointer;
+        font:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface); border:1.5px solid var(--line); }
+  .cc .st { width:9px; height:9px; border-radius:50%; background:var(--line); flex:none; }
+  .cc .st.ok { background:var(--p); } .cc .st.wait { background:var(--l); }
+  .cc.on { color:#fff; border-color:transparent; background:linear-gradient(135deg,var(--ac1),var(--ac2)); box-shadow:0 8px 16px -8px var(--glow); }
+  :root[data-theme="dark"] .cc.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .cc.on { color:#05201a; } }
+  .cc:active { transform:scale(.96); }
+
+  /* ===== বাটন ও কার্ড সিস্টেম (v16) — মুছে ফেললেই v15 ফিরবে ===== */
+  :root { --rad-s:12px; --rad-m:18px; --rad-l:24px;
+          --el1:0 1px 2px rgba(8,56,47,.07), 0 4px 12px -6px rgba(8,56,47,.18);
+          --el2:0 2px 4px rgba(8,56,47,.08), 0 14px 28px -14px rgba(8,56,47,.32);
+          --edge:inset 0 1px 0 rgba(255,255,255,.28); }
+  :root[data-theme="dark"] { --el1:0 1px 2px rgba(0,0,0,.45); --el2:0 12px 26px -12px rgba(0,0,0,.65); --edge:inset 0 1px 0 rgba(255,255,255,.08); }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --el1:0 1px 2px rgba(0,0,0,.45); --el2:0 12px 26px -12px rgba(0,0,0,.65); --edge:inset 0 1px 0 rgba(255,255,255,.08); } }
+
+  /* --- কার্ড: একই ছাঁচ, হালকা উচ্চতা, ওপরে ফিনফিনে রঙের রেখা --- */
+  .card, .hero, .row, .ds-card, .ds-k, .ds-tile, .rp-tile, .ds-ab, .empty {
+    border-radius:var(--rad-m); border:1px solid color-mix(in srgb, var(--line) 75%, transparent);
+    background:var(--surface); box-shadow:var(--el1); }
+  .card { position:relative; overflow:hidden; border-radius:var(--rad-l); }
+  .card::before { content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg, var(--ac1), var(--ac2)); opacity:.85; }
+  .lg-card::before, #edModal .card::before { display:none; }
+  .hero { background:linear-gradient(160deg, var(--surface), color-mix(in srgb, var(--pine-l) 50%, var(--surface))); }
+  .ds-card, .ds-q { transition:transform .15s, box-shadow .2s, border-color .2s; }
+  .ds-card:hover, .ds-q:hover { transform:translateY(-2px); box-shadow:var(--el2); border-color:color-mix(in srgb, var(--ac2) 45%, var(--line)); }
+  .cls-title { font-size:16.5px; }
+  .cls-title::before { background:linear-gradient(180deg, var(--ac1), var(--ac2)); width:5px; height:18px; }
+  .card > .cls-title { margin-bottom:12px; }
+
+  /* --- মূল বাটন (Primary): গ্রেডিয়েন্ট, ভেতরে আলোর রেখা, চাপলে বসে যায় --- */
+  .act:not(.alt):not(.rej), .save:not(:disabled), .abtn:not(.alt), .ds-call {
+    background:linear-gradient(135deg, var(--ac1), var(--ac2)); color:#fff; border:1px solid rgba(255,255,255,.18);
+    box-shadow:var(--el1), var(--edge), 0 10px 20px -10px var(--glow); }
+  :root[data-theme="dark"] .act:not(.alt):not(.rej), :root[data-theme="dark"] .save:not(:disabled), :root[data-theme="dark"] .abtn:not(.alt) { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .act:not(.alt):not(.rej), :root:not([data-theme="light"]) .save:not(:disabled), :root:not([data-theme="light"]) .abtn:not(.alt) { color:#05201a; } }
+
+  /* --- দ্বিতীয় বাটন (Secondary) --- */
+  .act.alt, .abtn.alt, .btn2 .act.alt, .chipbtn, .ds-ref {
+    background:var(--surface); color:var(--pine); border:1.5px solid color-mix(in srgb, var(--ac2) 35%, var(--line)); box-shadow:var(--el1); }
+  .chipbtn.p { background:var(--p-l); color:var(--p-t); border-color:color-mix(in srgb, var(--p) 30%, transparent); }
+  .chipbtn.a { background:var(--a-l); color:var(--a-t); border-color:color-mix(in srgb, var(--a) 30%, transparent); }
+  .chipbtn.on, .cc.on { background:linear-gradient(135deg, var(--ac1), var(--ac2)); color:#fff; border-color:transparent; box-shadow:var(--el1), var(--edge); }
+  :root[data-theme="dark"] .chipbtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .chipbtn.on { color:#05201a; } }
+
+  /* --- সতর্ক বাটন (Danger) --- */
+  .act.rej { background:linear-gradient(135deg, #d41f35, #f05a6a); color:#fff; border:1px solid rgba(255,255,255,.2);
+    box-shadow:var(--el1), var(--edge), 0 10px 20px -10px rgba(212,31,53,.5); }
+  .logout { background:linear-gradient(135deg, #d41f35, #f05a6a); }
+
+  /* --- সব বাটনের একই আচরণ --- */
+  .act, .chipbtn, .abtn, .save, .hbtn, .logout, .dchip, .pwbtn, .cc, .seg button, .ds-ref {
+    border-radius:99px; font-weight:700; letter-spacing:.15px; cursor:pointer;
+    transition:transform .12s, box-shadow .2s, filter .2s, background .2s; }
+  .act, .save { min-height:50px; }
+  .act:hover:not(:disabled), .save:hover:not(:disabled), .chipbtn:hover, .abtn:hover, .dchip:hover { filter:brightness(1.06); box-shadow:var(--el2); }
+  .act:active:not(:disabled), .save:active:not(:disabled), .chipbtn:active, .abtn:active, .cc:active, .seg button:active { transform:scale(.97); filter:brightness(.97); }
+  .act:disabled, .save:disabled, .chipbtn:disabled { background:color-mix(in srgb, var(--ink) 8%, var(--surface)); color:var(--mute); border-color:var(--line); box-shadow:none; filter:none; }
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline:3px solid var(--mint); outline-offset:2px; }
+
+  /* --- ড্যাশবোর্ড দ্রুত বাটন ও হিরো বাটন --- */
+  .ds-q { border-radius:var(--rad-l); box-shadow:var(--el1); }
+  .ds-q .qi { border-radius:16px; box-shadow:var(--edge), 0 10px 18px -8px var(--glow); }
+  .dchip { border-radius:99px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.32); box-shadow:inset 0 1px 0 rgba(255,255,255,.25); }
+  .pendb { border-radius:var(--rad-m); box-shadow:var(--el1); }
+
+  /* --- হাজিরা P/A/L বোতাম: সবুজ/লাল/হলুদ রঙে স্পষ্ট ও উঁচু --- */
+  #list .sb { border-radius:14px; font-weight:700; box-shadow:var(--el1); }
+  #list .sb.on { box-shadow:var(--el2), var(--edge); }
+
+  /* --- সেগমেন্ট (প্রোমোশন/ফিলাপ) --- */
+  .seg { border-radius:99px; padding:4px; background:color-mix(in srgb, var(--ink) 6%, transparent); }
+  .seg button { border-radius:99px; min-height:42px; }
+  .seg button.on { box-shadow:var(--el1), var(--edge); }
+
+  /* --- ফর্মের ঘর কার্ডের সাথে মানানসই --- */
+  select, input[type=date], input[type=month], input[type=search], input[type=text], input[type=email], input[type=password] { box-shadow:inset 0 1px 2px rgba(0,0,0,.05); }
+
+  /* ===== তারিখ/class অংশ ছোট ও গোছানো (v17) — মুছে ফেললেই v16 ফিরবে ===== */
+  #t-att > .card:first-child { padding:12px 12px 10px; }
+  #t-att > .card:first-child .grid { gap:8px; }
+  #t-att > .card:first-child label { font-size:12px; margin-bottom:3px; }
+  #t-att > .card:first-child input[type=date], #t-att > .card:first-child select { min-height:42px; padding:6px 10px; font-size:15px; }
+  #t-att > .card:first-child select { padding-right:32px; }
+  #t-att .datenav { gap:6px; margin-top:8px; }
+  #t-att .datenav .chipbtn { min-height:32px; padding:4px 11px; font-size:12.5px; font-weight:600; border-width:1px; box-shadow:none; }
+  #t-att .dlbl { margin-top:8px; font-size:12.5px; }
+  #t-att .clschips { margin-top:8px; gap:6px; }
+  #t-att .cc { min-height:34px; padding:4px 12px; font-size:13px; }
+  #t-att #fbar .chipbtn, #t-att #tools .chipbtn { min-height:34px; padding:4px 12px; font-size:12.5px; }
+
+  /* ===== তারিখ রেঞ্জ print: সব এক লাইনে (v18) — মুছে ফেললেই v17 ফিরবে ===== */
+  #t-mon .card:has(#rtype) { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 10px; }
+  #t-mon .card:has(#rtype) > .grid { display:contents; }
+  #t-mon .card:has(#rtype) > .cls-title { flex:1 0 100%; margin-bottom:2px; }
+  #t-mon .card:has(#rtype) .grid > div { flex:1 1 130px; min-width:0; margin:0; }
+  #t-mon .card:has(#rtype) .grid > div[style*="display: none"] { display:none; }
+  #t-mon .card:has(#rtype) label { font-size:12px; margin-bottom:3px; }
+  #t-mon .card:has(#rtype) select, #t-mon .card:has(#rtype) input[type=date] { min-height:42px; padding:6px 10px; font-size:14px; }
+  #t-mon .card:has(#rtype) > .note { flex:1 0 100%; margin-top:0; }
+  #t-mon .card:has(#rtype) > button.act { flex:0 0 auto; width:auto; min-width:120px; min-height:42px; margin:0 !important; padding:8px 18px; font-size:14px; }
+  @media (max-width:520px) { #t-mon .card:has(#rtype) .grid > div { flex:1 1 44%; } #t-mon .card:has(#rtype) > button.act { flex:1 0 100%; } }
+
+  /* ===== রিপোর্ট বাটন: ৪টি করে এক লাইনে (v19) — মুছে ফেললেই v18 ফিরবে ===== */
+  #t-mon .rp-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
+  #t-mon .rp-grid .act.alt { min-height:52px; padding:6px 4px; font-size:12.5px; line-height:1.3; font-weight:600;
+    display:flex; align-items:center; justify-content:center; text-align:center; border-radius:16px; word-break:break-word; }
+  @media (max-width:360px) { #t-mon .rp-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); } #t-mon .rp-grid .act.alt { font-size:11px; padding:4px 2px; } }
+
+  /* ===== সব ট্যাবে মাপ গোছানো (v20) — মুছে ফেললেই v19 ফিরবে ===== */
+  .card { padding:14px; margin-bottom:10px; }
+  label { font-size:12px; margin-bottom:3px; }
+  select, input[type=date], input[type=month], input[type=search], input[type=text], input[type=email], input[type=password] { min-height:42px; padding:6px 12px; font-size:15px; }
+  select { padding-right:32px; }
+  .act, .save { min-height:44px; padding:8px 16px; font-size:15px; }
+  .act.alt { font-size:14px; }
+  .bar-in .save { min-height:48px; font-size:16px; }
+  .chipbtn { min-height:34px; padding:4px 13px; font-size:13px; }
+  .tools { gap:6px; margin-bottom:10px; }
+  .btn2 { gap:8px; }
+  .btn2 .act { min-height:44px; }
+  .note { padding:7px 12px; font-size:13px; margin-top:8px; }
+  .empty { padding:22px 14px; }
+
+  /* ড্যাশবোর্ড */
+  .dhero { padding:16px 16px 14px; }
+  .dh-t { font-size:20px; }
+  .ds-quick { grid-template-columns:repeat(auto-fit, minmax(72px, 1fr)); gap:8px; margin-bottom:12px; }
+  .ds-q { padding:10px 4px; gap:4px; border-radius:18px; }
+  .ds-q .qi { width:40px; height:40px; font-size:21px; border-radius:13px; }
+  .ds-q .qt { font-size:12px; }
+  .ds-sec { margin:14px 2px 8px; font-size:14px; }
+  .ds-card { padding:11px 12px; }
+  .ds-cn { font-size:15px; }
+  .ds-k { padding:9px 10px; } .ds-k .ki { width:34px; height:34px; font-size:17px; } .ds-k b { font-size:17px; }
+  .ds-ov { padding:14px; } .ds-ring { width:100px; height:100px; }
+
+  /* রিপোর্ট / সতর্কতা / নিবন্ধন */
+  .rp-tiles { gap:8px; } .rp-tile { padding:10px 6px; border-radius:16px; } .rp-tile b { font-size:18px; }
+  .rp-h { margin:12px 0 6px; }
+  #t-alr .row, #t-reg .card { padding:12px; }
+  .reg-ph { width:60px; height:74px; }
+  .abtn { min-height:34px; padding:5px 13px; font-size:13px; line-height:22px; }
+  .act.rej, #t-reg .btn2 .act { min-height:42px; }
+
+  /* প্রোমোশন / ফিলাপ */
+  .pro-step { margin-bottom:8px; } .pro-step i { width:28px; height:28px; }
+  .pro-set { gap:8px; }
+  .seg button { min-height:36px; font-size:13px; }
+  .row.pro, .row.ff { padding:10px 12px; }
+  .pro-new input { min-height:40px; font-size:16px; }
+  .pf-box { padding:10px 12px; }
+  .ff-bar .act, .pro-bar .act { min-height:44px; padding:8px 16px; }
+
+  /* হেডার */
+  .hbtn, .logout { min-height:32px; padding:4px 12px; font-size:13px; }
+
+  /* ===== তারিখ, class ও বাটন এক লাইনে (v21) — মুছে ফেললেই v20 ফিরবে ===== */
+  #t-att .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  #t-att .dline::-webkit-scrollbar { display:none; }
+  #t-att .dline > .grid, #t-att .dline > .datenav { display:contents; }
+  #t-att .dline .grid > div { flex:0 0 auto; margin:0; }
+  #t-att .dline input[type=date] { width:140px; }
+  #t-att .dline select#cls { width:150px; }
+  #t-att .dline .chipbtn { flex:0 0 auto; white-space:nowrap; margin:0; }
+  /* ===== শিক্ষার্থী তালিকা লুকানো/দেখানো ===== */
+  #list .gate, #list .listbar { grid-column:1 / -1; }
+  #list .gate .detail { margin:2px 0 12px; }
+  #list .listbar { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px;
+                   padding:8px 12px; border-radius:16px; background:var(--pine-l); color:var(--pine); font-size:13px; font-weight:600; }
+  #list .listbar .lb-a { display:flex; gap:6px; }
+  /* সব বোতাম এক লাইনে (পাশে স্ক্রল করা যায়) */
+  #t-att .toolline { display:flex; flex-wrap:nowrap; align-items:center; gap:6px; margin-top:10px; padding:2px 2px 4px;
+                     overflow-x:auto; scrollbar-width:none; }
+  #t-att .toolline::-webkit-scrollbar { display:none; }
+  #t-att .toolline > .actrow, #t-att .toolline > .datenav { display:contents; }
+  #t-att .toolline button { flex:0 0 auto; white-space:nowrap; }
+  #t-att .toolline .chipbtn { min-height:40px; padding:6px 12px; }
+  #t-mon .rprow { display:flex; flex-wrap:nowrap; gap:8px; margin-top:12px; overflow-x:auto; scrollbar-width:none; }
+  #t-mon .rprow::-webkit-scrollbar { display:none; }
+  #t-mon .rprow button { flex:0 0 auto; width:auto; min-height:46px; padding:8px 14px; font-size:15px; white-space:nowrap; border-radius:99px; }
+  #t-mon .rprow .save { flex:1 1 auto; font-size:16px; }
+  #t-mon .rprow #rpViewBtn.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; border-color:transparent; }
+  :root[data-theme="dark"] #t-mon .rprow #rpViewBtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-mon .rprow #rpViewBtn.on { color:#05201a; } }
+  /* তারিখ ও class পরে: 👁 / ✏️ / জমা বোতাম */
+  #t-att .dline { display:block; overflow:visible; }
+  #t-att .dline > .grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #t-att .dline .grid > div { margin:0; min-width:0; }
+  #t-att .dline input[type=date], #t-att .dline select#cls { width:100%; }
+  #t-att .actrow { display:flex; gap:8px; margin-top:10px; }
+  #t-att .actrow button { flex:0 0 auto; width:auto; min-height:44px; padding:8px 14px; font-size:15px; white-space:nowrap; border-radius:99px; }
+  #t-att .actrow .save { flex:0 0 auto; font-size:16px; }
+  #t-att .actrow #viewBtn.on, #t-att .actrow #editBtn.on { background:linear-gradient(135deg,var(--ac1),var(--ac2)); color:#fff; border-color:transparent; }
+  :root[data-theme="dark"] #t-att .actrow #viewBtn.on, :root[data-theme="dark"] #t-att .actrow #editBtn.on { color:#05201a; }
+  @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-att .actrow #viewBtn.on, :root:not([data-theme="light"]) #t-att .actrow #editBtn.on { color:#05201a; } }
+  #list .gate { padding:16px; }
+  #list .gate-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  #list .gate-top .cls-title { margin-bottom:0 !important; }
+  #list .gate-top .pchip { margin:0; flex:none; }
+  #list .gate-chips { margin:0 0 10px; }
+  #list .gate .abs-line { margin:0 0 12px; }
+  #list .gate .act { width:100%; }
+  #list .gate .btn2 { margin-bottom:0; }
+  #list .gate .gate-next { margin-top:10px; }
+  #list.ro .btns { pointer-events:none; opacity:.9; }
+  #list.ro + .bar { display:none !important; }
+  #saveBar:not(.show) { display:none !important; }
+  /* ছোট জমা বোতাম */
+  #saveBar .bar-in { display:flex; justify-content:center; max-width:none; margin:0; }
+  #saveBar .save, #saveBar .bar-in .save { width:auto; min-width:0; min-height:36px; padding:4px 18px; font-size:14px; gap:6px; box-shadow:0 8px 16px -8px var(--glow), 0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35); }
+  #saveBar .bar-in .save::before { width:16px; height:16px; }
+  @media (min-width:900px) { #saveBar .bar-in { justify-content:flex-end; } }
+  /* রিপোর্টের print বোতাম ছোট */
+  #t-mon .rprow #rpPrintBtn { flex:0 0 auto; min-height:38px; padding:4px 16px; font-size:13px; }
+  /* রিপোর্ট ট্যাব থেকে "Sheet" বোতাম ও লিংক সরানো */
+  #expBtn, #expLink { display:none !important; }
+  /* লগইন: শিক্ষক / অফিস বাছাই */
+  .lg-mode { display:flex; gap:6px; padding:4px; margin:2px 0 12px; border-radius:99px; background:var(--pine-l); border:1px solid var(--line); }
+  .lg-mode button { flex:1; min-height:38px; border:0; border-radius:99px; background:transparent; color:var(--mute); font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  .lg-mode button.on { background:var(--surface); color:var(--pine); box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  body.office-only #dash, body.office-only #pendBanner { display:none !important; }
+  /* রিপোর্ট: class, মাস, তারিখ, ধরন ও ভিউ এক লাইনে */
+  #t-mon .rpline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  #t-mon .rpline::-webkit-scrollbar { display:none; }
+  #t-mon .rpline > .grid { display:contents; }
+  #t-mon .rpline .grid > div { flex:1 1 0; min-width:120px; margin:0; }
+  #t-mon .rpline .grid > div:nth-child(2) { min-width:130px; }
+  #t-mon .rpline .rprow { flex:0 0 auto; display:flex; gap:6px; margin:0; overflow:visible; }
+  #t-mon .rpline .rprow button { min-height:42px; padding:6px 12px; font-size:14px; white-space:nowrap; }
+  #t-mon .rpline .rprow #rpPrintBtn { min-height:42px; font-size:13px; }
+  /* অফিসিয়াল মাসিক প্রতিবেদনের হেডার */
+  .rp-off { margin:12px 0; padding:16px 14px 12px; border-radius:var(--rad-l, 22px); text-align:center; background:var(--surface);
+            border:1px solid var(--line); border-top:4px solid var(--ac1); box-shadow:var(--el1, var(--soft)); }
+  .rp-off-s { font-size:19px; font-weight:700; letter-spacing:.2px; }
+  .rp-off-t { display:inline-block; margin-top:6px; padding:3px 18px; font-size:14px; font-weight:700; color:var(--pine); border:1.5px solid color-mix(in srgb, var(--ac2) 55%, var(--line)); border-radius:99px; background:var(--pine-l); }
+  .rp-off-m { margin:8px 0 12px; font-size:13.5px; font-weight:600; color:var(--mute); }
+  .rp-off .rp-tiles { margin-bottom:0; }
+  .tw .mt th { white-space:normal; line-height:1.25; }
+  @media (min-width:900px) { #saveBar .bar-in { margin:0 0 0 auto; } }
+  /* ===== তারিখ, class ও 👁/✏️ বোতাম এক লাইনে ===== */
+  #t-att .card .dline { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  #t-att .card .dline::-webkit-scrollbar { display:none; }
+  #t-att .card .dline > .grid { display:contents; }
+  #t-att .card .dline .grid > div { flex:1 1 0; min-width:112px; margin:0; }
+  #t-att .card .dline .actrow { flex:0 0 auto; display:flex; gap:6px; margin:0; }
+  #t-att .card .dline .actrow button { min-height:42px; padding:6px 12px; font-size:14px; white-space:nowrap; }
+  @media (max-width:420px) { #t-att .card .dline { gap:6px; } #t-att .card .dline .actrow button { padding:6px 9px; font-size:13px; } }
+  /* ===== হাজিরার তারিখ-class কার্ড: ছোট ও আকর্ষণীয় ===== */
+  #t-att > .card:first-child { position:relative; padding:10px 10px 9px !important; margin-bottom:8px; border-radius:18px; overflow:hidden;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--pine-l) 70%, var(--surface)) 0%, var(--surface) 70%);
+    border:1px solid color-mix(in srgb, var(--ac2) 28%, var(--line)); box-shadow:0 8px 22px -14px var(--glow), 0 1px 2px rgba(0,0,0,.05); }
+  #t-att > .card:first-child::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--ac2), var(--ac1)); }
+  #t-att .card .dline { padding-left:4px; gap:7px; }
+  #t-att .card .dline label { display:block; margin:0 0 3px 2px; font-size:11px; font-weight:700; letter-spacing:.2px; color:var(--pine); }
+  #t-att .card .dline label[for="date"]::before { content:"📅 "; }
+  #t-att .card .dline label[for="cls"]::before { content:"🏫 "; }
+  #t-att .card .dline input, #t-att .card .dline select { min-height:38px; height:38px; padding:0 10px; font-size:14px; font-weight:600; border-radius:12px;
+    background-color:var(--surface); border:1.5px solid color-mix(in srgb, var(--ac2) 30%, var(--line)); box-shadow:0 1px 0 rgba(255,255,255,.6) inset; }
+  #t-att .card .dline input:focus, #t-att .card .dline select:focus { border-color:var(--ac2); box-shadow:0 0 0 3px color-mix(in srgb, var(--ac2) 22%, transparent); outline:0; }
+  #t-att .card .dline .actrow button { min-height:38px; height:38px; padding:0 12px; font-size:13px; font-weight:700; border-radius:99px; }
+  #t-att .card .toolline { margin-top:7px; padding-left:4px; }
+  #t-att .card .datenav .chipbtn { min-height:28px; padding:2px 11px; font-size:12px; border-radius:99px; }
+
+  /* ===== print পেজ সেটাপ (v-print) — মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  @media print {
+    /* ব্যাকগ্রাউন্ড পতাকা (body::before) printে আসত — বন্ধ */
+    body::before, body::after { display:none !important; content:none !important; }
+    html, body { width:auto !important; height:auto !important; min-height:0 !important; overflow:visible !important;
+                 background:#fff !important; background-image:none !important; }
+    #printArea { display:block !important; width:100%; }
+    .pr-head, .pr-sign, .pr-note, .pr-foot { break-inside:avoid; page-break-inside:avoid; }
+    .pr-head { break-after:avoid; page-break-after:avoid; }
+    #printArea h3 { margin:14px 0 6px; font-size:14px; color:#000; break-after:avoid; page-break-after:avoid; }
+    .pt tr { break-inside:avoid; page-break-inside:avoid; }
+    .pt thead { display:table-header-group; }
+    .pt th { white-space:normal; }
+    .pt.att td.l { white-space:nowrap; }
+    .pt.att th, .pt.att td { padding:3px 2px; }
+    .pt.att td:first-child { white-space:nowrap; }
+    .pt.dense { font-size:9px; }
+    .pt.xdense { font-size:7px; }
+    .pt.xdense th, .pt.xdense td { padding:2px 0.5px; }
+    .pt.dense th.dt { writing-mode:vertical-rl; text-orientation:mixed; padding:3px 1px; white-space:nowrap; }
+    .pr-sign { margin-top:40px; }
+  }
+
+  /* ===== আধুনিক UI (v-modern) — এই পুরো ব্লক মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+  :root {
+    --r-card:18px; --r-ctl:12px;
+    --sh-1:0 1px 2px rgba(10,40,32,.05), 0 6px 20px -10px rgba(10,40,32,.14);
+    --sh-2:0 2px 4px rgba(10,40,32,.06), 0 14px 32px -14px rgba(10,40,32,.22);
+    --ring:0 0 0 3px color-mix(in srgb, var(--pine) 24%, transparent);
+  }
+  body { font-feature-settings:"kern"; -webkit-font-smoothing:antialiased; }
+  body { background:var(--bg) !important; }
+  body::before { opacity:.035 !important; }
+  :root[data-theme="dark"] body::before { opacity:.06 !important; }
+
+  /* হেডার: ছোট, পরিষ্কার; লাল ধার ও জোরালো Logout বাদ */
+  body:not(.appmode) header { border-bottom:0 !important; border-radius:0 0 26px 26px !important; padding-bottom:30px !important; }
+  body:not(.appmode) header { box-shadow:0 12px 26px -16px rgba(0,50,38,.55) !important;
+    background:radial-gradient(circle at 90% -20%, rgba(95,224,180,.45), transparent 50%), linear-gradient(160deg, #007a58 0%, var(--pine-d) 72%) !important; }
+  body:not(.appmode) header #title { font-size:22px !important; letter-spacing:-.2px !important; }
+  body:not(.appmode) header small { background:rgba(255,255,255,.12) !important; border-radius:99px; }
+  body:not(.appmode) .hbtn, body:not(.appmode) .logout { min-height:34px !important; border-radius:10px !important; font-weight:600 !important;
+    background:rgba(255,255,255,.12) !important; color:#fff !important; border:1px solid rgba(255,255,255,.22) !important;
+    box-shadow:none !important; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+  body:not(.appmode) .hbtn:hover, body:not(.appmode) .logout:hover { background:rgba(255,255,255,.2) !important; }
+  body:not(.appmode) .logout { background:rgba(255,255,255,.92) !important; color:#a4162a !important; border-color:transparent !important; }
+  body:not(.appmode) header .today { background:rgba(255,255,255,.1) !important; border:1px solid rgba(255,255,255,.16) !important; border-radius:14px !important; }
+  /* ডেস্কটপ (সাইডবার) হেডার: হালকা, পরিষ্কার */
+  body.appmode .hbtn, body.appmode .logout { min-height:36px; border-radius:10px !important; }
+  body.appmode .logout { background:var(--a-l) !important; color:var(--a-t) !important; border:1px solid transparent !important; box-shadow:none !important; }
+
+  /* কার্ড ও সারি */
+  .card { border-radius:var(--r-card) !important; border:1px solid var(--line) !important; box-shadow:var(--sh-1) !important; background:var(--surface) !important; }
+  .row { border-radius:14px !important; border:1px solid var(--line) !important; box-shadow:none !important; }
+  .row[data-s="0"], .row:not([data-s]) { background:var(--surface); }
+  h3 { font-size:15px !important; letter-spacing:.1px; }
+  label { font-size:12.5px !important; font-weight:600; color:var(--mute); }
+
+  /* ইনপুট */
+  input[type=date], input[type=text], input[type=search], input[type=number], input[type=password], input[type=month], select, textarea {
+    min-height:44px; border-radius:var(--r-ctl) !important; border:1.5px solid var(--line) !important; background:var(--surface) !important;
+    transition:border-color .15s, box-shadow .15s; }
+  input:focus, select:focus, textarea:focus { border-color:var(--pine) !important; box-shadow:var(--ring) !important; outline:0 !important; }
+
+  /* বাটন */
+  .act { border-radius:var(--r-ctl) !important; font-weight:700; min-height:44px; box-shadow:0 6px 14px -8px color-mix(in srgb, var(--pine) 70%, transparent);
+    transition:transform .12s, box-shadow .15s, filter .15s; }
+  .act:hover { filter:brightness(1.05); }
+  .act:active { transform:scale(.98); }
+  .act.alt { box-shadow:none !important; border:1px solid color-mix(in srgb, var(--pine) 20%, transparent); }
+  .chipbtn { border-radius:99px !important; font-weight:600; transition:background .15s, transform .12s; }
+  .chipbtn:active { transform:scale(.96); }
+
+  /* ট্যাব বার */
+  body:not(.appmode) .tabs-in { border-radius:22px !important; border:1px solid var(--line) !important; box-shadow:var(--sh-2) !important; }
+  .tab { border-radius:16px !important; font-weight:600; transition:background .15s, color .15s; }
+  body:not(.appmode) .tab.on { background:var(--pine) !important; color:var(--on-pine) !important; box-shadow:0 6px 14px -8px var(--pine); }
+
+  /* Attendance বাটন, পিল, মিটার */
+  .btns { border-radius:12px !important; }
+  .sb { border-radius:9px !important; font-weight:700; }
+  .pill { font-weight:600 !important; }
+  .meter { height:6px !important; border-radius:99px !important; }
+  .bar-in { border-radius:20px !important; border:1px solid var(--line); box-shadow:var(--sh-2) !important; }
+
+  /* মোডাল ও টোস্ট */
+  .modal, .modal-in, .sheet { border-radius:22px !important; }
+  .toast { border-radius:14px !important; box-shadow:var(--sh-2) !important; }
+
+  /* হেডারের session বাছাই (select) — সাধারণ ইনপুট স্টাইল থেকে আলাদা */
+  #sess .sess-sel { min-height:0 !important; height:auto !important; padding:2px 8px !important; border-radius:10px !important; box-shadow:none !important; }
+  body:not(.appmode) #sess .sess-sel { background:rgba(255,255,255,.16) !important; color:#fff !important; border:1px solid rgba(255,255,255,.35) !important; }
+  body.appmode #sess .sess-sel { background:var(--bg) !important; color:var(--ink) !important; border:1px solid var(--line) !important; }
+  #sess .sess-sel option { background:var(--surface); color:var(--ink); }
+
+  /* মোবাইল: তারিখ/class/বাটন সারি যেন উপচে না পড়ে */
+  @media (max-width:560px) {
+    #t-att .card .dline { display:block !important; }
+    #t-att .card .dline .grid { display:grid !important; grid-template-columns:1fr !important; gap:10px !important; }
+    #t-att .card .dline .actrow { display:grid !important; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    #t-att .card .dline .actrow button { width:100%; }
+    #t-att .card .datenav { display:flex; flex-wrap:wrap; gap:6px; }
+    body:not(.appmode) header { padding-bottom:24px !important; }
+  }
+  @media (prefers-reduced-motion:reduce) { .act, .chipbtn, .tab { transition:none !important; } }
+
+  /* ===== লগইন: অ্যাডমিন পেজের মতো কাগজি কার্ড ===== */
+  #login.al, body.lgmode #login.al { position:fixed; inset:0; z-index:60; overflow-y:auto; max-width:none; padding:0; margin:0;
+    font-family:'Noto Sans Bengali','Hind Siliguri','Anek Bangla',sans-serif; color:#1F2D50; font-size:14px;
+    background:radial-gradient(circle at 12% 15%, rgba(199,154,71,.16), transparent 45%), radial-gradient(circle at 88% 85%, rgba(63,122,99,.14), transparent 45%), #FAF6EC; }
+  #login .al-bg span { position:fixed; border-radius:50%; border:1.5px solid rgba(31,45,80,.06); animation:alFloat 8s infinite ease-in-out; pointer-events:none; }
+  #login .al-bg span:nth-child(1) { width:260px; height:260px; top:6%; left:6%; }
+  #login .al-bg span:nth-child(2) { width:180px; height:180px; top:72%; right:8%; animation-delay:2.5s; }
+  #login .al-bg span:nth-child(3) { width:120px; height:120px; bottom:15%; left:14%; animation-delay:5s; }
+  @keyframes alFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-16px); } }
+  #login .al-wrap { min-height:100%; display:flex; justify-content:center; align-items:center; padding:24px; position:relative; z-index:1; box-sizing:border-box; }
+  #login .al-card { background:repeating-linear-gradient(to bottom, transparent 0, transparent 38px, #E7DFC8 38px, #E7DFC8 39px), #fff;
+    border:1px solid rgba(31,45,80,.08); padding:40px 36px; border-radius:20px; width:100%; max-width:460px; position:relative; box-sizing:border-box;
+    box-shadow:0 24px 48px rgba(31,45,80,.12), 0 2px 6px rgba(31,45,80,.06); animation:alUp .7s cubic-bezier(.25,.46,.45,.94); }
+  #login .al-card::before { content:''; position:absolute; top:0; left:34px; width:2px; height:100%; background:rgba(180,67,46,.14); border-radius:2px; }
+  @keyframes alUp { from { opacity:0; transform:translateY(40px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  #login .al-header { text-align:center; margin-bottom:32px; }
+  #login .al-badge { display:inline-block; font-size:12px; font-weight:600; letter-spacing:.06em; color:#A87E33; background:rgba(199,154,71,.14); padding:4px 14px; border-radius:999px; margin-bottom:12px; }
+  #login .al-header h2 { font-family:'Noto Serif Bengali','Hind Siliguri',serif; color:#1F2D50; font-size:30px; font-weight:700; margin:0 0 8px; letter-spacing:-.01em; }
+  #login .al-header p { color:#7A8399; font-size:14px; margin:0; }
+  #login form { position:relative; z-index:1; margin:0; padding:0; background:none; border:0; box-shadow:none; }
+  #login .al-group { position:relative; margin:0 0 22px; }
+  #login .al-group input { width:100%; box-sizing:border-box; height:auto; min-height:0; margin:0; padding:15px 18px 15px 45px; border:1.5px solid #E3E1D8; border-radius:11px;
+    font-size:15px; font-family:inherit; color:#1F2D50; background:#fff; box-shadow:none; outline:none; transition:all .25s; -webkit-appearance:none; appearance:none; }
+  #login .al-group input:focus { border-color:#C79A47; box-shadow:0 0 0 3px rgba(199,154,71,.15); background:#fff; }
+  #login .al-group label { position:absolute; top:50%; left:45px; transform:translateY(-50%); color:#7A8399; font-size:15px; margin:0; pointer-events:none; transition:all .25s; background:#fff; font-weight:400; letter-spacing:0; }
+  #login .al-group input:focus + label, #login .al-group input:not(:placeholder-shown) + label { top:-9px; left:14px; font-size:11.5px; color:#A87E33; padding:0 7px; font-weight:600; }
+  #login .al-icon { position:absolute; top:50%; left:15px; transform:translateY(-50%); font-size:16px; color:#B7BCC9; }
+  #login .al-toggle { position:absolute; top:50%; right:14px; transform:translateY(-50%); cursor:pointer; font-size:16px; user-select:none; }
+  #login .al-btn { width:100%; min-height:0; height:auto; margin:6px 0 0; padding:15px; background:linear-gradient(135deg,#1F2D50 0%,#2C3D6B 100%); color:#fff; border:0; border-radius:11px;
+    font-size:15.5px; font-weight:600; font-family:inherit; cursor:pointer; position:relative; overflow:hidden; transition:all .25s; box-shadow:none; }
+  #login .al-btn:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(31,45,80,.28); }
+  #login .al-btn:disabled { opacity:.7; cursor:not-allowed; transform:none; box-shadow:none; }
+  #login .al-btext { display:block; }
+  #login .al-loading { display:none; align-items:center; justify-content:center; gap:10px; background:none; color:#fff; position:static; padding:0; }
+  #login .al-spin { width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top:2px solid #fff; border-radius:50%; animation:alSpin .9s linear infinite; display:inline-block; }
+  @keyframes alSpin { to { transform:rotate(360deg); } }
+  #login .al-error { display:none; background:#FBE7E2; color:#B4432E; padding:12px 16px; border-radius:10px; font-size:13.5px; text-align:center; margin-top:18px; border:1px solid rgba(180,67,46,.25); }
+  #login .al-error.show { display:block; animation:alShake .5s ease-in-out; }
+  @keyframes alShake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+  #login .al-switch { text-align:center; margin-top:16px; font-size:13.5px; }
+  #login .al-switch a, #login .al-resend a { color:#A87E33; font-weight:600; cursor:pointer; }
+  #login .al-switch a:hover { text-decoration:underline; }
+  #login .al-otpinfo { text-align:center; color:#7A8399; font-size:13px; margin-bottom:24px; line-height:1.6; }
+  #login .al-otpinfo b { color:#1F2D50; word-break:break-all; }
+  #login .al-otps { display:flex; justify-content:space-between; gap:8px; margin-bottom:24px; }
+  #login .al-otps input { width:100%; min-width:0; height:auto; min-height:0; margin:0; padding:0; box-sizing:border-box; aspect-ratio:1; text-align:center; font-size:20px; font-weight:700; color:#1F2D50;
+    border:1.5px solid #E3E1D8; border-radius:10px; outline:none; transition:all .25s; font-family:inherit; background:#fff; box-shadow:none; }
+  #login .al-otps input:focus { border-color:#C79A47; box-shadow:0 0 0 3px rgba(199,154,71,.15); }
+  #login .al-resend { text-align:center; margin-top:18px; font-size:13.5px; color:#7A8399; }
+  #login .al-resend a.disabled { color:#C9CDD6; pointer-events:none; }
+  #login .al-back { text-align:center; margin-top:10px; }
+  #login .al-back a { color:#A6ACBB; font-size:12.5px; cursor:pointer; }
+  #login .al-back a:hover { color:#A87E33; }
+  @media (max-width:480px) { #login .al-card { padding:30px 22px; } #login .al-header h2 { font-size:24px; } #login .al-wrap { padding:12px; } }
+
+  /* ক্লাস কার্ডের ভেতরে গ্রুপ-সাবকার্ড */
+  .ds-card.has-grps { grid-column:1 / -1; }
+  .ds-card.has-grps .ds-l { flex:1; }
+  .ds-grps { margin-top:10px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
+  .ds-sc { padding:10px 12px; border-radius:14px; background:color-mix(in srgb,var(--line) 30%,var(--surface)); border:1px solid var(--line); cursor:pointer; transition:transform .15s,border-color .2s; }
+  .ds-sc:hover { transform:translateY(-1px); border-color:var(--pine); }
+  .ds-sc.wait { border-style:dashed; background:color-mix(in srgb,var(--l-l) 50%,var(--surface)); }
+  .ds-sc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .ds-sc-n { font-weight:700; font-size:14px; }
+  .ds-sc-p { font-weight:700; font-size:13px; color:var(--p-t); } .ds-sc-p.low { color:var(--a-t); }
+  .ds-sc-s { font-size:12px; color:var(--mute); font-weight:600; margin-top:2px; }
+  .ds-sc-w { margin-top:6px; font-size:12px; font-weight:600; color:var(--l-t); }
+  .ds-sc .bc-chips { margin:6px 0 0; gap:4px; } .ds-sc .bc-chip { font-size:11px; padding:2px 8px; }
+  /* এক ক্লাস-শাখার একটি কার্ড; ক্লিক করলে ভেতরে গ্রুপ-কার্ড খোলে */
+  .ds-wrap { padding:0; border-radius:20px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--soft); overflow:hidden; }
+  .ds-wrap.wait { border-style:dashed; background:color-mix(in srgb,var(--l-l) 55%,var(--surface)); }
+  .ds-wrap.open { grid-column:1 / -1; }
+  .ds-wrap-t { all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; cursor:pointer; }
+  .ds-wrap-t:focus-visible { outline:3px solid var(--mint); outline-offset:-3px; }
+  .ds-wrap-n { font-size:16px; font-weight:700; }
+  .ds-wrap-s { font-size:12.5px; font-weight:600; color:var(--mute); margin-top:2px; }
+  .ds-wrap-c { font-size:20px; color:var(--mute); transition:transform .2s; }
+  .ds-wrap.open .ds-wrap-c { transform:rotate(180deg); }
+  .ds-wrap-g { display:none; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; padding:0 14px 14px; }
+  .ds-wrap.open .ds-wrap-g { display:grid; }
+</style>
+<style id="pageStyle"></style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style id="modernUI">:root{--pine:#0f766e;--pine-d:#0b3b3a;--pine-l:#d9f3ef;--mint:#6ee7c8;--radius:18px;--shadow:0 10px 30px -12px rgba(15,40,38,.28);--shadow-s:0 1px 2px rgba(15,40,38,.06),0 4px 14px -6px rgba(15,40,38,.12)}
+@media (prefers-color-scheme:dark){:root{--pine:#2dd4bf;--shadow:0 12px 32px -12px rgba(0,0,0,.7);--shadow-s:0 1px 2px rgba(0,0,0,.4)}}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(135deg,#0b3b3a 0%,#0f766e 60%,#14917f 100%);border-radius:0 0 32px 32px}
+header #title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.today{border-left-color:rgba(255,255,255,.25)}
+.tabs-in{background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:22px;box-shadow:var(--shadow);padding:5px}
+.tab{border-radius:17px;font-weight:500;font-size:12px;transition:all .2s ease}
+.tab:hover{background:var(--pine-l);color:var(--pine-d)}
+.tab.on{background:linear-gradient(135deg,var(--pine),#14917f);color:#fff;box-shadow:0 6px 14px -6px var(--pine)}
+.card,.hero{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-s);transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:var(--shadow)}
+label{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--mute)}
+select,input[type=date],input[type=month],input[type=search],input[type=text],input[type=password],input[type=email]{border:1px solid var(--line);border-radius:14px;background-color:var(--surface);box-shadow:inset 0 1px 0 rgba(0,0,0,.02);transition:border-color .15s,box-shadow .15s}
+select:focus,input:focus{border-color:var(--pine);box-shadow:0 0 0 4px color-mix(in srgb,var(--pine) 18%,transparent);outline:none}
+button{transition:transform .12s,box-shadow .2s,background .2s,filter .2s}
+button:active{transform:scale(.97)}
+.act,.save,.chipbtn,.dchip,.hbtn{border-radius:14px;font-weight:600}
+.act:hover,.save:hover{filter:brightness(1.06);box-shadow:var(--shadow-s)}
+.note{border-radius:14px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;border:2px solid var(--bg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.td-wrap{padding:14px}
+.td-seg{display:flex;gap:6px;margin:10px 0;background:var(--bg);padding:4px;border-radius:14px}
+.td-tab{flex:1;border:0;background:none;padding:9px 6px;border-radius:11px;font-weight:600;font-size:13.5px;color:var(--mute);cursor:pointer}
+.td-tab.on.a{background:var(--a-l);color:var(--a-t)}.td-tab.on.p{background:var(--p-l);color:var(--p-t)}
+.td-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.td-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:14px 8px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--p);box-shadow:var(--shadow-s)}
+.td-card.a{border-top-color:var(--a)}
+.td-av{width:64px;height:64px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:26px;font-weight:700;background:var(--p-l);color:var(--p-t);margin-bottom:4px;box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--p)}
+.td-card.a .td-av{background:var(--a-l);color:var(--a-t);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--a)}
+.td-av img{width:100%;height:100%;object-fit:cover}
+.td-card b{font-size:14px;line-height:1.25;word-break:break-word}
+.td-card small{font-size:12px;color:var(--mute)}
+
+.bc-card{border-radius:20px;border:1px solid var(--line);box-shadow:var(--shadow-s);padding:14px 16px;transition:transform .15s,box-shadow .2s}
+.bc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.bc-card .ds-cn{font-weight:700;font-size:16px;letter-spacing:-.01em}
+.bc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.bc-chip{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--mute)}
+.bc-chip.pres{background:var(--p-l);color:var(--p-t)}.bc-chip.abs{background:var(--a-l);color:var(--a-t)}
+.bc-chip.oth{background:var(--l-l);color:var(--l-t)}.bc-chip.pend{background:var(--l-l);color:var(--l-t)}
+</style>
+<style id="stuUI">
+#stuModal .modal-in.su{width:min(660px,100%);padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
+.su-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 12px;background:linear-gradient(135deg,#00382a,#0a8a68);color:#fff}
+.su-head h4{margin:0;font-size:18px}.su-head small{opacity:.85;font-size:12.5px}
+.su-x{border:0;background:rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
+#stuPick,#stuFormWrap{padding:14px 16px 16px;overflow-y:auto;flex:1;position:relative}
+.su-tools{display:grid;grid-template-columns:1fr 1.2fr;gap:8px}
+@media(max-width:480px){.su-tools{grid-template-columns:1fr}}
+.su-stats{display:flex;align-items:center;gap:8px;margin:10px 2px 6px;font-size:13px;color:var(--mute);font-weight:600}
+.su-all{display:none;align-items:center;gap:8px;margin:0 2px 8px;font-size:13.5px;font-weight:600;text-transform:none;cursor:pointer;color:var(--ink)}
+.su-card{display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:6px;border-radius:16px;background:var(--surface);border:1px solid var(--line);transition:border-color .15s,box-shadow .15s,background .15s}
+.su-card:hover{border-color:color-mix(in srgb,var(--pine) 45%,var(--line));box-shadow:var(--shadow-s)}
+.su-card.sel{background:var(--a-l);border-color:color-mix(in srgb,var(--a) 50%,var(--line))}
+.su-av{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:17px;color:var(--p-t);background:linear-gradient(145deg,var(--p-l),color-mix(in srgb,var(--pine) 28%,var(--p-l)))}
+.su-main{flex:1;min-width:0;cursor:pointer}
+.su-main b{display:block;font-size:15.5px;line-height:1.3;word-break:break-word}
+.su-main small{color:var(--mute);font-size:12.5px}
+.su-chev{flex:none;color:var(--mute);font-size:20px;cursor:pointer}
+.su-bulk{position:sticky;bottom:0;display:none;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.su-bulk.on{display:flex}.su-bulk span{flex:1;font-weight:700;font-size:14px}
+.su-bulk .act{min-height:38px;padding:4px 14px;font-size:13px;width:auto}
+.su-danger{margin-top:14px;border:1px dashed color-mix(in srgb,var(--a) 45%,var(--line));border-radius:16px;padding:10px 12px}
+.su-danger summary{cursor:pointer;font-weight:700;color:var(--a-t);font-size:14px}
+.su-danger p{font-size:13px;color:var(--mute);margin:8px 0}
+.su-who{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--pine-l);margin-bottom:12px}
+.su-who .su-av{width:46px;height:46px}.su-who b{display:block}.su-who small{color:var(--mute)}
+.su-sec{margin:14px 0;padding:12px;border-radius:18px;border:1px solid var(--line);background:var(--surface)}
+.su-sec>h5{margin:0 0 10px;font-size:14px;color:var(--pine);display:flex;align-items:center;gap:8px}
+.su-sec>h5::after{content:"";flex:1;height:1px;background:var(--line)}
+.su-sec .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.su-sec .grid2{grid-template-columns:1fr}}
+.su-prev{display:none;margin-top:10px;padding:9px 12px;border-radius:14px;background:var(--l-l);color:var(--l-t);font-weight:600;font-size:13.5px}
+.su-prev.on{display:block}
+.su-foot{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;padding:10px 0 2px;background:var(--surface)}
+.su-foot span{flex:1;font-size:13px;color:var(--mute);font-weight:600}
+.su-foot .act{width:auto;min-height:42px;padding:6px 16px}
+</style>
+<style id="ffModern">
+/* ===== ফরম ফিলাপ: আধুনিক বোতাম ও চেকবক্স ===== */
+#t-ff #ffAll { gap:12px; padding:14px; border-radius:22px; align-items:center;
+  background:linear-gradient(145deg, color-mix(in srgb, var(--ac2,#0a9070) 10%, var(--surface,#fff)), var(--surface,#fff) 70%);
+  border:1px solid color-mix(in srgb, var(--ac2,#0a9070) 22%, var(--line,#dde5e2));
+  box-shadow:0 14px 34px -22px rgba(8,56,47,.45), inset 0 1px 0 rgba(255,255,255,.5); }
+
+/* ---- "পরের ১০ জন" টগল-বোতাম ---- */
+#t-ff .ff-pick { --pc:0%; position:relative; display:inline-flex; align-items:center; gap:12px; min-height:54px;
+  padding:8px 10px 8px 10px; border-radius:18px; cursor:pointer; user-select:none; overflow:hidden; isolation:isolate;
+  -webkit-tap-highlight-color:transparent;
+  background:var(--surface,#fff); color:var(--ink,#16302b);
+  border:1.5px solid color-mix(in srgb, var(--ac2,#0a9070) 30%, transparent);
+  box-shadow:0 1px 2px rgba(8,56,47,.08), 0 10px 22px -14px rgba(8,56,47,.4);
+  transition:transform .15s cubic-bezier(.3,1.4,.5,1), box-shadow .25s, border-color .25s, background .25s, color .25s; }
+/* নিচের প্রগ্রেস লাইন: কতজন ফরম পূরণ হয়েছে */
+#t-ff .ff-pick::after { content:""; position:absolute; left:0; bottom:0; height:4px; width:var(--pc);
+  background:linear-gradient(90deg, var(--ac1,#004d38), var(--ac2,#0a9070)); border-radius:0 4px 4px 0;
+  transition:width .45s cubic-bezier(.2,.8,.2,1); z-index:-1; }
+#t-ff .ff-pick:hover { transform:translateY(-2px); box-shadow:0 2px 4px rgba(8,56,47,.1), 0 16px 28px -14px rgba(8,56,47,.5); border-color:var(--ac2,#0a9070); }
+#t-ff .ff-pick:active { transform:scale(.97); }
+#t-ff .ff-pick input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:2; }
+
+/* গোল চেক-বক্স */
+#t-ff .ff-pick .ff-box { flex:none; width:32px; height:32px; border-radius:50%; position:relative; display:grid; place-items:center;
+  background:color-mix(in srgb, var(--ac2,#0a9070) 10%, var(--surface,#fff));
+  border:2px solid color-mix(in srgb, var(--ac2,#0a9070) 55%, transparent);
+  transition:background .25s, border-color .25s, transform .3s cubic-bezier(.3,1.6,.5,1), box-shadow .25s; }
+#t-ff .ff-pick input:checked + .ff-box, #t-ff .ff-pick input:indeterminate + .ff-box {
+  background:linear-gradient(135deg, var(--ac1,#004d38), var(--ac2,#0a9070)); border-color:transparent;
+  box-shadow:0 0 0 5px color-mix(in srgb, var(--ac2,#0a9070) 18%, transparent); transform:scale(1.06); }
+#t-ff .ff-pick input:checked + .ff-box::after { content:""; position:absolute; left:11px; top:5.5px; width:7px; height:13px;
+  border:solid #fff; border-width:0 3px 3px 0; border-radius:1px; transform:rotate(45deg);
+  animation:ffTick .28s ease-out both; }
+#t-ff .ff-pick input:indeterminate + .ff-box::after { content:""; position:absolute; left:8px; top:13px; width:12px; height:3px; border-radius:2px; background:#fff; }
+@keyframes ffTick { from { opacity:0; transform:rotate(45deg) scale(.3); } to { opacity:1; transform:rotate(45deg) scale(1); } }
+#t-ff .ff-pick input:focus-visible + .ff-box { outline:3px solid color-mix(in srgb, var(--ac2,#0a9070) 45%, transparent); outline-offset:3px; }
+
+#t-ff .ff-pick-t { font-size:15px; font-weight:800; letter-spacing:.1px; color:inherit; }
+/* সংখ্যার ব্যাজ (যেমন ১০/৪০) */
+#t-ff .ff-pick-c { font-size:12.5px; font-weight:800; padding:4px 11px; border-radius:99px; font-variant-numeric:tabular-nums;
+  color:var(--ac1,#004d38); background:color-mix(in srgb, var(--ac2,#0a9070) 14%, transparent);
+  transition:background .25s, color .25s; }
+
+/* টিক দেওয়া অবস্থা: পুরো বোতাম গ্রেডিয়েন্টে ভরে যায় */
+#t-ff .ff-pick:has(input:checked) { background:linear-gradient(135deg, var(--ac1,#004d38), var(--ac2,#0a9070)); color:#fff;
+  border-color:transparent; box-shadow:0 14px 28px -12px var(--glow, rgba(0,106,78,.5)), inset 0 1px 0 rgba(255,255,255,.3); }
+#t-ff .ff-pick:has(input:checked) .ff-box { background:rgba(255,255,255,.22); box-shadow:0 0 0 5px rgba(255,255,255,.14); border-color:rgba(255,255,255,.7); }
+#t-ff .ff-pick:has(input:checked) .ff-pick-c { background:rgba(255,255,255,.22); color:#fff; }
+#t-ff .ff-pick:has(input:checked)::after { background:rgba(255,255,255,.55); }
+/* আংশিক (indeterminate) অবস্থা */
+#t-ff .ff-pick:has(input:indeterminate) { border-color:var(--ac2,#0a9070); background:color-mix(in srgb, var(--ac2,#0a9070) 8%, var(--surface,#fff)); }
+:root[data-theme="dark"] #t-ff .ff-pick:has(input:checked), :root[data-theme="dark"] #t-ff .ff-pick:has(input:checked) .ff-pick-c { color:#05201a; }
+:root[data-theme="dark"] #t-ff .ff-pick:has(input:checked) .ff-box::after { border-color:#05201a; }
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) #t-ff .ff-pick:has(input:checked), :root:not([data-theme="light"]) #t-ff .ff-pick:has(input:checked) .ff-pick-c { color:#05201a; }
+  :root:not([data-theme="light"]) #t-ff .ff-pick:has(input:checked) .ff-box::after { border-color:#05201a; } }
+
+/* রিসেট বোতাম */
+#t-ff #ffAll .ff-reset { min-height:46px; padding:8px 18px; border-radius:16px; font-size:13.5px; font-weight:700; display:inline-flex; align-items:center; gap:6px;
+  background:color-mix(in srgb, var(--ink,#16302b) 5%, var(--surface,#fff)); color:var(--mute,#5b6f6a);
+  border:1.5px solid transparent; box-shadow:none; transition:transform .15s, background .2s, color .2s, border-color .2s, box-shadow .2s; }
+#t-ff #ffAll .ff-reset:hover { color:#c2410c; border-color:color-mix(in srgb, #f97316 45%, transparent); background:color-mix(in srgb, #f97316 9%, var(--surface,#fff)); box-shadow:0 8px 18px -12px rgba(194,65,12,.6); }
+#t-ff #ffAll .ff-reset:active { transform:scale(.96); }
+@media (max-width:520px) { #t-ff .ff-pick { flex:1 1 100%; justify-content:space-between; } #t-ff #ffAll .ff-reset { flex:1 1 100%; justify-content:center; } }
+@media (prefers-reduced-motion:reduce) { #t-ff .ff-pick, #t-ff .ff-pick *, #t-ff .ff-pick::after { transition:none !important; animation:none !important; } }
+/* ফিল্টার ও প্রিন্ট বোতাম */
+#t-ff #ffFbar, #t-ff #ffTools { gap:8px; padding:4px 2px 8px; }
+#t-ff #ffFbar .chipbtn, #t-ff #ffTools .chipbtn { min-height:40px; padding:8px 16px; font-size:13.5px; font-weight:700; border-radius:99px !important;
+  background:var(--surface,#fff); color:var(--ink,#16302b); border:1.5px solid color-mix(in srgb, var(--pine,#0f766e) 22%, var(--line,#dde5e2));
+  box-shadow:0 2px 8px -4px rgba(15,60,50,.25); transition:transform .12s, box-shadow .2s, background .2s; }
+#t-ff #ffFbar .chipbtn.on { background:linear-gradient(135deg, var(--ac1,#10b981), var(--ac2,#0f766e)); color:#fff; border-color:transparent;
+  box-shadow:0 8px 18px -8px rgba(15,118,110,.55); }
+#t-ff #ffTools .chipbtn { color:var(--pine,#0f766e); background:color-mix(in srgb, var(--pine,#0f766e) 8%, var(--surface,#fff)); }
+#t-ff #ffTools .chipbtn::before { content:"🖨️ "; }
+#t-ff #ffFbar .chipbtn:active, #t-ff #ffTools .chipbtn:active { transform:scale(.96); }
+</style>
+<style>
+/* ===== ফরম ফিলাপ আধুনিক UI (v-ff2) — এই পুরো <style> ব্লক মুছে ফেললেই আগের চেহারা ফিরবে ===== */
+@keyframes ffIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+#t-ff > .card { border-radius:22px; }
+#t-ff .ff-all { border-radius:18px; background:color-mix(in srgb, var(--p-l) 60%, var(--surface)); border-color:color-mix(in srgb, var(--p) 25%, var(--line)); }
+#t-ff #ffFbar { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding:2px 2px 8px; }
+#t-ff #ffFbar::-webkit-scrollbar { display:none; }
+#t-ff #ffFbar .chipbtn { white-space:nowrap; }
+#t-ff #ffQ { min-height:48px; border-radius:16px; padding-left:44px; border:1.5px solid var(--line);
+  background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238a9b96' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px center; }
+
+/* শিক্ষার্থী কার্ড */
+#t-ff .row.ff { position:relative; padding:14px 16px 14px 20px; border-radius:20px; border:1.5px solid var(--line); background:var(--surface);
+  box-shadow:none; transition:border-color .2s, background .2s; }
+#t-ff .row.ff::before { content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--line); transition:background .25s; }
+#t-ff .row.ff[data-f="paid"]::before { background:var(--p); }
+#t-ff .row.ff[data-f="part"]::before { background:var(--l); }
+#t-ff .row.ff[data-f="due"]::before { background:var(--a); }
+#t-ff .row.ff[data-f="paid"], #t-ff .row.ff[data-f="part"], #t-ff .row.ff[data-f="due"] { box-shadow:none; }
+@media (hover:hover) { #t-ff .row.ff:hover { border-color:color-mix(in srgb, var(--ac2,#0a9070) 40%, var(--line)); } }
+#t-ff .row.ff.open { border-color:var(--ac2,#0a9070); box-shadow:inset 0 0 0 1px var(--ac2,#0a9070); background:color-mix(in srgb, var(--p-l) 22%, var(--surface)); }
+#t-ff .ff-head { gap:12px; }
+#t-ff .row.ff .roll { width:46px; height:46px; min-width:46px; border-radius:15px; font-size:17px; font-weight:800;
+  background:color-mix(in srgb, var(--p) 16%, var(--surface)); color:var(--p-t); font-variant-numeric:tabular-nums; }
+#t-ff .row.ff .name { font-size:16px; font-weight:800; line-height:1.3; }
+#t-ff .ff-sub { font-size:12.5px; margin-top:1px; }
+#t-ff .ff-meta { margin-top:8px; }
+#t-ff .ff-meta .pchip { font-size:12px; font-weight:700; padding:4px 11px; }
+#t-ff .ff-ck { padding:7px 9px; border-radius:14px; gap:3px; font-weight:700; background:color-mix(in srgb, var(--ink) 5%, transparent); transition:background .15s, color .15s; }
+#t-ff .ff-ck:has(input:checked) { background:var(--p-l); color:var(--p-t); }
+#t-ff .ff-ck input { width:22px; height:22px; }
+#t-ff button.ff-caret { background:color-mix(in srgb, var(--ink) 5%, transparent); border-radius:14px; min-width:38px; min-height:38px; }
+#t-ff .row.ff.open button.ff-caret { background:var(--p-l); color:var(--p-t); }
+
+/* দ্রুত ফি এন্ট্রি */
+#t-ff .ff-qk { margin-top:10px; }
+#t-ff .ff-qk .q-in { min-height:44px; border-radius:14px; border:1.5px solid var(--line); background:color-mix(in srgb, var(--ink) 4%, var(--surface)); }
+#t-ff .ff-qk .q-full { min-height:44px; border-radius:14px; background:var(--p-l); color:var(--p-t); }
+#t-ff .ff-fee { height:6px; margin-top:10px; }
+
+/* কার্ডের ভেতর */
+#t-ff .ff-body { margin-top:14px; padding-top:6px; border-top:1px solid var(--line); animation:ffIn .22s ease both; }
+#t-ff .ff-sec { display:flex; align-items:center; gap:10px; margin:14px 0 8px; padding:0; border:0; font-size:12.5px; font-weight:800; letter-spacing:.2px; color:var(--p-t); }
+#t-ff .ff-sec::after { content:""; flex:1; height:1px; background:var(--line); }
+#t-ff .ff-body .ed-f label { font-size:12px; font-weight:700; color:var(--mute); margin-bottom:4px; }
+#t-ff .ff-body input, #t-ff .ff-body select { min-height:46px; border-radius:14px; border:1.5px solid var(--line); background:color-mix(in srgb, var(--ink) 3%, var(--surface)); transition:border-color .15s, box-shadow .15s; }
+#t-ff .ff-body input:focus, #t-ff .ff-body select:focus { outline:0; border-color:var(--ac2,#0a9070); box-shadow:0 0 0 3px color-mix(in srgb, var(--ac2,#0a9070) 22%, transparent); background:var(--surface); }
+#t-ff .ff-body input:disabled { opacity:.6; }
+#t-ff .ff-body .act.rej { width:100%; min-height:46px; margin-top:14px; border-radius:14px; font-weight:700; box-shadow:none;
+  background:color-mix(in srgb, #ef4444 9%, var(--surface)); color:color-mix(in srgb, #dc2626 80%, var(--ink));
+  border:1.5px solid color-mix(in srgb, #ef4444 35%, transparent); }
+#t-ff .ff-body .act.rej:active { transform:scale(.98); }
+
+/* নিচের সাবমিট বার */
+#t-ff .ff-bar .pro-bar-in { padding:10px 12px; border:1px solid var(--line); border-radius:22px; background:color-mix(in srgb, var(--surface) 84%, transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4); backdrop-filter:blur(14px) saturate(1.4); box-shadow:0 18px 40px -16px rgba(8,56,47,.55); }
+#t-ff .ff-bar .act { border-radius:16px; font-weight:800; }
+
+/* বড় পর্দায় দুই কলাম */
+@media (min-width:900px) {
+  #t-ff #ffBox { display:grid; grid-template-columns:repeat(auto-fill, minmax(400px, 1fr)); gap:12px; align-items:start; }
+  #t-ff #ffBox .row.ff { margin-bottom:0; }
+  #t-ff #ffBox .empty { grid-column:1 / -1; }
 }
+@media (prefers-reduced-motion:reduce) { #t-ff .ff-body { animation:none; } #t-ff * { transition:none !important; } }
+</style>
+<style>
+/* ===== ফরম ফিলাপ UI v-ff3 — এই পুরো <style> ব্লক মুছলেই আগের চেহারা ফিরবে ===== */
+#t-ff label { text-transform:none; letter-spacing:0; }
+/* সেটআপ কার্ড */
+#t-ff > .card:first-child { padding:18px; }
+#t-ff .seg.ft { display:flex; gap:4px; padding:4px; border-radius:16px; background:color-mix(in srgb, var(--ink) 6%, transparent); }
+#t-ff .seg.ft button { flex:1; min-height:46px; border-radius:12px; font-size:14px; font-weight:700; transition:background .2s, color .2s, box-shadow .2s; }
+#t-ff .seg.ft button.on { background:linear-gradient(135deg, var(--ac1,#004d38), var(--ac2,#0a9070)); color:#fff; box-shadow:0 8px 18px -8px var(--glow, rgba(0,106,78,.5)); }
+#t-ff #ffCls { min-height:52px; font-size:16px; font-weight:700; border-radius:16px; }
+#t-ff .ff-both { padding:12px 14px; border-radius:16px; background:color-mix(in srgb, var(--p-l) 55%, var(--surface)); border:1px solid color-mix(in srgb, var(--p) 22%, var(--line)); }
+/* অগ্রগতির কার্ড */
+#t-ff .hero { padding:16px 18px; gap:18px; border-radius:24px; }
+#t-ff .ring { width:96px; height:96px; box-shadow:0 10px 24px -12px var(--glow, rgba(0,106,78,.5)); }
+#t-ff .hcount { gap:8px; }
+#t-ff .hcount > * { padding:9px 12px; border-radius:14px; background:color-mix(in srgb, var(--ink) 4%, var(--surface)); border:1px solid color-mix(in srgb, var(--line) 70%, transparent); line-height:1.25; }
+/* খোঁজা ও ফিল্টার */
+#t-ff #ffSearchCard { padding:8px; margin-bottom:8px; border-radius:20px; }
+#t-ff #ffQ { border:0; background-color:transparent; box-shadow:none; }
+#t-ff #ffQ:focus { box-shadow:none; }
+/* শিক্ষার্থী কার্ড */
+#t-ff #ffBox .row.ff { margin-bottom:10px; padding:14px 14px 14px 20px; border-radius:22px; box-shadow:0 1px 2px rgba(8,56,47,.05), 0 12px 26px -18px rgba(8,56,47,.35); }
+#t-ff .row.ff::before { width:7px; }
+#t-ff .row.ff .roll { width:50px; height:50px; min-width:50px; border-radius:50%; font-size:18px; }
+#t-ff .row.ff[data-f="paid"] .roll { background:var(--p); color:#fff; }
+#t-ff .row.ff[data-f="part"] .roll { background:var(--l); color:#fff; }
+#t-ff .row.ff[data-f="due"] .roll { background:var(--a); color:#fff; }
+#t-ff .row.ff .name { font-size:16.5px; letter-spacing:.1px; }
+#t-ff .ff-sub { color:var(--mute); line-height:1.4; }
+#t-ff .ff-ck { min-width:50px; padding:8px 6px; border-radius:16px; border:1.5px solid transparent; font-size:11.5px; }
+#t-ff .ff-ck:has(input:checked) { border-color:color-mix(in srgb, var(--p) 40%, transparent); }
+#t-ff .ff-ck input { width:24px; height:24px; }
+#t-ff .ff-meta .pchip { border-radius:99px; margin:0 6px 4px 0; }
+/* দ্রুত ফি এন্ট্রি: এক সারিতে ইনপুট ও বোতাম */
+#t-ff .ff-qk { display:flex; align-items:center; gap:8px; margin-top:12px; }
+#t-ff .ff-qk .q-in { flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:0 14px; border-radius:16px; }
+#t-ff .ff-qk .q-in input { border:0; background:transparent; min-height:42px; padding:0; box-shadow:none; width:100%; font-weight:700; font-size:16px; }
+#t-ff .ff-qk .q-in:focus-within { border-color:var(--ac2,#0a9070); box-shadow:0 0 0 3px color-mix(in srgb, var(--ac2,#0a9070) 22%, transparent); background:var(--surface); }
+#t-ff .ff-qk .q-full { flex:none; padding:0 18px; border:0; border-radius:16px; font-weight:800; font-size:13.5px; cursor:pointer; transition:transform .12s, background .2s, color .2s; }
+#t-ff .ff-qk .q-full:active { transform:scale(.95); background:var(--p); color:#fff; }
+#t-ff .ff-fee { height:7px; margin-top:12px; }
+/* খোলা কার্ড */
+#t-ff .row.ff.open { box-shadow:0 0 0 1.5px var(--ac2,#0a9070), 0 18px 36px -20px var(--glow, rgba(0,106,78,.5)); }
+#t-ff button.ff-caret { transition:transform .2s, background .2s; }
+#t-ff .row.ff.open button.ff-caret { transform:rotate(180deg); }
+/* নিচের সাবমিট বার */
+#t-ff .ff-bar .pro-bar-in { border-radius:26px; padding:8px 8px 8px 18px; }
+#t-ff .ff-bar .pro-bar-t { font-weight:700; color:var(--ink); }
+#t-ff .ff-bar .act { min-height:50px; padding:0 26px; border-radius:20px; font-size:15px; background:linear-gradient(135deg, var(--ac1,#004d38), var(--ac2,#0a9070)); color:#fff; border:0; }
+:root[data-theme="dark"] #t-ff .ff-bar .act, :root[data-theme="dark"] #t-ff .seg.ft button.on { color:#05201a; }
+#t-ff .ff-bar .act:disabled { background:color-mix(in srgb, var(--ink) 10%, var(--surface)); color:var(--mute); }
+@media (max-width:520px) { #t-ff .hero { flex-direction:row; padding:14px; } #t-ff .ring { width:84px; height:84px; } }
+@media (prefers-reduced-motion:reduce) { #t-ff .row.ff.open button.ff-caret { transition:none; } }
+</style>
+<style>
+/* ===== Form Fill-Up বাটন: আধুনিক চেহারা — এই <style> ব্লক মুছলেই আগের চেহারা ফিরবে ===== */
+/* ফরম ফিলাপ তালিকা: এক কলামে, উপর থেকে নিচে রোল ক্রমে */
+#t-ff #ffBox { grid-template-columns:1fr !important; }
+.dchip.ff-chip { display:inline-flex; align-items:center; gap:8px; }
+.dchip.ff-chip svg { width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 
-self.addEventListener('install', function (e) {
-  e.waitUntil(
-    caches.open(SHELL).then(function (c) {
-      return Promise.all(FILES.map(function (u) {
-        return fetchT(u, { credentials: 'same-origin' }, 25000).then(function (r) { if (r && r.ok) return c.put(u, clean(r)); }).catch(function () {});
+.ds-q.ds-q-ff { position:relative; overflow:hidden; border-color:color-mix(in srgb, var(--ac2,#0a9070) 38%, var(--line));
+  background:linear-gradient(160deg, color-mix(in srgb, var(--ac2,#0a9070) 11%, var(--surface,#fff)), var(--surface,#fff) 70%); }
+.ds-q.ds-q-ff .qi { color:#fff; border-radius:16px; box-shadow:0 10px 18px -8px var(--glow), inset 0 1px 0 rgba(255,255,255,.35);
+  background:linear-gradient(135deg,var(--ac1,#004d38),var(--ac2,#0a9070)); transition:transform .25s; }
+.ds-q.ds-q-ff .qi svg { width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.ds-q.ds-q-ff .qt { font-weight:800; }
+@media (hover:hover) { .ds-q.ds-q-ff:hover .qi { transform:rotate(-6deg) scale(1.06); } }
+@media (max-width:520px) { .ds-q.ds-q-ff .qi svg { width:22px; height:22px; } }
+:root[data-theme="dark"] .ds-q.ds-q-ff .qi { color:#05201a; }
+@media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .ds-q.ds-q-ff .qi { color:#05201a; } }
+@media (prefers-reduced-motion:reduce) { .ds-q.ds-q-ff .qi { transition:none !important; } }
+</style>
+<style id="ffModern4">
+/* ===== ফরম ফিলাপ শিক্ষার্থী তালিকা — আধুনিক ডিজাইন (v-ff4) =====
+   শুধু CSS; কোনো JS বদলানো হয়নি। আগের চেহারায় ফিরতে এই পুরো <style id="ffModern4"> ব্লক মুছে দিন। */
+#t-ff { --ffline:color-mix(in srgb, var(--line) 82%, transparent); }
+
+/* ---- সেটআপ কার্ড ও Class select ---- */
+#t-ff > .card:first-child { border-radius:26px !important; }
+#t-ff #ffCls { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a9b96' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important; background-position:right 16px center !important; background-size:14px !important; padding-right:42px; }
+
+/* ---- অগ্রগতি কার্ড: রঙিন ছোট টাইল ---- */
+#t-ff .hero { border-radius:26px; padding:18px; gap:16px; background:linear-gradient(150deg, var(--surface), color-mix(in srgb, var(--ac2) 9%, var(--surface))); }
+#t-ff .hcount { grid-template-columns:1fr 1fr; gap:8px; }
+#t-ff .hc { flex-direction:column; align-items:flex-start; gap:0; position:relative; padding:9px 12px; border-radius:16px; border:1px solid transparent; font-size:12px; line-height:1.3; }
+#t-ff .hc i { position:absolute; top:11px; right:11px; width:8px; height:8px; }
+#t-ff .hc b { font-size:20px; line-height:1.15; min-width:0; font-variant-numeric:tabular-nums; }
+#t-ff .hc.s0 { background:color-mix(in srgb, var(--p) 12%, var(--surface)); border-color:color-mix(in srgb, var(--p) 20%, transparent); }
+#t-ff .hc.s1 { background:color-mix(in srgb, var(--a) 10%, var(--surface)); border-color:color-mix(in srgb, var(--a) 18%, transparent); }
+#t-ff .hc.s2 { background:color-mix(in srgb, var(--l) 13%, var(--surface)); border-color:color-mix(in srgb, var(--l) 22%, transparent); }
+#t-ff .hc.s3 { background:color-mix(in srgb, var(--t) 11%, var(--surface)); border-color:color-mix(in srgb, var(--t) 20%, transparent); }
+
+/* ---- খোঁজার ঘর ও ফিল্টার ---- */
+#t-ff #ffSearchCard { padding:4px !important; border-radius:20px !important; }
+#t-ff #ffQ { border:0 !important; box-shadow:none !important; border-radius:16px !important; min-height:48px; padding-left:46px !important;
+  background-color:transparent !important; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238a9b96' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important; background-position:16px center !important; background-size:18px !important; }
+#t-ff #ffFbar { scroll-snap-type:x proximity; }
+#t-ff #ffFbar .chipbtn { scroll-snap-align:start; }
+
+/* ---- শিক্ষার্থী কার্ড ---- */
+#t-ff #ffBox .row.ff { position:relative; overflow:hidden; margin-bottom:12px; padding:14px 14px 14px 19px; border-radius:22px !important;
+  border:1px solid var(--ffline) !important; background:var(--surface);
+  box-shadow:0 1px 2px rgba(8,56,47,.05), 0 14px 28px -20px rgba(8,56,47,.4) !important;
+  contain-intrinsic-size:auto 190px; }
+#t-ff .row.ff::before { width:5px; }
+#t-ff .row.ff[data-f="paid"] { background:color-mix(in srgb, var(--p) 4%, var(--surface)); }
+#t-ff .row.ff[data-f="part"] { background:color-mix(in srgb, var(--l) 5%, var(--surface)); }
+#t-ff .row.ff[data-f="due"]  { background:color-mix(in srgb, var(--a) 4%, var(--surface)); }
+#t-ff #ffBox .row.ff.open { border-color:var(--ac2) !important; box-shadow:0 0 0 1.5px var(--ac2), 0 18px 36px -20px var(--glow) !important; }
+:root[data-theme="dark"] #t-ff #ffBox .row.ff { box-shadow:none !important; }
+
+/* ---- কার্ডের মাথা: পরিষ্কার grid (রোল | নাম | টিক | তীর), নিচে ফি-সারি ---- */
+#t-ff .ff-head { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto auto; column-gap:0; row-gap:0; align-items:center; }
+#t-ff .ff-nm { display:contents; }
+#t-ff .ff-head > .roll { grid-column:1; grid-row:1 / span 2; margin-right:12px; }
+#t-ff .ff-head .name { grid-column:2; grid-row:1; align-self:center; min-width:0; overflow-wrap:anywhere; }
+#t-ff .ff-head .ff-sub { grid-column:2; grid-row:2; align-self:center; min-width:0; overflow-wrap:anywhere; }
+#t-ff .ff-head > label.ff-ck { grid-row:1 / span 2; align-self:center; margin-left:8px; }
+#t-ff .ff-head > label.ff-ck:nth-of-type(1) { grid-column:3; }
+#t-ff .ff-head > label.ff-ck:nth-of-type(2) { grid-column:4; }
+#t-ff .ff-head > .ff-caret { grid-column:5; grid-row:1 / span 2; margin-left:8px; }
+#t-ff .ff-head .ff-meta { grid-column:1 / -1; grid-row:3; margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+#t-ff .ff-head .ff-qk   { grid-column:1 / -1; grid-row:4; margin-top:10px; }
+#t-ff .ff-head .ff-fee  { grid-column:1 / -1; grid-row:5; margin-top:10px; }
+
+/* রোল ব্যাজ: ফি-র অবস্থা অনুযায়ী নরম রঙ */
+#t-ff .row.ff .roll { width:50px; height:50px; min-width:50px; padding:0; border-radius:16px; display:grid; place-items:center; font-size:18px; font-weight:800;
+  font-variant-numeric:tabular-nums; background:color-mix(in srgb, var(--ink) 6%, var(--surface)); color:var(--ink); box-shadow:none; }
+#t-ff .row.ff[data-f="paid"] .roll { background:color-mix(in srgb, var(--p) 16%, var(--surface)); color:var(--p-t); box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--p) 38%, transparent); }
+#t-ff .row.ff[data-f="part"] .roll { background:color-mix(in srgb, var(--l) 18%, var(--surface)); color:var(--l-t); box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--l) 42%, transparent); }
+#t-ff .row.ff[data-f="due"]  .roll { background:color-mix(in srgb, var(--a) 14%, var(--surface)); color:var(--a-t); box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--a) 38%, transparent); }
+#t-ff .row.ff .name { font-size:16.5px; font-weight:800; line-height:1.3; }
+#t-ff .ff-sub { font-size:12.5px; line-height:1.4; color:var(--mute); }
+
+/* স্ট্যাটাস chip */
+#t-ff .ff-meta .pchip { margin:0; padding:4px 11px; font-size:12px; font-weight:700; box-shadow:inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent); }
+
+/* টিক-বক্স (ফরম / ৪র্থ): নিজস্ব গোল-কোণা চেকবক্স */
+#t-ff .ff-ck { min-width:52px; padding:7px 6px 6px; gap:4px; border-radius:16px; font-size:11.5px; font-weight:700; color:var(--mute);
+  background:color-mix(in srgb, var(--ink) 5%, transparent); border:1.5px solid transparent; transition:background .2s, color .2s, border-color .2s; }
+#t-ff .ff-ck:has(input:checked) { background:var(--p-l); color:var(--p-t); border-color:color-mix(in srgb, var(--p) 40%, transparent); }
+#t-ff .ff-ck input { -webkit-appearance:none; appearance:none; width:24px; height:24px; margin:0; border-radius:8px; display:grid; place-items:center; cursor:pointer;
+  background:var(--surface); border:2px solid color-mix(in srgb, var(--ink) 26%, transparent); transition:background .2s, border-color .2s, box-shadow .2s; }
+#t-ff .ff-ck input::after { content:""; width:6px; height:11px; margin-top:-2px; border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg) scale(0); transition:transform .2s cubic-bezier(.3,1.6,.5,1); }
+#t-ff .ff-ck input:checked { background:linear-gradient(135deg, var(--ac1), var(--ac2)); border-color:transparent; box-shadow:0 6px 12px -6px var(--glow); }
+#t-ff .ff-ck input:checked::after { transform:rotate(45deg) scale(1); }
+:root[data-theme="dark"] #t-ff .ff-ck input::after { border-color:#05201a; }
+@media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) #t-ff .ff-ck input::after { border-color:#05201a; } }
+
+/* খোলার তীর */
+#t-ff button.ff-caret { width:36px; height:36px; min-width:36px; min-height:36px; padding:0; border:0; border-radius:12px; display:grid; place-items:center; font-size:16px; line-height:1; }
+
+/* ---- দ্রুত ফি এন্ট্রি ---- */
+#t-ff .ff-qk { display:flex; align-items:stretch; gap:8px; }
+#t-ff .ff-qk .q-in { flex:1; min-width:0; display:flex; align-items:center; gap:6px; margin:0; padding:0 14px; min-height:46px; border-radius:14px;
+  background:color-mix(in srgb, var(--ink) 4%, var(--surface)); border:1.5px solid var(--ffline); color:var(--mute); font-weight:800; transition:border-color .15s, box-shadow .15s, background .15s; }
+#t-ff .ff-qk .q-in:focus-within { border-color:var(--ac2); box-shadow:0 0 0 4px var(--glow); background:var(--surface); }
+#t-ff .ff-qk .q-in input { width:100%; min-height:42px !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important;
+  box-shadow:none !important; font-size:16px; font-weight:700; color:var(--ink); }
+#t-ff .ff-qk .q-in input::placeholder { color:var(--mute); font-weight:500; }
+#t-ff .ff-qk .q-full { flex:none; min-height:46px; padding:0 16px; border-radius:14px; font-weight:800; font-size:13.5px; cursor:pointer;
+  background:var(--p-l); color:var(--p-t); border:1.5px solid color-mix(in srgb, var(--p) 30%, transparent); }
+#t-ff .ff-qk .q-full:disabled { opacity:.45; cursor:not-allowed; }
+#t-ff .ff-fee { height:6px; border-radius:99px; background:color-mix(in srgb, var(--ink) 8%, transparent); }
+
+/* ---- খোলা অংশ ---- */
+#t-ff .ff-body { margin-top:14px; padding-top:8px; border-top:1px dashed var(--ffline); }
+
+/* ---- ২ কলামের তালিকা: বাঁ কলামে ১ ২ ৩ ... উপর-নিচে, তারপর ডান কলামে পরের রোল (৬০০px+; ছোট ফোনে ১ কলাম) ---- */
+@media (min-width:600px) {
+  #t-ff #ffBox { display:block !important; columns:2; column-gap:12px; }
+  #t-ff #ffBox .row.ff { margin-bottom:12px; break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid; }
+  #t-ff #ffBox .empty { column-span:all; }
+}
+@media (min-width:900px) { #t-ff.wrap { max-width:1040px; } }
+
+/* ---- ছোট ফোন ---- */
+@media (max-width:380px) {
+  #t-ff .row.ff .roll { width:44px; height:44px; min-width:44px; font-size:16px; border-radius:14px; }
+  #t-ff .ff-ck { min-width:46px; padding:6px 4px 5px; }
+  #t-ff .ff-qk .q-full { padding:0 12px; }
+}
+@media (prefers-reduced-motion:reduce) { #t-ff .ff-ck, #t-ff .ff-ck input, #t-ff .ff-ck input::after, #t-ff .ff-qk .q-in { transition:none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="brand">
+      <svg class="flag" viewBox="0 0 100 60" role="img" aria-label="National flag of Bangladesh"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
+      <div>
+        <div class="pgt" id="pgTitle">Attendance</div>
+        <div id="title">Student Attendance</div>
+        <small id="sess"></small>
+      </div>
+    </div>
+    <div class="hright">
+      <div class="today" id="todayBox"></div>
+      <div class="userbar">
+        <small id="who"></small>
+        <span id="hbtns">
+          <button type="button" class="hbtn" id="themeBtn" onclick="toggleTheme()" aria-label="Dark/Light mode">🌓</button>
+          <button type="button" class="hbtn" onclick="doRefresh()">🔄 Refresh</button>
+        </span>
+        <a class="hbtn" id="homeBtn" href="/" title="Home page" aria-label="Home page" style="display:none">🏠</a>
+        <button type="button" class="logout" id="logoutBtn" style="display:none" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="denied" class="wrap" style="display:none">
+  <div class="card">
+    <div class="name">Access denied</div>
+    <div id="deniedMsg"></div>
+  </div>
+</div>
+
+<div id="login" class="al" style="display:none">
+  <div class="al-bg"><span></span><span></span><span></span></div>
+  <div class="al-wrap">
+   <div class="al-card">
+    <!-- ধাপ ১: লগইন -->
+    <div id="alStepLogin">
+      <div class="al-header">
+        <span class="al-badge">শিক্ষার্থী হাজিরা সিস্টেম</span>
+        <h2>স্বাগতম</h2>
+        <p>আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
+      </div>
+      <form onsubmit="doLogin(); return false;" autocomplete="on" novalidate>
+        <div class="al-group" id="lgUserBox">
+          <input type="text" id="lgUser" inputmode="email" placeholder=" " autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <label for="lgUser">ইমেইল ঠিকানা</label>
+          <span class="al-icon">✉️</span>
+        </div>
+        <div class="al-group">
+          <input type="password" id="lgPass" placeholder=" " autocomplete="current-password">
+          <label for="lgPass" id="lgPassLbl">পাসওয়ার্ড</label>
+          <span class="al-icon">🔒</span>
+          <span class="al-toggle" id="pwBtn" onclick="togglePw()">👁️</span>
+        </div>
+        <button type="submit" class="al-btn" id="lgBtn">
+          <span class="al-btext">প্রবেশ করুন</span>
+          <div class="al-loading"><span class="al-spin"></span><span>প্রবেশ করা হচ্ছে...</span></div>
+        </button>
+      </form>
+      <div class="al-error" id="lgNote"></div>
+      <div class="al-switch"><a id="lgModeLink" onclick="setLoginMode(LG_OFFICE ? 'teacher' : 'office')">অফিস লগইন</a></div>
+    </div>
+
+    <!-- ধাপ ২: OTP যাচাই -->
+    <div id="alStepOtp" style="display:none">
+      <div class="al-header"><h2>OTP যাচাই করুন</h2><p>আপনার ইমেইলে পাঠানো কোডটি লিখুন</p></div>
+      <div class="al-otpinfo"><b id="alOtpEmail"></b> ঠিকানায় ৬-ডিজিটের একটি কোড পাঠানো হয়েছে।</div>
+      <form onsubmit="doVerify(); return false;">
+        <div class="al-otps">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit" autocomplete="one-time-code">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+          <input type="text" maxlength="1" inputmode="numeric" class="al-digit">
+        </div>
+        <button type="submit" class="al-btn" id="alOtpBtn">
+          <span class="al-btext">যাচাই করুন</span>
+          <div class="al-loading"><span class="al-spin"></span><span>যাচাই করা হচ্ছে...</span></div>
+        </button>
+      </form>
+      <div class="al-error" id="alOtpErr"></div>
+      <div class="al-resend">নতুন কোড পাননি? <a id="alResend" onclick="otpResend()">আবার পাঠান</a><span id="alResendT"></span></div>
+      <div class="al-back"><a onclick="otpBack()">← ইমেইল পরিবর্তন করুন</a></div>
+    </div>
+   </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <nav class="tabs">
+    <div class="side-brand">
+      <svg class="flag" viewBox="0 0 100 60" aria-hidden="true"><rect width="100" height="60" rx="3" fill="#006a4e"/><circle cx="45" cy="30" r="20" fill="#f42a41"/></svg>
+      <div><div class="sb-t" id="sbTitle">Student Attendance</div><div class="sb-s">Attendance Management</div></div>
+    </div>
+    <div class="tabs-in">
+    <button class="tab on" data-t="home" type="button" onclick="showTab('home')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v10h4v-6h4v6h4V10"/></svg><span>Dashboard</span></button>
+    <button class="tab" data-t="att" type="button" onclick="showTab('att')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Attendance</span></button>
+    <button class="tab" data-t="mon" type="button" onclick="showTab('mon')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Reports</span></button>
+    <button class="tab" data-t="alr" type="button" onclick="showTab('alr')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/></svg><span>Alerts</span></button>
+    <button class="tab" data-t="reg" id="regTab" type="button" style="display:none" onclick="showTab('reg')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>Registration</span><i class="bdg" id="regBdg"></i></button>
+    <button class="tab" data-t="pro" id="proTab" type="button" style="display:none" onclick="showTab('pro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>Promotion</span></button>
+    <button class="tab" data-t="ff" id="ffTab" type="button" style="display:none" title="Form Fill-Up" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Form Fill-Up</span></button>
+  </div></nav>
+
+  <section class="wrap" id="dash">
+    <div class="dhero">
+      <div class="dh-row">
+        <div class="dh-t" id="greet"></div>
+        <div class="dh-dates">
+          <div class="dd-en" id="dhDate"></div>
+          <div id="dhBn"></div>
+          <div id="dhAr"></div>
+        </div>
+      </div>
+      <div class="dh-chips">
+        <button type="button" class="dchip" onclick="showTab('att')">✅ Take attendance</button>
+        <button type="button" class="dchip" onclick="showTab('mon')">🗓️ Reports</button>
+        <button type="button" class="dchip" onclick="showTab('alr')">🔔 Alerts</button>
+        <button type="button" class="dchip" id="regChip" style="display:none" onclick="showTab('reg')">🧾 Registration</button>
+        <button type="button" class="dchip" id="proChip" style="display:none" onclick="showTab('pro')">🎓 Promotion</button>
+        <button type="button" class="dchip ff-chip" id="ffChip" style="display:none" onclick="showTab('ff')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9.2 14.2l2 2 3.8-4"/></svg><span>Form Fill-Up</span></button>
+        <button type="button" class="dchip" onclick="openStuEdit()">✏️ Edit info</button>
+      </div>
+    </div>
+    <div class="ds-skel" id="dsSkel" style="display:none" aria-busy="true" aria-label="Loading"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>
+    <div class="ds-err" id="dsErr" style="display:none" role="alert"><div>Could not load dashboard data. Check your connection and try again.</div><button type="button" onclick="loadDash()">Try again</button></div>
+    <div id="dashSum" style="display:none">
+      <div class="ds-quick" id="dsQuick"></div>
+      <div class="ds-head"><b>📊 Today’s summary</b><span id="dsInfo" aria-live="polite"></span>
+        <button type="button" class="ds-prt" onclick="rpSummary(cfg.today)" aria-label="Print today’s summary">🖨️ Print</button>
+        <button type="button" class="ds-ref" id="dsRef" onclick="loadDash()" aria-label="Refresh summary">↻</button></div>
+      <div class="ds-hol" id="dsHol" style="display:none"></div>
+      <div id="dsTot" style="display:none"></div>
+      <div id="dsCmp"></div>
+      <div class="ds-kpi" id="dsKpi"></div>
+      <div id="dsBday"></div>
+      <div id="dsMon"></div>
+      <div class="ds-sec">By class</div>
+      <div class="ds-grid" id="dsGrid"></div>
+      <div class="ds-sec" id="dsAbsH" style="display:none"></div>
+      <div class="ds-abs" id="dsAbs"></div>
+      <div id="dsAlr"></div>
+    </div>
+    <button type="button" class="pendb" id="pendBanner" style="display:none" onclick="showTab('reg')"></button>
+  </section>
+
+  <div class="wrap" id="periodBar" style="display:none; padding-bottom:0">
+    <div class="card">
+      <label for="period">পিরিয়ড / বিষয়</label>
+      <select id="period" onchange="onPeriodChange()"></select>
+    </div>
+  </div>
+
+  <!-- ১. হাজিরা -->
+  <div id="t-home"></div>
+  <section id="t-att" class="wrap" style="display:none">
+    <div class="card">
+      <div class="dline">
+      <div class="grid">
+        <div>
+          <label for="date">Date</label>
+          <input type="date" id="date" onchange="onAttChange()">
+        </div>
+        <div>
+          <label for="cls">Class</label>
+          <select id="cls" onchange="onAttChange()">
+            <option value="">-- Select --</option>
+          </select>
+        </div>
+      </div>
+      <div class="actrow" id="actRow">
+        <button type="button" class="act alt" id="viewBtn" onclick="toggleView()" aria-pressed="false" disabled>👁 Show</button>
+        <button type="button" class="act alt" id="editBtn" onclick="editMode()" style="display:none" disabled>✏️ Change</button>
+      </div>
+      </div>
+      <div class="toolline">
+      <div class="datenav">
+        <button type="button" class="chipbtn" onclick="stepDate(-1)">‹ Previous day</button>
+        <button type="button" class="chipbtn" onclick="stepDate(0)">Today</button>
+        <button type="button" class="chipbtn" onclick="stepDate(1)">Next day ›</button>
+        <button type="button" class="chipbtn" onclick="stepClass(1)">Next class ›</button>
+        <button type="button" class="chipbtn p" id="nextPend" onclick="nextPending()">Remaining classes ⏭</button>
+      </div>
+      </div>
+      <div class="dlbl" id="dateLbl"></div>
+      <div class="clschips" id="clsChips" role="group" aria-label="Select class"></div>
+      <div class="note" id="note"></div>
+    </div>
+
+    <div class="hero" id="hero" style="display:none">
+      <div class="ring" id="ring"><b><span id="ringPct">০%</span><small>Present</small></b></div>
+      <div class="hcount" id="hcount"></div>
+    </div>
+    <div class="abs-line" id="absLine"></div>
+
+    <div class="card" id="searchCard" style="display:none">
+      <input type="search" id="q" placeholder="Search by name or roll" oninput="applySearch()">
+    </div>
+
+    <div class="tools" id="fbar" style="display:none"></div>
+
+    <div class="tools" id="tools" style="display:none">
+      <button class="chipbtn p" type="button" onclick="setAll(0)">All present (P)</button>
+      <button class="chipbtn a" type="button" onclick="setAll(1)">All absent (A)</button>
+      <button class="chipbtn p" type="button" onclick="printAttendance('P')">Print present list</button>
+      <button class="chipbtn a" type="button" onclick="printAttendance('A')">Print absent list</button>
+      <button class="chipbtn" type="button" onclick="printAttendance('all')">Print all attendance</button>
+      <button class="chipbtn" type="button" onclick="printAttendance('blank')">Print blank list</button>
+    </div>
+
+    <div id="list"><div class="empty">Select class</div></div>
+    <!-- জমা বোতাম: শুধু হাজিরা শুরু করলে বা পরিবর্তন চাপলে, সিটের নিচে ভাসমান স্টাইলিশ বোতাম -->
+    <div class="bar" id="saveBar"><div class="bar-in"><button type="button" class="save" id="saveBtn" onclick="submitAtt()" disabled>Submit</button></div></div>
+  </section>
+
+  <!-- ২. তারিখ অনুযায়ী সারাংশ -->
+  <section id="t-sum" class="wrap" style="display:none">
+    <div class="card">
+      <label for="sdate">Date</label>
+      <input type="date" id="sdate" onchange="loadSummary()">
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label for="sfcls">Class</label>
+          <select id="sfcls" onchange="onSumFilter()"><option value="">All classes</option></select>
+        </div>
+        <div>
+          <label for="sfsec">শাখা / ছাত্র-ছাত্রী</label>
+          <select id="sfsec" onchange="onSumFilter()"><option value="">All</option></select>
+        </div>
+      </div>
+      <div class="note" id="snote"></div>
+    </div>
+    <div id="sumBox"></div>
+    <button class="act" id="sPrintBtn" type="button" onclick="printSummary()" disabled>Print summary</button>
+  </section>
+
+  <!-- ৩. রিপোর্ট (মাসিক ছক + print) — সারাংশ এখন ড্যাশবোর্ডে -->
+  <section id="t-mon" class="wrap" style="display:none">
+    <div class="card">
+      <div class="cls-title">Reports</div>
+      <div class="rpline">
+      <div class="grid">
+        <div>
+          <label for="mcls">Class</label>
+          <select id="mcls" onchange="onMonSel()">
+            <option value="">-- Select --</option>
+          </select>
+        </div>
+        <div>
+          <label for="mmonth">Month</label>
+          <input type="month" id="mmonth" onchange="onMonSel()">
+        </div>
+      </div>
+      <div class="grid">
+        <div style="display:none">
+          <label for="rpDate">Date</label>
+          <input type="date" id="rpDate">
+        </div>
+        <div>
+          <label for="rpFeature">Type</label>
+          <select id="rpFeature" onchange="onRpFeature()">
+            <option value="">-- Select print type --</option>
+            <option value="monthly">🗓️ মাসিক রিপোর্ট (ছক)</option>
+            <option value="daily-all">📋 দৈনিক — সব হাজিরা</option>
+            <option value="daily-P">✅ দৈনিক — উপস্থিত তালিকা</option>
+            <option value="daily-A">❌ দৈনিক — অনুপস্থিত তালিকা</option>
+            <option value="daily-blank">📝 দৈনিক — খালি তালিকা</option>
+            <option value="summary">📊 Day summary (all classes)</option>
+            <option value="alerts">⚠️ সতর্কতা (কম উপস্থিতি)</option>
+            <option value="range">📅 তারিখ রেঞ্জ অনুযায়ী</option>
+          </select>
+        </div>
+      </div>
+      <div class="rprow">
+        <button type="button" class="act alt" id="rpViewBtn" onclick="toggleMonView()" aria-pressed="false">👁 Show</button>
+        <button type="button" class="save" id="rpPrintBtn" onclick="rpPrint()" style="display:none">🖨️ Print</button>
+        <button type="button" class="act alt" id="expBtn" onclick="exportReport()" disabled title="Sheet-এ রিপোর্ট">📤 Sheet</button>
+      </div>
+      </div>
+      <div class="note" id="mnote"></div>
+      <a class="exp" id="expLink" href="#" target="_blank" rel="noopener">রিপোর্ট Sheet খুলুন</a>
+    </div>
+
+    <!-- 👁 চাপলে মাসিক ছক (শিক্ষার্থীসহ) দেখা যায়; ডিফল্টে লুকানো -->
+    <div id="monBox"></div>
+
+    <!-- তারিখ রেঞ্জ অনুযায়ী print (শুধু "তারিখ রেঞ্জ" বাছলে দেখা যায়) -->
+    <details class="card rp-det" id="rpRange" style="margin-top:14px;display:none">
+      <summary class="cls-title">3 · Print by date range</summary>
+      <div class="grid">
+        <div>
+          <label for="rtype">Type</label>
+          <select id="rtype" onchange="rngNote()">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly (7 days)</option>
+            <option value="fortnight">Fortnightly (15 days)</option>
+            <option value="monthly">Monthly (full month)</option>
+            <option value="custom">From date – to date</option>
+          </select>
+        </div>
+        <div>
+          <label for="rkind">Print type</label>
+          <select id="rkind">
+            <option value="report">হাজিরা রিপোর্ট (নেওয়া হাজিরা)</option>
+            <option value="blank">খালি সিট (সব দিন, ঘর ফাঁকা)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label for="rfrom">Start date</label>
+          <input type="date" id="rfrom" onchange="rngNote()">
+        </div>
+        <div id="rtoBox" style="display:none">
+          <label for="rto">End date</label>
+          <input type="date" id="rto" onchange="rngNote()">
+        </div>
+      </div>
+      <div class="note" id="rrnote"></div>
+      <button class="act" type="button" style="margin-top:12px" onclick="printRange()">Print by range</button>
+    </details>
+  </section>
+
+  <!-- ৪. সতর্কতা -->
+  <section id="t-alr" class="wrap" style="display:none">
+    <div class="card">
+      <label for="amonth">মাস (কম উপস্থিতির হিসাবের জন্য)</label>
+      <input type="month" id="amonth" onchange="loadAlerts()">
+    </div>
+    <div id="alrBox"></div>
+  </section>
+
+  <!-- ৫. নিবন্ধন নিশ্চিতকরণ -->
+  <section id="t-reg" class="wrap" style="display:none">
+    <div class="tools" id="regFbar"></div>
+    <div class="note" id="rnote"></div>
+    <div id="regBox"></div>
+  </section>
+
+  <!-- ৬. প্রোমোশন (শুধু অ্যাডমিন) -->
+  <section id="t-pro" class="wrap" style="display:none">
+    <div class="card">
+      <div class="pro-step"><i>১</i><div><b>Select class</b><small>Class to promote from</small></div></div>
+      <label for="proCls">Your class (students will be promoted from)</label>
+      <select id="proCls" onchange="loadPromo()"><option value="">-- Select --</option></select>
+      <div class="note" id="pnote"></div>
+    </div>
+    <div class="pro-hero" id="proFT" style="display:none"></div>
+    <div class="card" id="proOpt" style="display:none">
+      <div class="pro-step"><i>২</i><div><b>New session & class</b><small>Section & group apply only to "পরের class" students</small></div></div>
+      <div class="pro-set">
+        <div>
+          <label for="proSes">New session</label>
+          <input type="text" id="proSes" inputmode="numeric" autocomplete="off">
+        </div>
+        <div>
+          <label for="proSec">New section / boys-girls</label>
+          <select id="proSec"><option value="">-- No section --</option></select>
+        </div>
+        <div>
+          <label for="proGrp">New group (Class 9–10)</label>
+          <select id="proGrp"><option value="">-- No group --</option></select>
+        </div>
+      </div>
+      <div class="tools" style="margin:14px 0 0">
+        <button class="chipbtn p" type="button" id="proAllUp" onclick="proSetAction('up')">Everyone to next class</button>
+        <button class="chipbtn" type="button" onclick="proRolls('same')">Keep roll</button>
+        <button class="chipbtn" type="button" onclick="proRolls('seq')">Sequential from roll 1</button>
+      </div>
+      <div class="pro-prev" id="proPrev"></div>
+    </div>
+    <div id="proBox"></div>
+
+    <div class="card" id="arCard" style="margin-top:14px;display:none">
+      <div class="cls-title">বছর শেষে হাজিরা সিট আর্কাইভ (শুধু অ্যাডমিন)</div>
+      <div class="detail">Do this after promotion of all classes is complete. Attendance-6…10 tabs will be renamed Archive-session-… and new empty tabs will be created. Then update SESSION in Code.gs.</div>
+      <label for="arLabel">আর্কাইভ লেবেল (পুরোনো session, ইংরেজিতে)</label>
+      <input type="text" id="arLabel" autocomplete="off">
+      <button class="act alt" type="button" style="margin-top:12px" onclick="doArchive()">হাজিরা সিট আর্কাইভ করুন</button>
+    </div>
+
+    <div class="pro-bar" id="proBar">
+      <div class="pro-bar-in">
+        <div class="pro-bar-t" id="proBarT"></div>
+        <button class="act" id="proBtn" type="button" onclick="runPromo()" disabled>Promote</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ৭. ফরম ফিলাপ -->
+  <section id="t-ff" class="wrap" style="display:none">
+    <div class="card">
+      <div class="pro-step"><i>১</i><div><b>Select class</b><small>পরীক্ষার ফরম ফিলাপ ও ফি আদায়</small></div></div>
+      <label>Exam type</label>
+      <div class="seg ft" id="ffType"></div>
+      <label for="ffCls">Class</label>
+      <select id="ffCls" onchange="onFfCls()"><option value="">-- Select --</option></select>
+      <label class="ff-both"><input type="checkbox" id="ffBoth" checked> <span>অর্ধবার্ষিক ও বার্ষিক — দুটোতেই একসাথে সংরক্ষণ <small>(রেজি., বোর্ড রোল, ৪র্থ বিষয়, অবস্থা, মন্তব্য; ফি আলাদা থাকে)</small></span></label>
+      <div class="note" id="ffNote"></div>
+    </div>
+    <div class="hero" id="ffHero" style="display:none">
+      <div class="ring" id="ffRing"><b><span id="ffRingPct">০%</span><small>ফরম পূরণ</small></b></div>
+      <div class="hcount" id="ffHc"></div>
+    </div>
+    <div class="card" id="ffSearchCard" style="display:none">
+      <input type="search" id="ffQ" placeholder="Search by name or roll" oninput="ffApplyFilter()">
+    </div>
+    <div class="tools" id="ffFbar" style="display:none"></div>
+    <div class="tools" id="ffTools" style="display:none">
+      <button class="chipbtn" type="button" onclick="ffPrintList()">Print form fill-up list</button>
+    </div>
+    <div class="ff-all" id="ffAll"></div>
+    <div id="ffBox"><div class="empty">Select class</div></div>
+    <datalist id="ffFourth"></datalist>
+    <div class="ff-bar" id="ffBar">
+      <div class="pro-bar-in">
+        <div class="pro-bar-t" id="ffBarT"></div>
+        <button class="act" id="ffSaveBtn" type="button" onclick="ffSave()" disabled>সাবমিট</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div style="display:none"><div id="meter"></div><div id="sum"></div></div>
+
+<div class="modal" id="edModal" onclick="if (event.target === this) closeEdit()">
+  <div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <h4 id="edTitle">Edit info</h4>
+    <div class="ed-top">
+      <div class="reg-ph" id="edPh"></div>
+      <div class="ed-ro" id="edRo"></div>
+    </div>
+    <div id="edForm"></div>
+    <div class="ed-foot">
+      <div class="ed-cnt" id="edCnt"></div>
+      <div class="btn2">
+        <button type="button" class="act" id="edSave" onclick="saveEdit(false)">Save</button>
+        <button type="button" class="act alt" onclick="closeEdit()">Cancel</button>
+      </div>
+      <button type="button" class="act" id="edSaveOk" onclick="saveEdit(true)">✅ সংরক্ষণ ও কনফার্ম</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="stuModal" onclick="if (event.target === this) closeStuEdit()">
+  <div class="modal-in su" role="dialog" aria-modal="true" aria-labelledby="stuTitle">
+    <div class="su-head">
+      <div><h4 id="stuTitle">✏️ শিক্ষার্থী ব্যবস্থাপনা</h4><small>তথ্য সংশোধন · ট্রান্সফার · মোছা</small></div>
+      <button type="button" class="su-x" onclick="closeStuEdit()" aria-label="Close">✕</button>
+    </div>
+    <div id="stuPick">
+      <div class="su-tools">
+        <select id="stuCls" onchange="stuLoad()" aria-label="Class"></select>
+        <input type="search" id="stuQ" placeholder="🔍 নাম বা রোল খুঁজুন" oninput="stuRender()">
+      </div>
+      <div class="su-stats" id="stuStats"></div>
+      <label class="su-all" id="stuAllWrap"><input type="checkbox" id="stuAll" class="reg-cb" onchange="stuToggleAll(this.checked)"> সব বাছুন</label>
+      <div id="stuBox"></div>
+      <details class="su-danger" id="stuDanger" style="display:none">
+        <summary>⚠️ বিপজ্জনক কাজ</summary>
+        <p>পুরো class-এর সব শিক্ষার্থী মুছে যাবে। ব্যাকআপ থাকবে, হাজিরার পুরোনো রেকর্ড মুছবে না।</p>
+        <button type="button" class="act rej" id="stuDel" style="width:100%" onclick="stuDeleteClass()">🗑 এই class-এর সব শিক্ষার্থী মুছুন</button>
+      </details>
+      <div class="su-bulk" id="stuBulk">
+        <span id="stuSelCnt"></span>
+        <button type="button" class="act alt" onclick="stuClearSel()">বাতিল</button>
+        <button type="button" class="act rej" id="stuDelSel" onclick="stuDeleteSelected()">🗑 মুছুন</button>
+      </div>
+    </div>
+    <div id="stuFormWrap" style="display:none">
+      <div class="su-who" id="stuRo"></div>
+      <div id="stuForm"></div>
+      <div class="su-foot">
+        <span id="stuCnt"></span>
+        <button type="button" class="act alt" onclick="stuBack()">← পেছনে</button>
+        <button type="button" class="act" id="stuSave" onclick="stuSave()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="netBar" role="status" aria-live="polite"></div>
+<div class="toast" id="toast"></div>
+<div class="loading" id="loading"><div class="spin"></div><span id="loadingMsg">Loading...</span></div>
+
+<div id="printArea"></div>
+
+<script>
+  // ===== GitHub Pages সংযোগ: Apps Script Web App-কে API হিসেবে ডাকা =====
+  // নিচে Supabase Edge Function-এর URL ও Publishable key বসানো আছে
+  var API_URL = 'https://xemvwhqqpbxsdkqcscrg.supabase.co/functions/v1/attendance';
+  var API_KEY = 'sb_publishable_Ecayyqfsteeio6zjLzHAZw_F6I3h_F0';   // Supabase → Project Settings → API Keys → Publishable key (sb_publishable_...)
+
+  // নিচের অংশ google.script.run-এর মতো আচরণ করে (সাথে অফলাইন ক্যাশ ও কিউ), তাই বাকি কোড বদলাতে হয়নি
+  var google = { script: { run: (function () {
+    // ===== অফলাইন + দ্রুত গতির স্তর =====
+    // ১) পড়ার কাজ: ডিভাইসে (IndexedDB) ক্যাশ — আগে ক্যাশ থেকে তাৎক্ষণিক দেখায়, পেছনে নতুন তথ্য আনে
+    // ২) লেখার কাজ (হাজিরা, ফরম ফিলাপ): নেট না থাকলে কিউতে জমে, নেট এলে নিজে নিজে জমা হয়
+    var INSTANT_CB = { getClassData: 1, getFormData: 1, getDaySummary: 1, getAlerts: 1 };   // ক্যাশ আগে, নতুন এলে আবার আঁকে
+    var INSTANT_SILENT = { getInitData: 1, getFormInit: 1 };                                   // ক্যাশ আগে, নতুন শুধু ক্যাশে রাখে
+    var RACE = { getMonthReport: 1, getClassStudents: 1, getPromotionPreview: 1, getPending: 1 };                                      // নেট ধীর হলে (১.২ সেকেন্ড) ক্যাশ দেখায়
+    var WRITE_Q = { saveAttendance: 1, saveFormData: 1 };                                       // অফলাইনে কিউতে যাবে
+    var RACE_MS = 1000, QKEY = 'att_queue';
+    function raceMs() { var c = navigator.connection; if (c && (c.saveData || /^(slow-)?2g$|^3g$/.test(c.effectiveType || ''))) return 250; return RACE_MS; }
+    var syncing = false;
+
+    function clone(o) { return JSON.parse(JSON.stringify(o)); }
+    // বিলম্বে (LT) বাদ: সার্ভার পুরোনো থাকলেও LT কে উপস্থিত (P) ধরে LT সরিয়ে দেয়
+    function stripLT(o) {
+      if (Array.isArray(o)) { o.forEach(stripLT); return o; }
+      if (o && typeof o === 'object') {
+        if (Array.isArray(o.statuses)) o.statuses = o.statuses.filter(function (x) { return x !== 'LT'; });
+        if (o.labels && o.labels.LT !== undefined) delete o.labels.LT;
+        if (o.counts && o.counts.LT !== undefined) { o.counts.P = (o.counts.P || 0) + o.counts.LT; delete o.counts.LT; }
+        Object.keys(o).forEach(function (k) {
+          var v = o[k];
+          if (v === 'LT') o[k] = 'P'; else if (v && typeof v === 'object') stripLT(v);
+        });
+      }
+      return o;
+    }
+    function curUser() { try { return localStorage.getItem('att_user') || ''; } catch (e) { return ''; } }
+    function localISO() {
+      var d = new Date();
+      function p(n) { return (n < 10 ? '0' : '') + n; }
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    }
+    function isNetErr(e) { return !!(e && e.netErr); }
+    function msgOf(e) { return String(e && e.message ? e.message : e); }
+
+    // ----- নেটওয়ার্ক কল (দুর্বল নেটের জন্য: ছোট timeout, নিজে নিজে পুনরায় চেষ্টা, একসাথে সর্বোচ্চ ৪টি) -----
+    function tmo(fn) { return fn === 'saveFormData' ? 60000 : WRITE_Q[fn] ? 40000 : (/^get/.test(fn) ? 25000 : 60000); }
+    function callOnce(fn, args, ms) {
+      if (!/^https:\/\/[a-z0-9]+\.supabase\.co\/functions\/v1\/.+$/.test(API_URL) || !API_KEY || /PASTE_/.test(API_KEY)) {
+        return Promise.reject(new Error('API_KEY বসানো হয়নি। index.html-এ Supabase Publishable key বসান।'));
+      }
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        var oe = new Error('offline'); oe.netErr = true;
+        return Promise.reject(oe);
+      }
+      var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms) : null;
+      return fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': API_KEY },
+        body: JSON.stringify({ fn: fn, args: args }),
+        redirect: 'follow',
+        signal: ctrl ? ctrl.signal : undefined
+      }).then(function (res) {
+        if (res.status >= 502 && res.status <= 504) { var be = new Error('server busy'); be.netErr = true; throw be; }
+        return res.json().catch(function () {
+          throw new Error('সার্ভার থেকে সঠিক উত্তর আসেনি। Supabase-এ function-এর Verify JWT বন্ধ আছে কি না দেখুন।');
+        });
+      }).then(function (out) {
+        if (timer) clearTimeout(timer);
+        if (!out || !out.ok) throw new Error((out && out.error) || 'Unknown error');
+        return stripLT(out.data);
+      }).catch(function (e) {
+        if (timer) clearTimeout(timer);
+        if (e && e.name === 'AbortError') { var te = new Error('Timeout — please try again.'); te.netErr = true; throw te; }
+        if (e instanceof TypeError) e.netErr = true;           // fetch ব্যর্থ = নেট নেই / সংযোগ বিচ্ছিন্ন
+        throw e;
+      });
+    }
+    var inflight = 0, waitQ = [], MAXC = 4;
+    function slot() {
+      return new Promise(function (res) {
+        function go() { inflight++; res(); }
+        if (inflight < MAXC) go(); else waitQ.push(go);
+      });
+    }
+    function release() { inflight--; var n = waitQ.shift(); if (n) n(); }
+    function callApi(fn, args) {
+      var tries = /^get/.test(fn) ? 2 : ((fn === 'login' || fn === 'logout' || fn === 'setMySession') ? 2 : 1), n = 0;
+      return slot().then(function () {
+        return (function attempt() {
+          n++;
+          return callOnce(fn, args, tmo(fn)).catch(function (e) {
+            if (isNetErr(e) && n < tries && navigator.onLine !== false) {
+              return new Promise(function (r) { setTimeout(r, 1200 * n); }).then(attempt);
+            }
+            throw e;
+          });
+        })();
+      }).then(function (v) { release(); return v; }, function (e) { release(); throw e; });
+    }
+
+    // ----- IndexedDB ক্যাশ -----
+    var dbP = new Promise(function (res) {
+      try {
+        var r = indexedDB.open('att_cache_sb', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('kv'); };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { res(null); };
+      } catch (e) { res(null); }
+    });
+    function kvOp(mode, fn) {
+      return dbP.then(function (db) {
+        if (!db) return null;
+        return new Promise(function (res) {
+          try {
+            var tx = db.transaction('kv', mode), st = tx.objectStore('kv'), q = fn(st);
+            tx.oncomplete = function () { res(q && q.result !== undefined ? q.result : null); };
+            tx.onerror = tx.onabort = function () { res(null); };
+          } catch (e) { res(null); }
+        });
+      });
+    }
+    function kvGet(k) { return kvOp('readonly', function (s) { return s.get(k); }); }
+    function kvSet(k, v) { return kvOp('readwrite', function (s) { return s.put(v, k); }); }
+    function kvDel(k) { return kvOp('readwrite', function (s) { return s.delete(k); }); }
+    function kvKeys() {
+      return dbP.then(function (db) {
+        if (!db) return [];
+        return new Promise(function (res) {
+          try { var r = db.transaction('kv', 'readonly').objectStore('kv').getAllKeys(); r.onsuccess = function () { res(r.result || []); }; r.onerror = function () { res([]); }; }
+          catch (e) { res([]); }
+        });
+      });
+    }
+    // নেট নেই + এই তারিখের ক্যাশ নেই: একই class-এর অন্য তারিখের ক্যাশ থেকে শিক্ষার্থী তালিকা নিয়ে অফলাইনে হাজিরা নেওয়া যায়
+    function synthClass(args) {
+      var pre = 'getClassData|';
+      return kvKeys().then(function (keys) {
+        var best = null;
+        keys.forEach(function (k) {
+          if (typeof k !== 'string' || k.indexOf(pre) !== 0) return;
+          try { var a = JSON.parse(k.substr(pre.length)); if (a[1] === args[2] && a[2] === args[3] && (!best || a[0] > best.d)) best = { d: a[0], k: k }; } catch (e) {}
+        });
+        if (!best) return null;
+        return kvGet(best.k).then(function (rec) {
+          if (!rec || !rec.d || !rec.d.students) return null;
+          var d = clone(rec.d); d.saved = {}; d.holiday = null; d.blocked = false; return d;
+        });
+      });
+    }
+    function kvClear() { return kvOp('readwrite', function (s) { return s.clear(); }); }
+
+    // ----- অফলাইন কিউ (localStorage) -----
+    function qGet() { try { return JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { return []; } }
+    function qSet(a) { try { localStorage.setItem(QKEY, JSON.stringify(a)); } catch (e) {} netUI(); }
+    function qMine() { var u = curUser(); return qGet().filter(function (x) { return x.u === u; }); }
+    function qFindAtt(date, cls, period) {
+      var q = qMine();
+      for (var i = 0; i < q.length; i++) {
+        var a = q[i].args;
+        if (q[i].fn === 'saveAttendance' && a[0] === date && a[1] === cls && a[2] === period) return a[3];
+      }
+      return null;
+    }
+    function qRemoveAtt(date, cls, period) {
+      var u = curUser();
+      qSet(qGet().filter(function (x) {
+        return !(x.u === u && x.fn === 'saveAttendance' && x.args[0] === date && x.args[1] === cls && x.args[2] === period);
       }));
-    }).then(function () {
-      if (!self.registration.active) return self.skipWaiting();
-    })
-  );
-});
+    }
+    function qAdd(fn, args) {            // args: টোকেন ছাড়া
+      var q = qGet(), u = curUser();
+      if (fn === 'saveAttendance') {
+        q = q.filter(function (x) { return !(x.u === u && x.fn === fn && x.args[0] === args[0] && x.args[1] === args[1] && x.args[2] === args[2]); });
+        q.push({ id: Date.now() + '' + Math.random(), u: u, fn: fn, args: args });
+      } else {
+        var ex = null;
+        q.forEach(function (x) { if (x.u === u && x.fn === fn && x.args[0] === args[0] && x.args[2] === args[2] && x.args[3] === args[3]) ex = x; });
+        if (ex) {
+          var map = {}, order = [];
+          ex.args[1].concat(args[1]).forEach(function (it) { if (!map[it.key]) order.push(it.key); map[it.key] = it; });
+          ex.args[1] = order.map(function (k) { return map[k]; });
+        } else {
+          q.push({ id: Date.now() + '' + Math.random(), u: u, fn: fn, args: args });
+        }
+      }
+      qSet(q);
+    }
+    function qDrop(id) { qSet(qGet().filter(function (x) { return x.id !== id; })); }
 
-self.addEventListener('activate', function (e) {
-  e.waitUntil(
-    caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k.indexOf('att-') === 0 && k !== SHELL && k !== RUNTIME && k !== META; }).map(function (k) { return caches.delete(k); }));
-    }).then(function () { return self.clients.claim(); })
-  );
-});
+    // ----- অফলাইন ব্যানার -----
+    function netUI() {
+      var b = document.getElementById('netBar');
+      if (!b) return;
+      b.onclick = function () { syncQueue(false); };
+      var n = qMine().length, off = typeof navigator !== 'undefined' && navigator.onLine === false;
+      if (off) { b.textContent = '📴 Offline mode' + (n ? ' · অপেক্ষমাণ ' + bn(n) + '' : ''); b.className = 'on off'; }
+      else if (syncing || n) { b.textContent = '🔄 অপেক্ষমাণ ' + bn(n) + 'টি কাজ Submitting... (চাপলে আবার চেষ্টা)'; b.className = 'on'; }
+      else b.className = '';
+    }
 
-self.addEventListener('message', function (e) {
-  var d = e.data || {};
-  if (d.type === 'SKIP_WAITING') { self.skipWaiting(); return; }
-  if (d.type === 'CHECK_PAGE') { e.waitUntil(checkAll()); }
-});
+    // ----- ক্যাশে থাকা তথ্যের ওপর অপেক্ষমাণ (কিউ) পরিবর্তন বসানো -----
+    function prep(fn, args, d, stale) {
+      if (!d) return d;
+      if (fn === 'getInitData' && stale && d.today) { d = clone(d); d.today = localISO(); }
+      if (fn === 'getClassData' && d.saved) {
+        var recs = qFindAtt(args[1], args[2], args[3]);
+        if (recs) { d = clone(d); recs.forEach(function (r) { d.saved[r.roll] = r.status; }); }
+      }
+      if (fn === 'getFormData' && d.students) {
+        var by = {}, any = false;
+        qMine().forEach(function (x) {
+          if (x.fn === 'saveFormData' && x.args[0] === args[1] && x.args[2] === args[2]) {
+            x.args[1].forEach(function (it) { by[it.key] = it; any = true; });
+          }
+        });
+        if (any) {
+          d = clone(d);
+          d.students.forEach(function (s) {
+            var it = by[s.key];
+            if (it) { var m = {}; for (var k in it) if (k !== 'key') m[k] = it[k]; s.saved = Object.assign({}, s.saved || {}, m); }
+          });
+        }
+      }
+      return d;
+    }
 
-// সব মূল ফাইল নতুন করে এনে হ্যাশ মেলানো; কিছু বদলালে ক্যাশ হালনাগাদ + বার্তা
-var checking = false, lastCheck = 0;
-function checkAll() {
-  if (checking || Date.now() - lastCheck < 180000) return Promise.resolve();   // ৩ মিনিটে একবারের বেশি নয় (নেট বাঁচাতে)
-  lastCheck = Date.now();
-  checking = true;
-  return Promise.all([caches.open(SHELL), caches.open(META)]).then(function (cs) {
-    var shell = cs[0], meta = cs[1], any = false, first = false;
-    return Promise.all(FILES.map(function (u) {
-      return fetchT(u, { cache: 'no-store', credentials: 'same-origin' }, 20000).then(function (r) {
-        if (!r || !r.ok) return;
-        var res = clean(r.clone());
-        return digest(r).then(function (h) {
-          return meta.match(u).then(function (old) {
-            return (old ? old.text() : Promise.resolve(null)).then(function (oh) {
-              if (oh === null) first = true;
-              else if (oh !== h) any = true;
-              if (oh !== h) return Promise.all([meta.put(u, new Response(h)), shell.put(u, res)]);
+    // সফল হাজিরা জমার পর ক্যাশের getClassData হালনাগাদ
+    function cacheAtt(args) {   // args: [token, date, cls, period, records]
+      var key = 'getClassData|' + JSON.stringify([args[1], args[2], args[3]]);
+      return kvGet(key).then(function (rec) {
+        if (!rec || !rec.d || !rec.d.saved) return;
+        var saved = {};
+        args[4].forEach(function (r) { saved[r.roll] = r.status; });
+        rec.d.saved = saved;
+        return kvSet(key, rec);
+      });
+    }
+
+    function canRefresh(fn) {
+      if (fn === 'getClassData') return !(typeof dirty !== 'undefined' && dirty);
+      if (fn === 'getFormData') return typeof ffDirtyCount === 'function' && ffDirtyCount() === 0;
+      return true;
+    }
+    function cacheable(d) { return d && !d.needLogin && !d.denied; }
+    function offErr(e) {
+      if (!isNetErr(e)) return e;
+      try { console.warn('API সংযোগ ব্যর্থ:', e && e.message, '| online =', navigator.onLine); } catch (x) {}
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return new Error('অফলাইন: এই তথ্য ডিভাইসে সংরক্ষিত নেই। একবার ইন্টারনেট চালু করে খুলুন।');
+      return new Error('ইন্টারনেট আছে, কিন্তু সার্ভারের (Supabase) সাথে যোগাযোগ হয়নি। কিছুক্ষণ পর Try again।');
+    }
+
+    // ----- পড়ার কাজ -----
+    function doRead(fn, args, ok, ng) {
+      var key = fn + '|' + JSON.stringify(args.slice(1));
+      var useCache = !!args[0];
+      (useCache ? kvGet(key) : Promise.resolve(null)).then(function (rec) {
+        var cached = rec && rec.d !== undefined ? rec.d : null;
+
+        // ক) তাৎক্ষণিক: ক্যাশ আগে, পেছনে নতুন
+        if ((INSTANT_CB[fn] || INSTANT_SILENT[fn]) && cached) {
+          var served = JSON.stringify(cached);
+          if (ok) ok(prep(fn, args, cached, true));
+          callApi(fn, args).then(function (d) {
+            if (fn === 'getInitData' && d && d.needLogin) { kvDel(key); if (typeof sessionExpired === 'function') sessionExpired(); return; }
+            if (cacheable(d)) kvSet(key, { t: Date.now(), d: d });
+            if (INSTANT_CB[fn] && JSON.stringify(d) !== served && canRefresh(fn)) { if (ok) ok(prep(fn, args, d, false)); }
+            else if (fn === 'getInitData' && d && d.canConfirm !== undefined && typeof setRegBadge === 'function') setRegBadge(d.pendingCount || 0);
+          }, function (e) {
+            if (/SESSION_EXPIRED/.test(msgOf(e))) { kvDel(key); if (typeof sessionExpired === 'function') sessionExpired(); }
+          });
+          return;
+        }
+
+        // খ) নেট আগে (ধীর হলে ক্যাশ; অফলাইনে ক্যাশ)
+        var settled = false, timer = null;
+        callApi(fn, args).then(function (d) {
+          if (useCache && cacheable(d)) kvSet(key, { t: Date.now(), d: d });
+          if (settled) return;
+          settled = true; if (timer) clearTimeout(timer);
+          if (ok) ok(prep(fn, args, d, false));
+        }, function (e) {
+          if (settled) return;
+          settled = true; if (timer) clearTimeout(timer);
+          if (isNetErr(e) && cached) { if (ok) ok(prep(fn, args, cached, true)); }
+          else if (isNetErr(e) && fn === 'getClassData') {
+            synthClass(args).then(function (d) {
+              if (d) { if (ok) ok(prep(fn, args, d, true)); }
+              else if (ng) ng(offErr(e)); else console.error(e);
             });
+          }
+          else if (ng) ng(offErr(e)); else console.error(e);
+        });
+        if (RACE[fn] && cached) {
+          timer = setTimeout(function () {
+            if (settled) return;
+            settled = true;
+            if (ok) ok(prep(fn, args, cached, true));
+          }, raceMs());
+        }
+      });
+    }
+
+    // ----- লেখার কাজ: আগে ফোনে সংরক্ষণ (তাৎক্ষণিক), সার্ভারে জমা পেছনে -----
+    function doWrite(fn, args, ok, ng) {
+      var offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      qAdd(fn, args.slice(1));
+      var res = offline ? { queued: true } : { fast: true };
+      if (fn === 'saveAttendance') {
+        var counts = {};
+        (typeof STATUS !== 'undefined' ? STATUS : []).forEach(function (s) { counts[s] = 0; });
+        args[4].forEach(function (r) { counts[r.status] = (counts[r.status] || 0) + 1; });
+        res.counts = counts;
+        cacheAtt(args);
+      }
+      if (ok) ok(res);
+      if (!offline) setTimeout(function () { syncQueue(true); }, 0);
+    }
+
+    // ----- কিউ থেকে স্বয়ংক্রিয় জমা -----
+    function syncQueue(quiet) {
+      if (syncing || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+      var tok = (typeof TOKEN !== 'undefined') ? TOKEN : '';
+      if (!tok || !qMine().length) { netUI(); return; }
+      syncing = true; netUI();
+      var done = 0, bad = [], warns = [], netFail = false;
+      function fin() {
+        syncing = false; netUI();
+        if (typeof toast !== 'function') return;
+        if (warns.length) toast('Saved, but not submitted to the class sheet: ' + warns[0], true);
+        else if (netFail && quiet) toast('নেট সমস্যা — তথ্য ফোনে সংরক্ষিত আছে, নেট এলে জমা হবে', true);
+        else if (done && !quiet) toast('📶 অফলাইনে রাখা ' + bn(done) + 'টি কাজ জমা হয়েছে', false);
+        else if (bad.length) toast('অফলাইন কাজ জমা হয়নি: ' + bad[0], true);
+        if (done && typeof attStale !== 'undefined') attStale = true;
+      }
+      (function step() {
+        var q = qMine();
+        if (!q.length) { fin(); return; }
+        var it = q[0];
+        if (it.fn === 'saveFormData' && it.args[1] && it.args[1].length) {   // ফরম ফিলাপ: ১০ জন করে ভাগ করে পাঠানো
+          var FF_BATCH = 10, sentItems = it.args[1].slice(0, FF_BATCH), sentArgs = it.args.slice();
+          sentArgs[1] = sentItems;
+          callApi(it.fn, [tok].concat(sentArgs)).then(function (r) {
+            if (r && r.synced === false) warns.push(r.syncMsg || 'Unknown reason');
+            var all = qGet(), j, sentMap = {};
+            sentItems.forEach(function (x) { sentMap[x.key] = JSON.stringify(x); });
+            for (j = 0; j < all.length; j++) {
+              if (all[j].id !== it.id) continue;
+              all[j].args[1] = all[j].args[1].filter(function (x) {      // শুধু জমা হওয়া ও অপরিবর্তিত রেকর্ড বাদ
+                return !(sentMap[x.key] !== undefined && sentMap[x.key] === JSON.stringify(x));
+              });
+              if (!all[j].args[1].length) all.splice(j, 1);
+              break;
+            }
+            qSet(all); done++; step();
+          }, function (e) {
+            if (isNetErr(e)) { netFail = true; fin(); return; }
+            if (/SESSION_EXPIRED/.test(msgOf(e))) { fin(); if (typeof sessionExpired === 'function') sessionExpired(); return; }
+            qDrop(it.id); bad.push(msgOf(e)); step();
+          });
+          return;
+        }
+        callApi(it.fn, [tok].concat(it.args)).then(function (r) {
+          if (r && r.synced === false) warns.push(r.syncMsg || 'Unknown reason');
+          qDrop(it.id);
+          if (it.fn === 'saveAttendance') cacheAtt([tok].concat(it.args));
+          done++; step();
+        }, function (e) {
+          if (isNetErr(e)) { netFail = true; fin(); return; }
+          if (/SESSION_EXPIRED/.test(msgOf(e))) { fin(); if (typeof sessionExpired === 'function') sessionExpired(); return; }
+          qDrop(it.id); bad.push(msgOf(e)); step();           // সার্ভার প্রত্যাখ্যান করলে বাদ (যেমন ছুটির দিন)
+        });
+      })();
+    }
+    try {
+      window.addEventListener('online', function () { netUI(); setTimeout(syncQueue, 800); });
+      window.addEventListener('offline', netUI);
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) syncQueue(); });
+      document.addEventListener('DOMContentLoaded', function () { netUI(); setTimeout(syncQueue, 2500); });
+      setInterval(syncQueue, 30000);
+    } catch (e) {}
+
+    // ----- অন্য কল (login, logout, প্রোমোশন, নিবন্ধন ইত্যাদি) -----
+    function doOther(fn, args, ok, ng) {
+      callApi(fn, args).then(function (r) {
+        if (fn === 'login' || fn === 'loginVerify' || (fn === 'loginStart' && r && r.token)) { try { localStorage.setItem('att_user', String(args[0] || '').trim().toLowerCase()); } catch (e) {} kvClear().then(function () { if (ok) ok(r); }); return; }
+        if (fn === 'logout' || fn === 'setMySession') { kvClear().then(function () { if (ok) ok(r); }); return; }
+        if (ok) ok(r);
+      }, function (e) {
+        if (fn === 'logout') { kvClear().then(function () { if (ok) ok(null); }); return; }
+        if (isNetErr(e)) e = new Error('ইন্টারনেট সংযোগ নেই। এই কাজের জন্য নেট প্রয়োজন।');
+        if (ng) ng(e); else console.error(e);
+      });
+    }
+
+    // আগাম লোড (UI ছাড়া): ক্যাশ ২০ মিনিটের মধ্যে নতুন থাকলে নেট ডাকে না
+    window.__prefetch = function (fn, args, cb) {
+      var key = fn + '|' + JSON.stringify(args.slice(1));
+      kvGet(key).then(function (rec) {
+        if (rec && rec.t && Date.now() - rec.t < 20 * 60000) { cb(rec.d); return; }
+        callApi(fn, args).then(function (d) { if (cacheable(d)) kvSet(key, { t: Date.now(), d: d }); cb(d); }, function () { cb(null); });
+      });
+    };
+
+    function run(fn, args, ok, ng) {
+      if (WRITE_Q[fn]) return doWrite(fn, args, ok, ng);
+      if (/^get/.test(fn)) return doRead(fn, args, ok, ng);
+      return doOther(fn, args, ok, ng);
+    }
+
+    function makeRunner(ok, ng) {
+      var base = {
+        withSuccessHandler: function (f) { return makeRunner(f, ng); },
+        withFailureHandler: function (f) { return makeRunner(ok, f); }
+      };
+      return new Proxy(base, {
+        get: function (t, name) {
+          if (name in t) return t[name];
+          return function () {
+            run(String(name), Array.prototype.slice.call(arguments), ok, ng);
+          };
+        }
+      });
+    }
+    return makeRunner(null, null);
+  })() } };
+
+  var cfg = null;
+  var STATUS = [];
+  var students = [];
+  var state = {};
+  var rowEls = [], hdrAll = [];
+  var blocked = false;
+  var dirty = false;
+  var attStale = false;
+  var attFilter = '';
+  var attGender = '';   // '', 'Boys', 'Girls'
+  var attGroup = '';    // '' বা গ্রুপের নাম
+  var attTaken = false;
+  var listOpen = false, listMode = 'edit';   // শিক্ষার্থী তালিকা ডিফল্টে লুকানো; mode: edit | view
+  var curTab = 'home';
+  var cur = { date: '', cls: '', period: '' };
+  var rq = { att: 0, sum: 0, mon: 0, alr: 0, reg: 0 };
+  var monData = null;
+  var monOpen = false;   // রিপোর্টে শিক্ষার্থী ছক ডিফল্টে লুকানো
+  var sumData = null;
+
+  // ===== লগইন session =====
+  var TOKEN = '';
+  function saveToken(t) { try { if (t) localStorage.setItem('att_token', t); else localStorage.removeItem('att_token'); } catch (e) {} }
+  function loadToken() { try { return localStorage.getItem('att_token') || ''; } catch (e) { return ''; } }
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+
+  function rollNum(r) {
+    var n = parseFloat(String(r === undefined || r === null ? '' : r).replace(/[০-৯]/g, function (d) { return '০১২৩৪৫৬৭৮৯'.indexOf(d); }).replace(/[^\d.]/g, ''));
+    return isNaN(n) ? Infinity : n;
+  }
+  function cmpRoll(a, b) {
+    var x = rollNum(a), y = rollNum(b);
+    if (x !== y) return x - y;
+    a = String(a); b = String(b);
+    return a < b ? -1 : (a > b ? 1 : 0);
+  }
+  function sortByRoll(list, key) {
+    if (list && list.sort) list.sort(function (p, q) { return cmpRoll(key ? p[key] : p, key ? q[key] : q); });
+    return list;
+  }
+  // ক্লাসের ক্রম (cfg.classes), তারপর রোল ক্রমে সাজায়
+  function sortByClsRoll(list) {
+    if (!list || !list.sort) return list;
+    var ord = (typeof cfg !== 'undefined' && cfg && cfg.classes) ? cfg.classes : [];
+    function ci(c) { var i = ord.indexOf(c); return i < 0 ? 9999 : i; }
+    list.sort(function (p, q) { return (ci(p.cls) - ci(q.cls)) || cmpRoll(p.roll, q.roll); });
+    return list;
+  }
+  // সারাদিনের সামারির প্রতিটি ক্লাসের অনুপস্থিতদের তালিকা রোল ক্রমে সাজায়
+  function sortSummaryAbsent(d) {
+    if (d && d.classes) d.classes.forEach(function (c) { if (c && c.absent) sortByRoll(c.absent, 'roll'); });
+    return d;
+  }
+
+  function bnD(x) {
+    return String(x).replace(/\d/g, function (d) { return '০১২৩৪৫৬৭৮৯'.charAt(d); });
+  }
+
+  function bn(x) {
+    return String(x).replace(/[০-৯]/g, function (d) { return '০১২৩৪৫৬৭৮৯'.indexOf(d); });
+  }
+
+  // e-SIF-এর ইংরেজি মান → বাংলা প্রদর্শন
+  var SEC_BN = { 'Boys': 'Boys', 'Girls': 'Girls', 'ছাত্র': 'Boys', 'ছাত্রী': 'Girls', 'ক': 'A', 'খ': 'B', 'গ': 'C', 'ঘ': 'D' };
+  var GRP_BN = { 'Science': 'Science', 'Humanities': 'Humanities', 'Business Studies': 'Business Studies', 'বিজ্ঞান': 'Science', 'মানবিক': 'Humanities', 'ব্যবসায় শিক্ষা': 'Business Studies' };
+  function secText(s) { return SEC_BN[s] ? SEC_BN[s] : 'Section ' + s; }
+  function grpText(g) { return GRP_BN[g] || g; }
+
+  // "9 | Boys | Science" → "৯, ছাত্র, বিজ্ঞান"  /  "6 | A" → "৬, শাখা A"
+  function clsPlain(label) {
+    var p = String(label).split('|').map(function (x) { return x.trim(); });
+    var out = bn(p[0] || '');
+    if (p[1]) out += ', ' + secText(p[1]);
+    if (p[2]) out += ', ' + grpText(p[2]);
+    return out;
+  }
+
+  // "9 | ক | বিজ্ঞান" → { base:'9', section:'ক', group:'বিজ্ঞান' }
+  function clsParts(l) {
+    var p = String(l).split('|').map(function (x) { return x.trim(); });
+    return { base: p[0] || '', section: p[1] || '', group: p[2] || '' };
+  }
+
+  function fillClassSelects(d) {
+    var meta = d.classMeta && d.classMeta.length ? d.classMeta
+      : d.classes.map(function (c) { return { label: c, base: c, section: '', group: '' }; });
+    ['cls', 'mcls', 'proCls'].forEach(function (id) {
+      var sel = $(id);
+      sel.innerHTML = '<option value="">-- Select --</option>';
+      var grp = null, lastKey = null;
+      meta.forEach(function (m) {
+        // ৯–১০ম: সেকশন (Boys/Girls) ধরে গ্রুপ; ৬–৮: শ্রেণি ধরে
+        var key = m.group ? m.base + '|' + m.section : m.base;
+        if (key !== lastKey) {
+          grp = document.createElement('optgroup');
+          grp.label = m.group ? 'Class ' + bn(m.base) + ' — ' + secText(m.section) : 'Class ' + bn(m.base);
+          sel.appendChild(grp);
+          lastKey = key;
+        }
+        var o = document.createElement('option');
+        o.value = m.label;
+        var parts = [];
+        if (m.section) parts.push(secText(m.section));
+        if (m.group) parts.push(grpText(m.group));
+        o.textContent = parts.length ? 'Class ' + bn(m.base) + ' — ' + parts.join(' — ') : 'Class ' + bn(m.base);
+        grp.appendChild(o);
+      });
+    });
+
+    // সারাংশ ট্যাবের class ও শাখা ফিল্টার
+    $('sfcls').innerHTML = '<option value="">All classes</option>';
+    $('sfsec').innerHTML = '<option value="">All</option>';
+    var bases = [], secs = [];
+    meta.forEach(function (m) {
+      if (bases.indexOf(m.base) === -1) bases.push(m.base);
+      if (m.section && secs.indexOf(m.section) === -1) secs.push(m.section);
+    });
+    bases.forEach(function (b) {
+      var o = document.createElement('option');
+      o.value = b; o.textContent = 'Class ' + bn(b);
+      $('sfcls').appendChild(o);
+    });
+    secs.forEach(function (s) {
+      var o = document.createElement('option');
+      o.value = s; o.textContent = secText(s);
+      $('sfsec').appendChild(o);
+    });
+  }
+
+  function fmtDM(d) {
+    return bn(parseInt(d.substr(8, 2), 10) + '/' + parseInt(d.substr(5, 2), 10));
+  }
+
+  function loading(on, msg) {
+    $('loading').style.display = on ? 'flex' : 'none';
+    if (msg) $('loadingMsg').textContent = msg;
+  }
+
+  function toast(msg, isErr) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isErr ? ' err' : '');
+    t.style.display = 'block';
+    setTimeout(function () { t.style.display = 'none'; }, isErr ? 5000 : 2500);
+  }
+
+  // সার্ভার/নেটওয়ার্কের ত্রুটিকে সহজ বাংলায় রূপ দেওয়া
+  function friendlyErr(e) {
+    var m = String(e && e.message ? e.message : e);
+    if (/permission|authoriz|openById|Unexpected error|Access denied|You do not have/i.test(m)) {
+      return 'Sheet খোলা যাচ্ছে না। Sheet-এর শেয়ারিং/অনুমতি এবং Spreadsheet ID ঠিক আছে কি না দেখুন।';
+    }
+    if (/network|fetch|timeout|timed out|offline|Failed to/i.test(m)) {
+      return 'ইন্টারনেট সংযোগে সমস্যা। সংযোগ দেখে Try again।';
+    }
+    return m;
+  }
+
+  function sessionExpired() {
+    TOKEN = '';
+    saveToken('');
+    loading(false);
+    toast('Session expired. Please log in again.', true);
+    setTimeout(function () { location.reload(); }, 1500);
+  }
+
+  function fail(e) {
+    if (e && String(e.message || e).indexOf('SESSION_EXPIRED') !== -1) { sessionExpired(); return; }
+    loading(false);
+    $('saveBtn').disabled = !(students.length && !blocked && listOpen && listMode === 'edit');
+    toast('Error: ' + friendlyErr(e), true);
+  }
+
+  function setNote(id, msg, isErr) {
+    var n = $(id);
+    n.textContent = msg || '';
+    n.className = 'note' + (isErr ? ' err' : '');
+  }
+
+  // ===== লগইন / লগআউট =====
+  function togglePw() {
+    var i = $('lgPass'), b = $('pwBtn');
+    var show = i.type === 'password';
+    i.type = show ? 'text' : 'password';
+    b.textContent = show ? '🙈' : '👁️';
+  }
+
+  function showLogin() {
+    dashData = null; dashAlr = null; dashAgg = null; dashMon = null; monReq++; dashBusy = false; dashFail = false; dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
+    dashPrev = null; dashToday = null; prevReq++;
+    $('app').style.display = 'none';
+    $('denied').style.display = 'none';
+    LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false);
+    $('login').style.display = 'block';
+    $('logoutBtn').style.display = 'none';
+    $('homeBtn').style.display = 'none';
+    $('who').style.display = 'none';
+    document.body.classList.add('nobar');
+    document.body.classList.add('lgmode');
+    document.body.classList.remove('appmode');
+    setTimeout(function () { $('lgUser').focus(); }, 50);
+  }
+
+  var LG_OFFICE = false, LG_STEP = 'pw', LG_EMAIL = '', LG_PASS = '', LG_TIMER = null;
+
+  // বিশ্বস্ত ডিভাইস টোকেন (ইমেইল অনুযায়ী, ৩০ দিন): OTP যাচাইয়ের পর সার্ভার দেয়
+  function getDev(em) { try { return (JSON.parse(localStorage.getItem('trusted_devices') || '{}'))[String(em).trim().toLowerCase()] || ''; } catch (e) { return ''; } }
+  function setDev(em, tok) { try { var m = JSON.parse(localStorage.getItem('trusted_devices') || '{}'); m[String(em).trim().toLowerCase()] = tok; localStorage.setItem('trusted_devices', JSON.stringify(m)); } catch (e) {} }
+
+  function alErr(id, msg) { var e = $(id); if (!e) return; e.textContent = msg || ''; e.classList.toggle('show', !!msg); }
+  function alBusy(btn, busy) {
+    btn.disabled = busy;
+    btn.querySelector('.al-btext').style.display = busy ? 'none' : 'block';
+    btn.querySelector('.al-loading').style.display = busy ? 'flex' : 'none';
+  }
+  function alDigits() { return Array.prototype.slice.call(document.querySelectorAll('#login .al-digit')); }
+
+  function setLoginMode(m) {
+    LG_OFFICE = (m === 'office');
+    $('lgUserBox').style.display = LG_OFFICE ? 'none' : '';
+    $('lgPassLbl').textContent = LG_OFFICE ? 'অফিসের পাসওয়ার্ড' : 'পাসওয়ার্ড';
+    $('lgModeLink').textContent = LG_OFFICE ? '← শিক্ষক লগইন' : 'অফিস লগইন';
+    alErr('lgNote', '');
+    try { (LG_OFFICE ? $('lgPass') : $('lgUser')).focus(); } catch (e) {}
+  }
+
+  // ধাপ বদল: false = ইমেইল/পাসওয়ার্ড, true = OTP
+  function lgShowOtp(on) {
+    $('alStepLogin').style.display = on ? 'none' : 'block';
+    $('alStepOtp').style.display = on ? 'block' : 'none';
+    alDigits().forEach(function (i) { i.value = ''; });
+    alErr('alOtpErr', '');
+    if (on) { alStartTimer(); setTimeout(function () { try { alDigits()[0].focus(); } catch (e) {} }, 60); }
+    else { clearInterval(LG_TIMER); }
+  }
+  function otpBack() { LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false); }
+
+  function alStartTimer() {
+    var s = 30, link = $('alResend'), t = $('alResendT');
+    link.classList.add('disabled'); t.textContent = ' (30s)'; clearInterval(LG_TIMER);
+    LG_TIMER = setInterval(function () {
+      s--; t.textContent = ' (' + s + 's)';
+      if (s <= 0) { clearInterval(LG_TIMER); link.classList.remove('disabled'); t.textContent = ''; }
+    }, 1000);
+  }
+
+  // OTP বক্সের অটো-মুভ ও পেস্ট
+  (function () {
+    var all = alDigits();
+    all.forEach(function (input, idx) {
+      input.addEventListener('input', function () { this.value = this.value.replace(/[^0-9]/g, ''); if (this.value && idx < all.length - 1) all[idx + 1].focus(); });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Backspace' && !this.value && idx > 0) all[idx - 1].focus(); });
+      input.addEventListener('paste', function (e) {
+        e.preventDefault();
+        var p = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/[^0-9]/g, '');
+        p.split('').forEach(function (c, i) { if (all[i]) all[i].value = c; });
+        if (all[p.length]) all[p.length].focus();
+      });
+    });
+  })();
+
+  function lgDone(token) {
+    TOKEN = token;
+    saveToken(TOKEN);
+    LG_STEP = 'pw'; LG_PASS = ''; lgShowOtp(false);
+    $('lgPass').value = '';
+    $('lgPass').type = 'password';
+    alBusy($('lgBtn'), false); alBusy($('alOtpBtn'), false);
+    loading(true, 'Loading...');
+    google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
+  }
+
+  function doLogin() {
+    var u = LG_OFFICE ? 'office' : $('lgUser').value.trim(), p = $('lgPass').value;
+    if (!u || !p) { alErr('lgNote', LG_OFFICE ? 'অফিসের পাসওয়ার্ড দিন।' : 'ইমেইল ও পাসওয়ার্ড দিন।'); return; }
+    alErr('lgNote', ''); alBusy($('lgBtn'), true);
+    google.script.run
+      .withSuccessHandler(function (res) {
+        alBusy($('lgBtn'), false);
+        if (res && res.token) { lgDone(res.token); return; }   // অফিস/পরীক্ষা মোডে OTP লাগে না
+        LG_STEP = 'otp'; LG_EMAIL = u.toLowerCase(); LG_PASS = p;
+        $('alOtpEmail').textContent = LG_EMAIL;
+        lgShowOtp(true);
+      })
+      .withFailureHandler(function (e) { alBusy($('lgBtn'), false); alErr('lgNote', friendlyErr(e)); })
+      .loginStart(u, p, getDev(u));
+  }
+
+  function doVerify() {
+    var code = alDigits().map(function (i) { return i.value; }).join('');
+    if (code.length !== 6) { alErr('alOtpErr', '৬ ডিজিটের কোডটি সম্পূর্ণ লিখুন।'); return; }
+    alErr('alOtpErr', ''); alBusy($('alOtpBtn'), true);
+    google.script.run
+      .withSuccessHandler(function (res) { if (res.deviceToken) setDev(LG_EMAIL, res.deviceToken); lgDone(res.token); })
+      .withFailureHandler(function (e) { alBusy($('alOtpBtn'), false); alErr('alOtpErr', '❌ ' + friendlyErr(e)); })
+      .loginVerify(LG_EMAIL, code);
+  }
+
+  function otpResend() {
+    if ($('alResend').classList.contains('disabled')) return;
+    if (!LG_PASS) { otpBack(); return; }
+    google.script.run
+      .withSuccessHandler(function () { alStartTimer(); alErr('alOtpErr', ''); })
+      .withFailureHandler(function (e) { alErr('alOtpErr', friendlyErr(e)); })
+      .loginStart(LG_EMAIL, LG_PASS, getDev(LG_EMAIL));
+  }
+
+  function doLogout() {
+    var t = TOKEN;
+    TOKEN = '';
+    saveToken('');
+    function done() { location.reload(); }
+    google.script.run.withSuccessHandler(done).withFailureHandler(done).logout(t);
+  }
+
+  // ===== শুরু =====
+  window.onload = function () {
+    try {
+      var qt = new URLSearchParams(location.search).get('token');
+      if (qt) { saveToken(qt); history.replaceState(null, '', location.pathname); }
+    } catch (e) {}
+    TOKEN = loadToken();
+    loading(true, 'Loading...');
+    google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN);
+  };
+
+  // class তালিকা খালি হলে কারণসহ বার্তা
+  function emptyClassesBox(sess) {
+    var box = el('div', 'empty');
+    box.appendChild(el('b', null, 'No class or student found'));
+    box.appendChild(document.createTextNode('Possible reasons:'));
+    var ul = document.createElement('ul');
+    ['আপনার অ্যাকাউন্টের Access-এ class মিলছে না (যেমন: all, 9, 6, 7)',
+     'Students ট্যাবে session ' + (sess ? bn(sess) : '') + ' নেই, অথবা Session কলামের মান আলাদা',
+     'e-SIF ফর্মে এখনো Student info জমা হয়নি'
+    ].forEach(function (t) { ul.appendChild(el('li', null, t)); });
+    box.appendChild(ul);
+    return box;
+  }
+
+  // session বাছাই (একাধিক session থাকলে হেডারে ড্রপডাউন)
+  function buildSessSel(d) {
+    var box = $('sess');
+    if (!d.sessions || d.sessions.length < 2 || !d.session) return;
+    box.textContent = '';
+    var lb = document.createElement('span'); lb.textContent = 'Session '; box.appendChild(lb);
+    var sel = document.createElement('select'); sel.id = 'sessSel'; sel.setAttribute('aria-label', 'Select session');
+    sel.className = 'sess-sel';
+    d.sessions.forEach(function (x) {
+      var o = document.createElement('option'); o.value = x; o.textContent = x;
+      if (String(x) === String(d.session)) o.selected = true; sel.appendChild(o);
+    });
+    sel.onchange = function () {
+      var v = sel.value;
+      if (curTab === 'att' && !confirmLeave()) { sel.value = d.session; return; }
+      dirty = false; attStale = false;
+      loading(true, 'session বদলানো হচ্ছে...');
+      google.script.run
+        .withSuccessHandler(function () { google.script.run.withSuccessHandler(initOk).withFailureHandler(fail).getInitData(TOKEN); })
+        .withFailureHandler(function (e) { loading(false); sel.value = d.session; fail(e); })
+        .setMySession(TOKEN, v);
+    };
+    box.appendChild(sel);
+  }
+
+  function initOk(d) {
+    if (d.needLogin) { loading(false); showLogin(); return; }
+    document.body.classList.remove('lgmode');
+    document.body.classList.remove('appmode');
+    if (d.denied) {
+      loading(false);
+      $('app').style.display = 'none';
+      $('login').style.display = 'none';
+      $('denied').style.display = 'block';
+      $('deniedMsg').textContent = d.message;
+      document.body.classList.add('nobar');
+      return;
+    }
+    $('login').style.display = 'none';
+    $('app').style.display = 'block';
+    document.body.classList.add('appmode');
+    setupDash(d);
+    $('logoutBtn').style.display = TOKEN ? 'inline-block' : 'none';
+    $('homeBtn').style.display = TOKEN ? 'inline-flex' : 'none';
+    document.body.classList.remove('nobar');
+
+    cfg = d;
+    STATUS = d.statuses;
+    $('title').textContent = d.school || d.title;
+    $('who').textContent = d.teacher || '';
+    $('who').style.display = d.teacher ? 'inline' : 'none';
+    $('sess').textContent = d.session ? 'Session ' + d.session : '';
+    $('sess').style.display = d.session ? 'block' : 'none';
+    buildSessSel(d);
+    $('todayBox').innerHTML = '';
+    $('todayBox').appendChild(document.createTextNode('Today'));
+    $('todayBox').appendChild(el('b', null, fmtLong(d.today)));
+
+    $('date').value = d.today;
+    $('sdate').value = d.today;
+    $('mmonth').value = d.today.substr(0, 7);
+    $('amonth').value = d.today.substr(0, 7);
+    $('rfrom').value = d.today;
+    rngNote();
+
+    fillClassSelects(d);
+    proInit(d);
+    ffInit(d);
+    $('regTab').style.display = d.canConfirm ? '' : 'none';
+    setRegBadge(d.pendingCount || 0);
+
+    var ps = $('period');
+    ps.innerHTML = '';
+    d.periods.forEach(function (p) {
+      var o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      ps.appendChild(o);
+    });
+    ps.value = d.defaultPeriod;
+    cur.period = ps.value;
+    if (d.periods.length > 1) $('periodBar').style.display = 'block';
+
+    loading(false);
+    setTimeout(warmCache, 1500);
+    if (!d.classes.length) {
+      $('list').innerHTML = '';
+      $('list').appendChild(emptyClassesBox(d.session));
+      toast('No classes found', true);
+      return;
+    }
+    if (d.classes.length === 1) {
+      $('cls').value = d.classes[0];
+      $('mcls').value = d.classes[0];
+      loadClass();
+    }
+  }
+
+  // ===== আগাম লোড: আজকের হাজিরার তথ্য আগেই ফোনে রাখা, যাতে খুললেই তাৎক্ষণিক =====
+  function warmCache() {
+    if (!cfg || !cfg.classes || navigator.onLine === false || !window.__prefetch) return;
+    var T = TOKEN, date = cfg.today, period = cfg.defaultPeriod, month = date.substr(0, 7), jobs = [];
+    var pm = (function () { var y = +month.substr(0, 4), m = +month.substr(5, 2) - 1; if (m < 1) { m = 12; y--; } return y + '-' + (m < 10 ? '0' : '') + m; })();
+    function J(f) { jobs.push(f); }
+    function P(fn, args, after) { J(function (n) { window.__prefetch(fn, [T].concat(args), function (d) { if (after) { try { after(d); } catch (e) {} } n(); }); }); }
+    // অফলাইনে সব ট্যাব চলার জন্য আগেই ফোনে রাখা (একটি একটি করে, দুর্বল নেটেও চলে)
+    P('getClassData', [date, cfg.classes[0], period]);            // আজকের হাজিরার তালিকা আগে
+    cfg.classes.slice(0, 30).forEach(function (c) {
+      if (c !== cfg.classes[0]) P('getClassData', [date, c, period]);
+    });
+    P('getDaySummary', [date, period]);
+    P('getAlerts', [month, period]);
+    cfg.classes.slice(0, 30).forEach(function (c) {
+      P('getClassStudents', [c]);
+      P('getMonthReport', [month, c, period]);
+      P('getMonthReport', [pm, c, period]);
+      P('getPromotionPreview', [c]);
+    });
+    P('getFormInit', [], function (d) {                           // ফরম ফিলাপ: প্রতিটি class ও ধরনের তথ্য
+      if (!d || !d.classes) return;
+      (d.types || [{ code: d.defaultType || 'annual' }]).forEach(function (t) {
+        d.classes.forEach(function (c) { P('getFormData', [c, t.code]); });
+      });
+    });
+    if (cfg.canConfirm) P('getPending', ['pending']);
+    (function step(i) {
+      if (i >= jobs.length || navigator.onLine === false || T !== TOKEN) return;
+      var called = false;
+      function nxt() { if (called) return; called = true; setTimeout(function () { step(i + 1); }, 300); }
+      try { jobs[i](nxt); } catch (e) { nxt(); }
+    })(0);
+  }
+
+  // ===== ট্যাব =====
+  function showTab(t) {
+    if (curTab === 'ff' && t !== 'ff' && !ffLeaveOk()) return;
+    curTab = t;
+    $('pgTitle').textContent = PG_TITLES[t] || '';
+    ['home', 'att', 'sum', 'mon', 'alr', 'reg', 'pro', 'ff'].forEach(function (k) {
+      $('t-' + k).style.display = (k === t) ? 'block' : 'none';
+    });
+    var tabs = document.querySelectorAll('.tab');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('on', tabs[i].getAttribute('data-t') === t);
+    }
+    document.body.classList.toggle('nobar', t !== 'att');
+    window.scrollTo(0, 0);
+    if (t === 'att') { if (attStale) loadClass(); }
+    else if (t === 'home') loadDash();
+    else if (t === 'sum') loadSummary();
+    else if (t === 'mon') monInit();
+    else if (t === 'reg') loadPending();
+    else if (t === 'pro') { /* বাছাইয়ের পর লোড হবে */ }
+    else if (t === 'ff') ffOpen();
+    else loadAlerts();
+  }
+
+  function refreshTab() {
+    if (curTab === 'home') loadDash();
+    else if (curTab === 'att') { loadClass(); loadDash(); }
+    else if (curTab === 'sum') loadSummary();
+    else if (curTab === 'mon') monRefresh();
+    else if (curTab === 'reg') loadPending();
+    else if (curTab === 'pro') loadPromo();
+    else if (curTab === 'ff') { if (!ffLeaveOk()) return; if (ffCfg) loadFf(); else ffOpen(); }
+    else loadAlerts();
+  }
+
+  function confirmLeave() {
+    if (!dirty) return true;
+    return confirm('সংরক্ষণ না করা পরিবর্তন মুছে যাবে। চালিয়ে যাবেন?');
+  }
+
+  function onAttChange() {
+    if (!confirmLeave()) {
+      $('date').value = cur.date;
+      $('cls').value = cur.cls;
+      return;
+    }
+    loadClass();
+  }
+
+  function onPeriodChange() {
+    if (!confirmLeave()) { $('period').value = cur.period; return; }
+    dirty = false;
+    cur.period = $('period').value;
+    attStale = true;
+    refreshTab();
+  }
+
+  // ===== ১. হাজিরা নেওয়া =====
+  function loadClass() {
+    var cls = $('cls').value, date = $('date').value;
+    cur.date = date; cur.cls = cls;
+    students = []; state = {}; blocked = false; dirty = false; attStale = false; attFilter = ''; attGender = ''; attGroup = ''; attTaken = false; listOpen = false; listMode = 'edit';
+    $('q').value = '';
+    setNote('note', '');
+    renderList();
+    if (!cls || !date) return;
+    var id = ++rq.att;
+    loading(true, 'Loading student list...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if (id !== rq.att) return;
+        blocked = !!d.blocked;
+        students = blocked ? [] : sortByRoll(d.students.slice(), 'roll');
+        state = {};
+        students.forEach(function (s) { state[s.roll] = d.saved[s.roll] || cfg.defaultStatus; });
+        attTaken = Object.keys(d.saved).length > 0;
+        if (d.holiday) {
+          setNote('note', 'Holiday: ' + d.holiday + (blocked ? ' — হাজিরা নেওয়া যাবে না।' : ''), blocked);
+        } else if (Object.keys(d.saved).length) {
+          setNote('note', 'এই তারিখের হাজিরা আগে নেওয়া হয়েছে। সংশোধন করে আবার জমা দিতে পারবেন।');
+        }
+        // ব্রাউজারে সংরক্ষিত খসড়া থাকলে ফিরিয়ে আনা (পেজ রিফ্রেশে কাজ হারাবে না)
+        var dr = students.length ? loadDraft() : null, back = 0;
+        if (dr) {
+          students.forEach(function (s) {
+            if (dr[s.roll] && STATUS.indexOf(dr[s.roll]) !== -1 && dr[s.roll] !== state[s.roll]) { state[s.roll] = dr[s.roll]; back++; }
+          });
+          if (back) {
+            dirty = true; listOpen = true;
+            setNote('note', bn(back) + ' জনের অসংরক্ষিত পরিবর্তন খসড়া থেকে ফিরিয়ে আনা হয়েছে — যাচাই করে জমা দিন।');
+          } else { clearDraft(); }
+        }
+        renderList();
+        loading(false);
+      })
+      .withFailureHandler(function (e) { if (id === rq.att) fail(e); })
+      .getClassData(TOKEN, date, cls, cur.period);
+  }
+
+  function renderList() {
+    var box = $('list');
+    box.innerHTML = '';
+    rowEls = []; hdrAll = [];
+    box.classList.toggle('ro', !!(students.length && listOpen && listMode === 'view'));
+    $('tools').style.display = (students.length && listOpen) ? 'flex' : 'none';
+    $('searchCard').style.display = (students.length > 8 && listOpen) ? 'block' : 'none';
+
+    if (!students.length) {
+      if (cfg && !cfg.classes.length) {
+        box.appendChild(emptyClassesBox(cfg.session));
+      } else if ($('cls').value && !blocked) {
+        var eb = el('div', 'empty');
+        eb.appendChild(el('b', null, 'No students in this class'));
+        eb.appendChild(document.createTextNode('Students ট্যাবে এই class শিক্ষার্থী আছে কি না দেখুন।'));
+        box.appendChild(eb);
+      } else {
+        box.appendChild(el('div', 'empty', blocked ? 'Holiday on this day' : 'Select class'));
+      }
+      updateBar();
+      return;
+    }
+
+    if (!listOpen) { renderGate(box); updateBar(); return; }
+    box.appendChild(listBar());
+
+    var hdrEls = [], lastG = null;
+    var hasGroups = students.some(function (s) { return s.group; });
+    var ordered = students;
+    if (hasGroups) {
+      ordered = students.slice().sort(function (a, b) {
+        var ga = a.group || '', gb2 = b.group || '';
+        if (ga !== gb2) return ga < gb2 ? -1 : 1;
+        return 0;   // একই গ্রুপে আগের রোল-ক্রম থাকে (sort স্থিতিশীল)
+      });
+    }
+    ordered.forEach(function (s, ix) {
+      if (hasGroups && (s.group || '') !== lastG) {
+        lastG = s.group || '';
+        var cntG = students.filter(function (x) { return (x.group || '') === lastG; }).length;
+        var hd = el('div', 'grphead', (lastG ? grpText(lastG) : 'গ্রুপ নেই') + ' — ' + bn(cntG) + ' জন');
+        box.appendChild(hd); hdrEls.push({ el: hd, group: lastG });
+      }
+      var row = stg(el('div', 'row'), ix);
+      row.setAttribute('data-s', String(STATUS.indexOf(state[s.roll])));
+
+      var who = el('div', 'who');
+      who.appendChild(el('div', 'roll', s.roll));
+      var nm = el('div', 'name', s.name);
+      if (s.gender) { var gt = el('span', 'gtag g' + (s.gender === 'Girls' ? 'g' : 'b'), s.gender === 'Girls' ? 'বালিকা' : 'বালক'); nm.appendChild(gt); }
+      who.appendChild(nm);
+      row.appendChild(who);
+
+      var btns = el('div', 'btns');
+      btns.style.gridTemplateColumns = 'repeat(' + STATUS.length + ',1fr)';
+      btns.setAttribute('role', 'group');
+      btns.setAttribute('aria-label', s.name + ' — হাজিরা');
+      STATUS.forEach(function (st, k) {
+        var b = el('button', 'sb s' + k + (state[s.roll] === st ? ' on' : ''));
+        b.appendChild(el('span', 'sc', st));
+        b.appendChild(el('span', 'sl', cfg.labels[st]));
+        b.type = 'button';
+        b.setAttribute('aria-pressed', state[s.roll] === st ? 'true' : 'false');
+        b.setAttribute('aria-label', s.name + ' — ' + cfg.labels[st]);
+        b.onclick = function () {
+          state[s.roll] = st;
+          dirty = true;
+          saveDraft();
+          try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
+          row.setAttribute('data-s', String(k));
+          var all = btns.children;
+          for (var i = 0; i < all.length; i++) { all[i].classList.toggle('on', i === k); all[i].setAttribute('aria-pressed', i === k ? 'true' : 'false'); }
+          updateBar();
+        };
+        btns.appendChild(b);
+      });
+      row.appendChild(btns);
+      box.appendChild(row);
+      rowEls.push({ el: row, roll: s.roll, gender: s.gender || '', group: s.group || '', key: (s.roll + ' ' + s.name).toLowerCase() });
+    });
+    hdrEls.forEach(function (h) { hdrAll.push(h); });
+    applySearch();
+    updateBar();
+  }
+
+  // ===== হাজিরা: খসড়া, তারিখ/class বদল =====
+  function draftKey() { return 'att_draft|' + cur.date + '|' + cur.cls + '|' + cur.period; }
+  function saveDraft() { try { localStorage.setItem(draftKey(), JSON.stringify({ t: Date.now(), s: state })); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(draftKey()); } catch (e) {} }
+  function loadDraft() {
+    try {
+      var r = localStorage.getItem(draftKey());
+      if (!r) return null;
+      var o = JSON.parse(r);
+      if (!o || Date.now() - o.t > 2 * 86400000) { localStorage.removeItem(draftKey()); return null; }
+      return o.s;
+    } catch (e) { return null; }
+  }
+
+  window.addEventListener('beforeunload', function (ev) {
+    if (dirty || ffDirtyCount()) { ev.preventDefault(); ev.returnValue = ''; }
+  });
+
+  // n = -1 আগের দিন, 0 আজ, 1 পরের দিন
+  function stepDate(n) {
+    if (!cfg) return;
+    if (!confirmLeave()) return;
+    var d = n === 0 ? cfg.today : rngAddDays($('date').value || cfg.today, n);
+    $('date').value = d;
+    loadClass();
+  }
+
+  function stepClass(n) {
+    var opts = [].slice.call($('cls').options).filter(function (o) { return o.value; });
+    if (!opts.length) return;
+    var i = -1;
+    opts.forEach(function (o, k) { if (o.value === $('cls').value) i = k; });
+    var j = i + n;
+    if (j < 0 || j >= opts.length) { toast(n > 0 ? 'This is the last class' : 'This is the first class', false); return; }
+    if (!confirmLeave()) return;
+    $('cls').value = opts[j].value;
+    loadClass();
+  }
+
+  // ===== শিক্ষার্থী তালিকা: ডিফল্টে লুকানো, বোতামে দেখা যায় =====
+  function renderGate(box) {
+    var g = el('div', 'card gate');
+    var top = el('div', 'gate-top');
+    top.appendChild(el('div', 'cls-title', 'Class ' + clsPlain(cur.cls)));
+    top.appendChild(el('span', 'pchip ' + (attTaken ? 'up' : 'same'), attTaken ? '✅ Submitted' : '⏳ Attendance pending'));
+    g.appendChild(top);
+    g.appendChild(el('div', 'detail', 'Date: ' + fmtFull(cur.date) + ' · মোট ' + bn(students.length) + ' students'));
+
+    if (attTaken) {                       // জমা থাকলে সংখ্যা ও অনুপস্থিতের রোল
+      var c = {}, n = students.length;
+      STATUS.forEach(function (s) { c[s] = 0; });
+      students.forEach(function (s) { if (c[state[s.roll]] !== undefined) c[state[s.roll]]++; });
+      var here = c[STATUS[0]] + (STATUS[3] ? c[STATUS[3]] : 0);
+      var chips = el('div', 'gate-chips');
+      chips.appendChild(el('span', 'pill s0', 'Attendance ' + bn(n ? Math.round(here * 1000 / n) / 10 : 0) + '%'));
+      STATUS.forEach(function (s, k) { if (c[s]) chips.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' ' + bn(c[s]))); });
+      g.appendChild(chips);
+      var abs = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; }).map(function (s) { return s.roll; });
+      if (abs.length) g.appendChild(el('div', 'abs-line', 'অনুপস্থিত রোল: ' + abs.join(', ')));
+    }
+    g.appendChild(el('div', 'detail', attTaken
+      ? 'তালিকা দেখতে ওপরের 👁 চাপুন, সংশোধন করতে ✏️ পরিবর্তন চাপুন।'
+      : 'শিক্ষার্থী তালিকা খুলে হাজিরা নিতে ওপরের 👁 চাপুন।'));
+
+    var tm = takenMap();                  // আজকের তারিখে অন্য বাকি class থাকলে দ্রুত যাওয়ার বোতাম
+    if (tm) {
+      var left = Object.keys(tm).filter(function (k) { return tm[k] === false && k !== cur.cls; }).length;
+      if (left) {
+        var nx = el('button', 'act alt gate-next', '⏭ Next pending class (' + bn(left) + ' left)'); nx.type = 'button';
+        nx.onclick = nextPending;
+        g.appendChild(nx);
+      }
+    }
+    box.appendChild(g);
+  }
+
+  function listBar() {                    // শুধু অবস্থার লেখা; লুকানোর বোতাম নেই (👁 দিয়েই হয়)
+    return el('div', 'listbar', listMode === 'view'
+      ? '👁 শুধু দেখা হচ্ছে — সংশোধন করতে ওপরের ✏️ পরিবর্তন চাপুন'
+      : (attTaken ? '✏️ হাজিরা সংশোধন হচ্ছে' : 'হাজিরা নেওয়া হচ্ছে'));
+  }
+
+  // 👁 এক ক্লিকে দেখায়, আবার ক্লিকে লুকায়
+  function toggleView() {
+    if (!students.length || blocked) { toast('Select a class first', true); return; }
+    if (listOpen) { closeList(); return; }
+    openList(attTaken ? 'view' : 'edit');
+  }
+
+  function editMode() {
+    if (!students.length || blocked) return;
+    if (listOpen && listMode === 'edit') return;
+    openList('edit');
+  }
+
+  function syncActRow() {
+    var v = $('viewBtn'), e = $('editBtn');
+    if (!v || !e) return;
+    var has = students.length > 0 && !blocked;
+    v.disabled = !has; e.disabled = !has;
+    v.classList.toggle('on', listOpen);
+    v.setAttribute('aria-pressed', listOpen ? 'true' : 'false');
+    v.textContent = listOpen ? '👁 Hide' : '👁 Show';
+    e.style.display = attTaken ? '' : 'none';           // পরিবর্তন শুধু জমা থাকা class
+    e.classList.toggle('on', listOpen && listMode === 'edit');
+  }
+
+  function openList(mode) {
+    listOpen = true; listMode = mode || 'edit';
+    $('q').value = ''; attFilter = '';
+    renderList();
+    var bx = $('list'); if (bx && bx.scrollIntoView) { try { bx.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+  }
+
+  function closeList() {
+    if (dirty) {
+      if (!confirm('সংরক্ষণ না করা পরিবর্তন মুছে যাবে। তালিকা লুকাবেন?')) return;
+      dirty = false; clearDraft(); loadClass(); return;
+    }
+    listOpen = false; listMode = 'edit';
+    renderList();
+  }
+
+  function applySearch() {
+    var q = $('q').value.trim().toLowerCase();
+    rowEls.forEach(function (r) {
+      var okQ = !q || r.key.indexOf(q) !== -1;
+      var okF = !attFilter || state[r.roll] === attFilter;
+      var okG = !attGender || r.gender === attGender;
+      var okP = !attGroup || r.group === attGroup;
+      r.visible = okQ && okF && okG && okP;
+      r.el.style.display = r.visible ? '' : 'none';
+    });
+    hdrAll.forEach(function (h) {
+      h.el.style.display = rowEls.some(function (r) { return r.group === h.group && r.visible; }) ? '' : 'none';
+    });
+  }
+
+  function setAll(k) {
+    students.forEach(function (s) { state[s.roll] = STATUS[k]; });
+    dirty = true;
+    saveDraft();
+    var q = $('q').value;
+    renderList();
+    $('q').value = q;
+    applySearch();
+  }
+
+  function updateBar() {
+    syncActRow();
+    var sbar = $('saveBar');   // জমা বোতাম: P/A বাছাই করে কিছু বদলালে তবেই দেখা যায়
+    if (sbar) sbar.classList.toggle('show', !!(students.length && listOpen && listMode === 'edit' && dirty));
+    var meter = $('meter');
+    var hero = $('hero');
+    meter.innerHTML = '';
+    if (!students.length) {
+      hero.style.display = 'none';
+      $('fbar').style.display = 'none';
+      $('absLine').textContent = '';
+      $('sum').textContent = '—';
+      $('saveBtn').disabled = true;
+      return;
+    }
+    if (!listOpen) {          // তালিকা লুকানো — সংখ্যা গেট কার্ডেই দেখানো হয়
+      hero.style.display = 'none';
+      $('fbar').style.display = 'none';
+      $('absLine').textContent = '';
+      $('sum').textContent = '—';
+      $('saveBtn').textContent = attTaken ? '✔ Submitted' : 'Submit';
+      $('saveBtn').disabled = true;
+      return;
+    }
+    var c = {};
+    STATUS.forEach(function (s) { c[s] = 0; });
+    students.forEach(function (s) { c[state[s.roll]]++; });
+    STATUS.forEach(function (s, k) {
+      var seg = el('span', 'm' + k);
+      seg.style.width = (c[s] * 100 / students.length) + '%';
+      meter.appendChild(seg);
+    });
+
+    var here = c[STATUS[0]] + (STATUS[3] ? c[STATUS[3]] : 0);
+    var pct = Math.round(here * 100 / students.length);
+    hero.style.display = 'flex';
+    $('ring').style.setProperty('--pc', pct);
+    $('ringPct').textContent = bn(pct) + '%';
+    var hc = $('hcount');
+    hc.innerHTML = '';
+    STATUS.forEach(function (s, k) {
+      var d = el('div', 'hc s' + k);
+      d.appendChild(el('i'));
+      d.appendChild(el('b', null, bn(c[s])));
+      d.appendChild(document.createTextNode(cfg.labels[s]));
+      hc.appendChild(d);
+    });
+
+    $('sum').textContent = 'Total ' + bn(students.length) + ' জন | ' +
+      STATUS.map(function (s) { return s + ' ' + bn(c[s]); }).join(' | ') + (dirty ? ' | ● অসংরক্ষিত' : '');
+    $('saveBtn').textContent = dirty ? (attTaken ? 'Submit correction' : 'Submit') : (attTaken ? '✔ Submitted' : 'Submit');
+    $('saveBtn').disabled = (listMode === 'view');
+
+    // অনুপস্থিতদের রোল একনজরে
+    var absRolls = students.filter(function (s) { return state[s.roll] === cfg.absentStatus; })
+      .map(function (s) { return s.roll; });
+    $('absLine').textContent = absRolls.length ? 'Absent (' + bn(absRolls.length) + '): রোল ' + absRolls.join(', ') : '';
+
+    // অবস্থা অনুযায়ী ফিল্টার
+    var fb = $('fbar');
+    fb.innerHTML = '';
+    fb.style.display = 'flex';
+    function mk(label, val) {
+      var b = el('button', 'chipbtn' + (attFilter === val ? ' on' : ''), label);
+      b.type = 'button';
+      b.onclick = function () { attFilter = val; applySearch(); updateBar(); };
+      fb.appendChild(b);
+    }
+    mk('সব (' + bn(students.length) + ')', '');
+    STATUS.forEach(function (st) { if (c[st]) mk(st + ' ' + cfg.labels[st] + ' (' + bn(c[st]) + ')', st); });
+    if (attFilter && !c[attFilter]) { attFilter = ''; applySearch(); }
+    // গ্রুপ ফিল্টার (সেকশনে একাধিক গ্রুপ থাকলে)
+    var gset = []; students.forEach(function (s) { if (s.group && gset.indexOf(s.group) < 0) gset.push(s.group); });
+    gset.sort();
+    if (gset.length > 1) {
+      [['সব গ্রুপ', '']].concat(gset.map(function (g) { return [grpText(g), g]; })).forEach(function (g) {
+        var b = el('button', 'chipbtn' + (attGroup === g[1] ? ' on' : ''), g[0]);
+        b.type = 'button';
+        b.onclick = function () { attGroup = g[1]; applySearch(); updateBar(); };
+        fb.appendChild(b);
+      });
+    } else if (attGroup) { attGroup = ''; applySearch(); }
+    // বালক/বালিকা ফিল্টার (শুধু যখন তালিকায় লিঙ্গের তথ্য আছে)
+    var nb = students.filter(function (s) { return s.gender === 'Boys'; }).length,
+        ng = students.filter(function (s) { return s.gender === 'Girls'; }).length;
+    if (nb && ng) {
+      [['সব বালক-বালিকা', ''], ['বালক (' + bn(nb) + ')', 'Boys'], ['বালিকা (' + bn(ng) + ')', 'Girls']].forEach(function (g) {
+        var b = el('button', 'chipbtn' + (attGender === g[1] ? ' on' : ''), g[0]);
+        b.type = 'button';
+        b.onclick = function () { attGender = g[1]; applySearch(); updateBar(); };
+        fb.appendChild(b);
+      });
+    } else if (attGender) { attGender = ''; applySearch(); }
+    if (!listOpen) fb.style.display = 'none';
+  }
+
+  function submitAtt() {
+    if (!students.length || blocked) return;
+    if (cur.date > cfg.today && !confirm('This is a future date (' + fmtFull(cur.date) + '). Submit attendance anyway?')) return;
+
+    // জমার আগে নিশ্চিতকরণ
+    var c = {};
+    STATUS.forEach(function (s) { c[s] = 0; });
+    students.forEach(function (s) { c[state[s.roll]]++; });
+    var msg = 'Class ' + clsPlain(cur.cls) + ' — ' + fmtFull(cur.date) + '\n' +
+      'Total ' + bn(students.length) + ' জন\n' +
+      STATUS.map(function (s) { return cfg.labels[s] + ' (' + s + '): ' + bn(c[s]); }).join('\n') +
+      '\n\nSubmit attendance?';
+    if (!confirm(msg)) return;
+
+    var records = students.map(function (s) { return { roll: s.roll, status: state[s.roll] }; });
+    $('saveBtn').disabled = true;
+    loading(true, 'Submitting...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        loading(false);
+        listOpen = false; listMode = 'edit';   // জমার পর তালিকা অটো লুকানো
+        dirty = false;
+        attTaken = true;
+        clearDraft();
+        attFilter = ''; $('q').value = '';
+        renderList();
+        window.scrollTo(0, 0);
+        updateBar();
+        loadDash();
+        setNote('note', 'Attendance for this date is submitted. Resubmit after editing.');
+        var parts = STATUS.map(function (s) { return s + ' ' + bn(res.counts[s]); }).join(', ');
+        if (res.queued) {
+          setNote('note', '📴 Saved offline — will submit automatically when online.');
+          toast('📴 Saved offline — will submit automatically when online', false);
+        } else toast('Attendance submitted — ' + parts, false);
+      })
+      .withFailureHandler(fail)
+      .saveAttendance(TOKEN, cur.date, cur.cls, cur.period, records);
+  }
+
+  // ===== ২. তারিখ অনুযায়ী সারাংশ =====
+  function sumFiltered() {
+    if (!sumData) return [];
+    var b = $('sfcls').value, s = $('sfsec').value;
+    return sumData.classes.filter(function (c) {
+      var p = clsParts(c.cls);
+      return (!b || p.base === b) && (!s || p.section === s);
+    });
+  }
+
+  function onSumFilter() { if (sumData) renderSummary(sumData); }
+
+  function loadSummary() {
+    var date = $('sdate').value;
+    var box = $('sumBox');
+    box.innerHTML = '';
+    sumData = null;
+    $('sPrintBtn').disabled = true;
+    setNote('snote', '');
+    if (!date) return;
+    var id = ++rq.sum;
+    loading(true, 'Loading summary...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if (id !== rq.sum) return;
+        sortSummaryAbsent(d);
+        renderSummary(d);
+        loading(false);
+      })
+      .withFailureHandler(function (e) { if (id === rq.sum) fail(e); })
+      .getDaySummary(TOKEN, date, cur.period);
+  }
+
+  function renderSummary(d) {
+    var box = $('sumBox');
+    box.innerHTML = '';
+    sumData = d;
+    var list = sumFiltered();
+    $('sPrintBtn').disabled = !list.length;
+    setNote('snote', d.holiday ? 'Holiday: ' + d.holiday : '');
+    if (!list.length) { box.appendChild(el('div', 'empty', 'No classes')); return; }
+
+    var tot = {}, pending = 0;
+    STATUS.forEach(function (s) { tot[s] = 0; });
+    list.forEach(function (c) {
+      if (c.taken) STATUS.forEach(function (s) { tot[s] += c.counts[s]; });
+      else pending++;
+    });
+
+    var top = el('div', 'card');
+    top.appendChild(el('div', 'cls-title', 'All classes combined'));
+    var chips = el('div', 'chips');
+    STATUS.forEach(function (s, k) {
+      var ch = el('div', 'chip s' + k);
+      ch.appendChild(el('b', null, bn(tot[s])));
+      ch.appendChild(document.createTextNode(cfg.labels[s] + ' (' + s + ')'));
+      chips.appendChild(ch);
+    });
+    top.appendChild(chips);
+    if (pending) top.appendChild(el('div', 'warn', 'Attendance not taken: ' + bn(pending) + ' classes'));
+    box.appendChild(top);
+
+    list.forEach(function (c) {
+      var card = el('div', 'card');
+      card.appendChild(el('div', 'cls-title', 'Class ' + clsPlain(c.cls) + ' — Total ' + bn(c.total) + ' students'));
+      if (!c.taken) {
+        card.appendChild(el('div', 'warn', 'Attendance not taken'));
+      } else {
+        var pills = el('div');
+        STATUS.forEach(function (s, k) { pills.appendChild(el('span', 'pill s' + k, cfg.labels[s] + ' (' + s + ') ' + bn(c.counts[s]))); });
+        card.appendChild(pills);
+        if (c.absent.length) {
+          card.appendChild(el('div', 'abs', 'Absent: ' + c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')));
+        }
+      }
+      box.appendChild(card);
+    });
+  }
+
+  // ===== ৩. মাসিক তারিখভিত্তিক ছক =====
+  function loadMonth(cb) {
+    var month = $('mmonth').value, cls = $('mcls').value;
+    var box = $('monBox');
+    monData = null;
+    $('expLink').style.display = 'none';
+    setNote('mnote', '');
+    box.innerHTML = '';
+    if (!cls || !month) { if (monOpen) box.appendChild(el('div', 'empty', 'Select class and month')); monSync(); return; }
+    var id = ++rq.mon;
+    loading(true, 'রিপোর্টের তথ্য আনা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (rep) {
+        if (id !== rq.mon) return;
+        sortByRoll(rep.rows, 'roll');
+        monData = rep;
+        if (monOpen) renderMonth(rep);          // লুকানো থাকলে ছক আঁকা হয় না
+        monSync();
+        loading(false);
+        if (typeof cb === 'function') cb(rep);
+      })
+      .withFailureHandler(function (e) { if (id === rq.mon) fail(e); })
+      .getMonthReport(TOKEN, month, cls, cur.period);
+  }
+
+  // ===== রিপোর্ট ট্যাব: 👁 ছক দেখা/লুকানো, ফিচার বেছে print =====
+  function monSync() {
+    var v = $('rpViewBtn'); if (!v) return;
+    v.classList.toggle('on', monOpen);
+    v.setAttribute('aria-pressed', monOpen ? 'true' : 'false');
+    v.textContent = monOpen ? '👁 Hide' : '👁 Show';
+    $('expBtn').disabled = !($('mcls').value && $('mmonth').value);
+  }
+  function toggleMonView() {
+    if (monOpen) { monOpen = false; $('monBox').innerHTML = ''; monSync(); return; }
+    if (!$('mcls').value || !$('mmonth').value) { toast('Select month and class first', true); return; }
+    monOpen = true; monSync(); loadMonth();
+  }
+  function onMonSel() {
+    monData = null; $('monBox').innerHTML = ''; $('expLink').style.display = 'none'; setNote('mnote', '');
+    monSync();
+    if (monOpen) loadMonth();
+  }
+  function onRpFeature() {
+    var f = $('rpFeature').value, r = $('rpRange');
+    var pb = $('rpPrintBtn'); if (pb) pb.style.display = f ? '' : 'none';   // print বোতাম: আইটেম বাছাইয়ের পরেই
+    if (r) { r.style.display = f === 'range' ? '' : 'none'; if (f === 'range') r.open = true; }
+  }
+  function monInit() { monSync(); onRpFeature(); if (monOpen && !monData) loadMonth(); }
+  function monRefresh() { monData = null; if (monOpen) loadMonth(); else { $('monBox').innerHTML = ''; monSync(); } }
+  function rpPrint() {
+    var f = $('rpFeature').value;
+    if (!f) { toast('Select a print type first', true); return; }
+    if (f === 'monthly') rpMonth();
+    else if (f.indexOf('daily-') === 0) rpDaily(f.substr(6));
+    else if (f === 'summary') rpSummary();
+    else if (f === 'alerts') rpAlerts();
+    else if (f === 'range') printRange();
+  }
+
+  // মাসিক রিপোর্টের শিরোনাম ও সর্বমোট
+  function stHead(s) { return s === STATUS[0] ? 'Total present' : (s === cfg.absentStatus ? 'Total absent' : cfg.labels[s]); }
+  function monTotals(rep) {
+    var c = {}, tot = 0, pres = 0;
+    STATUS.forEach(function (s) { c[s] = 0; });
+    rep.rows.forEach(function (r) { STATUS.forEach(function (s) { c[s] += r.counts[s] || 0; }); tot += r.total; pres += r.present; });
+    return { c: c, tot: tot, avg: tot ? Math.round(pres * 1000 / tot) / 10 : 0 };
+  }
+
+  function renderMonth(rep) {
+    var box = $('monBox');
+    box.innerHTML = '';
+    if (!rep.dates.length) {
+      box.appendChild(el('div', 'empty', 'No attendance for this class this month'));
+      return;
+    }
+    var mt = monTotals(rep);          // ছকের নিচের "Grand total" সারি ও সারাংশ টাইলের জন্য
+    setNote('mnote', '');
+
+    var low = rep.rows.filter(function (r) { return r.percent !== null && r.percent < cfg.lowPercent; }).length;
+    var off = el('div', 'rp-off');
+    off.appendChild(el('div', 'rp-off-s', cfg.school || cfg.title));
+    off.appendChild(el('div', 'rp-off-t', 'Monthly Attendance Report'));
+    off.appendChild(el('div', 'rp-off-m', 'Class: ' + clsPlain(rep.cls) + '  |  Month: ' + monthLabel(rep.month) + (cfg.session ? '  |  Session: ' + bn(cfg.session) : '')));
+    var tl = el('div', 'rp-tiles');
+    [['Working days', bn(rep.dates.length), ''], ['Students', bn(rep.rows.length) + ' students', ''],
+     ['Total present', bn(mt.c[STATUS[0]]), ' good'], ['Total absent', bn(mt.c[cfg.absentStatus] || 0), (mt.c[cfg.absentStatus] ? ' bad' : '')],
+     ['Average attendance', bn(mt.avg) + '%', mt.avg < cfg.lowPercent ? ' bad' : ' good'],
+     ['Low attendance', bn(low) + ' students', low ? ' bad' : ' good']].forEach(function (x) {
+      var d = el('div', 'rp-tile' + x[2]);
+      d.appendChild(el('b', null, x[1]));
+      d.appendChild(el('span', null, x[0]));
+      tl.appendChild(d);
+    });
+    off.appendChild(tl);
+    box.appendChild(off);
+
+    var wrap = el('div', 'tw');
+    var t = el('table', 'mt');
+    var thead = el('thead');
+    var hr = el('tr');
+    hr.appendChild(el('th', 'c1', 'Roll'));
+    hr.appendChild(el('th', 'c2', 'Name'));
+    rep.dates.forEach(function (d) { hr.appendChild(el('th', null, bn(parseInt(d.substr(8, 2), 10)))); });
+    STATUS.forEach(function (s) {
+      var th = el('th', null, stHead(s));
+      th.title = cfg.labels[s];
+      hr.appendChild(th);
+    });
+    hr.appendChild(el('th', null, 'Working days'));
+    hr.appendChild(el('th', null, '%'));
+    thead.appendChild(hr);
+    t.appendChild(thead);
+
+    var tb = el('tbody');
+    rep.rows.forEach(function (r) {
+      var tr = el('tr', (r.percent !== null && r.percent < cfg.lowPercent) ? 'low' : '');
+      tr.appendChild(el('td', 'c1', r.roll));
+      tr.appendChild(el('td', 'c2', r.name));
+      rep.dates.forEach(function (d) {
+        var st = r.cells[d];
+        var k = STATUS.indexOf(st);
+        tr.appendChild(el('td', st ? 'm' + k : '', st ? st : '–'));
+      });
+      STATUS.forEach(function (s) { tr.appendChild(el('td', null, bn(r.counts[s]))); });
+      tr.appendChild(el('td', null, bn(r.total)));
+      var pcTd = el('td', 'pc', r.percent === null ? '–' : bn(r.percent) + '%');
+      if (r.percent !== null) pcTd.style.setProperty('--w', Math.max(0, Math.min(100, r.percent)) + '%');
+      tr.appendChild(pcTd);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    var tf = el('tfoot'), fr = el('tr', 'ft'), fc = el('td', 'c1', 'Grand total');
+    fc.colSpan = 2 + rep.dates.length; fc.style.textAlign = 'left'; fr.appendChild(fc);
+    STATUS.forEach(function (s) { fr.appendChild(el('td', null, bn(mt.c[s]))); });
+    fr.appendChild(el('td', null, bn(rep.dates.length)));
+    fr.appendChild(el('td', null, bn(mt.avg) + '%'));
+    tf.appendChild(fr); t.appendChild(tf);
+    wrap.appendChild(t);
+    box.appendChild(wrap);
+    box.appendChild(el('div', 'legend', STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(' · ')));
+  }
+
+  function exportReport() {
+    if (!monData) {
+      loadMonth(function () { if (monData && monData.dates.length) exportReport(); else toast('No attendance for this class this month', true); });
+      return;
+    }
+    $('expBtn').disabled = true;
+    loading(true, 'Sheet-এ লেখা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        loading(false);
+        $('expBtn').disabled = false;
+        var a = $('expLink');
+        a.href = res.url;
+        a.style.display = 'inline-block';
+        toast('"' + res.sheet + '" Sheet-এ রিপোর্ট তৈরি হয়েছে', false);
+      })
+      .withFailureHandler(function (e) { $('expBtn').disabled = false; fail(e); })
+      .exportReportToSheet(TOKEN, monData.month, monData.cls, monData.period);
+  }
+
+  // ===== print (A4) =====
+  var MONTHS_BN = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+
+  function monthLabel(m) {
+    return MONTHS_BN[parseInt(m.substr(5, 2), 10) - 1] + ' ' + bnD(m.substr(0, 4));
+  }
+
+  function fmtFull(d) {
+    return bn(d.substr(8, 2) + '/' + d.substr(5, 2) + '/' + d.substr(0, 4));
+  }
+
+  // "2026-10-17" → "১৭ অক্টোবর ২০২৬, শনিবার"
+  var DAYS_BN = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  function fmtLong(d) {
+    var y = parseInt(d.substr(0, 4), 10), m = parseInt(d.substr(5, 2), 10), day = parseInt(d.substr(8, 2), 10);
+    var wd = new Date(Date.UTC(y, m - 1, day)).getUTCDay();
+    return bnD(day) + ' ' + MONTHS_BN[m - 1] + ' ' + bnD(y) + ', ' + DAYS_BN[wd];
+  }
+
+  function periodLine(p) {
+    return cfg.periods.length > 1 ? 'পিরিয়ড: ' + p : '';
+  }
+
+  function prHead(title, lines) {
+    var h = el('div', 'pr-head');
+    h.appendChild(el('div', 'pr-school', cfg.school || cfg.title));
+    h.appendChild(el('div', 'pr-title', title));
+    lines.forEach(function (t) { if (t) h.appendChild(el('div', 'pr-meta', t)); });
+    return h;
+  }
+
+  function prSign() {
+    var w = el('div');
+    var s = el('div', 'pr-sign');
+    [['Prepared by', cfg.teacher || ''], ['Class teacher', ''], ['Head teacher', '']].forEach(function (x) {
+      var d = el('div', null, x[0]);
+      if (x[1]) d.appendChild(el('small', null, x[1]));
+      s.appendChild(d);
+    });
+    w.appendChild(s);
+    w.appendChild(el('div', 'pr-foot', (cfg.school || cfg.title || '') + (cfg.session ? '  ·  Session ' + bn(cfg.session) : '') + '  ·  Print date: ' + fmtFull(cfg.today)));
+    return w;
+  }
+
+  function prRow(cells) {
+    var tr = el('tr');
+    cells.forEach(function (c) { tr.appendChild(c); });
+    return tr;
+  }
+
+  function doPrint(landscape) {
+    $('pageStyle').textContent = '@page { size: A4 ' + (landscape ? 'landscape' : 'portrait') + '; margin: ' + (landscape ? '8mm' : '10mm') + '; }';
+    // @page ও ফন্ট প্রস্তুত হওয়ার পরে print ডায়ালগ খোলে (সরাসরি print() দিলে আগের সেটাপ থেকে যেতে পারে)
+    var go = function () { setTimeout(function () { window.print(); }, 150); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
+  }
+
+  // মাসিক/রেঞ্জ টেবিলের class: কলাম বেশি হলে ছোট ফন্ট
+  function attCls(n) { return 'pt att' + (n > 40 ? ' dense xdense' : n > 20 ? ' dense' : ''); }
+
+  // --- দৈনিক হাজিরা print (এক classes) ---
+  // mode: 'P' = শুধু উপস্থিত, 'A' = শুধু অনুপস্থিত, 'all' = সবার অবস্থাসহ, 'blank' = অবস্থা ঘর খালি
+  function printAttendance(mode) {
+    if (!students.length || blocked) { toast('No student list to print', true); return; }
+    mode = (mode === true) ? 'blank' : (mode === false || !mode) ? 'all' : mode;
+
+    var onlyCode = (mode === 'P') ? STATUS[0] : (mode === 'A') ? cfg.absentStatus : '';
+    var list = onlyCode
+      ? students.filter(function (s) { return state[s.roll] === onlyCode; })
+      : students;
+
+    if (onlyCode && !list.length) {
+      toast(cfg.labels[onlyCode] + ' তালিকায় None', true);
+      return;
+    }
+
+    var c = {};
+    STATUS.forEach(function (s) { c[s] = 0; });
+    students.forEach(function (s) { c[state[s.roll]]++; });
+
+    var title = mode === 'P' ? 'উপস্থিত শিক্ষার্থীর তালিকা'
+              : mode === 'A' ? 'অনুপস্থিত শিক্ষার্থীর তালিকা'
+              : mode === 'blank' ? 'হাজিরা তালিকা (খালি)'
+              : 'Daily Attendance List';
+
+    var info = '';
+    if (onlyCode) {
+      info = cfg.labels[onlyCode] + ': ' + bn(list.length) + ' students (class total ' + bn(students.length) + ' students)';
+    } else if (mode === 'all') {
+      info = 'Total: ' + bn(students.length) + ' students   |   ' +
+        STATUS.map(function (s) { return cfg.labels[s] + ' ' + bn(c[s]); }).join('   |   ');
+    }
+
+    var pa = $('printArea');
+    pa.innerHTML = '';
+    pa.appendChild(prHead(title, [
+      'Class: ' + clsPlain(cur.cls) + '   |   Date: ' + fmtFull(cur.date),
+      periodLine(cur.period),
+      info
+    ]));
+
+    var t = el('table', 'pt');
+    var thead = el('thead');
+    var hc = [el('th', null, 'No.'), el('th', null, 'Roll'), el('th', null, 'Name')];
+    if (onlyCode === 'A') hc.push(el('th', null, 'Mobile'));
+    if (!onlyCode) hc.push(el('th', null, mode === 'blank' ? 'Attendance' : 'Status'));
+    hc.push(el('th', null, onlyCode === 'A' ? 'Reason / remarks' : 'Remarks'));
+    thead.appendChild(prRow(hc));
+    t.appendChild(thead);
+
+    var tb = el('tbody');
+    list.forEach(function (s, i) {
+      var cells = [el('td', null, bn(i + 1)), el('td', null, s.roll), el('td', 'l', s.name)];
+      if (onlyCode === 'A') cells.push(el('td', null, s.phone || '—'));
+      if (!onlyCode) {
+        var st = state[s.roll];
+        cells.push(mode === 'blank'
+          ? el('td', 'bx', '')
+          : el('td', st === cfg.absentStatus ? 'ab' : '', st + ' (' + cfg.labels[st] + ')'));
+      }
+      cells.push(el('td', 'bx', ''));
+      tb.appendChild(prRow(cells));
+    });
+    t.appendChild(tb);
+    pa.appendChild(t);
+
+    pa.appendChild(el('div', 'pr-note',
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ')));
+    pa.appendChild(prSign());
+    doPrint(false);
+  }
+
+  // --- সারাংশ print: By class গ্রুপ, শাখা/class ফিল্টার মানা হয় ---
+  function printSummary() {
+    var list = sumFiltered();
+    if (!sumData || !list.length) return;
+    var d = sumData;
+
+    var fb = $('sfcls').value, fs = $('sfsec').value;
+    var filt = (fb || fs)
+      ? 'বাছাই: ' + (fb ? 'Class ' + bn(fb) : 'All classes') + (fs ? ', ' + secText(fs) : '')
+      : '';
+
+    var pa = $('printArea');
+    pa.innerHTML = '';
+    pa.appendChild(prHead('Daily attendance summary (by class & section)', [
+      'Date: ' + fmtFull(d.date) + (d.holiday ? ' (ছুটির দিন: ' + d.holiday + ')' : ''),
+      periodLine(cur.period),
+      filt,
+      'Print date: ' + fmtFull(cfg.today)
+    ]));
+
+    // By class গ্রুপ
+    var groups = [], idx = {};
+    list.forEach(function (c) {
+      var b = clsParts(c.cls).base;
+      if (idx[b] === undefined) { idx[b] = groups.length; groups.push({ base: b, items: [] }); }
+      groups[idx[b]].items.push(c);
+    });
+
+    var t = el('table', 'pt');
+    var thead = el('thead');
+    var hc = [el('th', null, 'Class'), el('th', null, 'Section / division'), el('th', null, 'Total')];
+    STATUS.forEach(function (s) { hc.push(el('th', null, cfg.labels[s] + ' (' + s + ')')); });
+    hc.push(el('th', null, 'অনুপস্থিতের তালিকা'));
+    thead.appendChild(prRow(hc));
+    t.appendChild(thead);
+
+    var tb = el('tbody');
+    var gStu = 0, gTot = {};
+    STATUS.forEach(function (s) { gTot[s] = 0; });
+
+    groups.forEach(function (g) {
+      var sStu = 0, sTot = {};
+      STATUS.forEach(function (s) { sTot[s] = 0; });
+
+      g.items.forEach(function (c) {
+        var p = clsParts(c.cls);
+        var sub = [p.section ? secText(p.section) : '', p.group ? grpText(p.group) : ''].filter(Boolean).join(', ') || '—';
+        sStu += c.total;
+        var cells = [el('td', null, bn(g.base)), el('td', 'l', sub), el('td', null, bn(c.total))];
+        STATUS.forEach(function (s) {
+          if (c.taken) sTot[s] += c.counts[s];
+          cells.push(el('td', null, c.taken ? bn(c.counts[s]) : '–'));
+        });
+        cells.push(el('td', 'l', c.taken
+          ? c.absent.map(function (a) { return a.roll + '. ' + a.name + (a.phone ? ' (' + a.phone + ')' : ''); }).join(', ')
+          : 'Attendance not taken'));
+        tb.appendChild(prRow(cells));
+      });
+
+      if (g.items.length > 1) {               // একাধিক শাখা থাকলে class উপমোট
+        var sc = [el('td', null, 'Class ' + bn(g.base) + ' মোট'), el('td', null, ''), el('td', null, bn(sStu))];
+        STATUS.forEach(function (s) { sc.push(el('td', null, bn(sTot[s]))); });
+        sc.push(el('td', null, ''));
+        var r = prRow(sc); r.className = 'tot'; tb.appendChild(r);
+      }
+      gStu += sStu;
+      STATUS.forEach(function (s) { gTot[s] += sTot[s]; });
+    });
+
+    if (groups.length > 1 || (groups.length === 1 && groups[0].items.length === 1)) {
+      var tc = [el('td', null, 'Grand total'), el('td', null, ''), el('td', null, bn(gStu))];
+      STATUS.forEach(function (s) { tc.push(el('td', null, bn(gTot[s]))); });
+      tc.push(el('td', null, ''));
+      var tr = prRow(tc); tr.className = 'tot'; tb.appendChild(tr);
+    }
+
+    t.appendChild(tb);
+    pa.appendChild(t);
+    pa.appendChild(prSign());
+    doPrint(false);
+  }
+
+  function printMonth() {
+    if (!monData || !monData.dates.length) return;
+    var rep = monData;
+    var pa = $('printArea');
+    pa.innerHTML = '';
+
+    var tp = 0, tt = 0;
+    rep.rows.forEach(function (r) { tp += r.present; tt += r.total; });
+    var avg = tt ? Math.round(tp * 1000 / tt) / 10 : 0;
+
+    pa.appendChild(prHead('Monthly Attendance Report', [
+      'Class: ' + clsPlain(rep.cls) + '   |   Month: ' + monthLabel(rep.month),
+      periodLine(rep.period),
+      'Working days: ' + bn(rep.dates.length) + ' days   |   Students: ' + bn(rep.rows.length) + ' জন   |   Total present: ' + bn(monTotals(rep).c[STATUS[0]]) +
+        '   |   Total absent: ' + bn(monTotals(rep).c[cfg.absentStatus] || 0) + '   |   Average attendance: ' + bn(avg) + '%'
+    ]));
+
+    var t = el('table', attCls(rep.dates.length));
+    var thead = el('thead');
+    var hc = [el('th', null, 'Roll'), el('th', null, 'Name')];
+    rep.dates.forEach(function (d) { hc.push(el('th', null, bn(parseInt(d.substr(8, 2), 10)))); });
+    STATUS.forEach(function (s) { hc.push(el('th', null, stHead(s))); });
+    hc.push(el('th', null, 'Working days'));
+    hc.push(el('th', null, '%'));
+    thead.appendChild(prRow(hc));
+    t.appendChild(thead);
+
+    var tb = el('tbody');
+    rep.rows.forEach(function (r) {
+      var low = r.percent !== null && r.percent < cfg.lowPercent;
+      var cells = [el('td', null, r.roll), el('td', 'l', r.name)];
+      rep.dates.forEach(function (d) {
+        var st = r.cells[d];
+        cells.push(el('td', st === cfg.absentStatus ? 'ab' : '', st ? st : '–'));
+      });
+      STATUS.forEach(function (s) { cells.push(el('td', null, bn(r.counts[s]))); });
+      cells.push(el('td', null, bn(r.total)));
+      cells.push(el('td', low ? 'ab' : '', r.percent === null ? '–' : bn(r.percent) + (low ? '*' : '')));
+      tb.appendChild(prRow(cells));
+    });
+    var mtp = monTotals(rep);
+    var ft = [el('td', 'l', 'Grand total')]; ft[0].colSpan = 2 + rep.dates.length;
+    STATUS.forEach(function (s) { ft.push(el('td', null, bn(mtp.c[s]))); });
+    ft.push(el('td', null, bn(rep.dates.length)));
+    ft.push(el('td', null, bn(mtp.avg)));
+    var ftr = prRow(ft); ftr.style.fontWeight = '700'; tb.appendChild(ftr);
+    t.appendChild(tb);
+    pa.appendChild(t);
+
+    pa.appendChild(el('div', 'pr-note',
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
+      '   |   * চিহ্নিত = Attendance ' + bn(cfg.lowPercent) + '%-এর কম'));
+    pa.appendChild(prSign());
+    doPrint(true);
+  }
+
+  // ===== তারিখ রেঞ্জ অনুযায়ী print (দৈনিক / সাপ্তাহিক / পাক্ষিক / মাসিক / কাস্টম) =====
+  function rngAddDays(iso, n) {
+    var d = new Date(iso + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().substr(0, 10);
+  }
+  function rngDiff(a, b) {
+    return Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400000);
+  }
+  function rngLastDay(iso) {
+    return new Date(Date.UTC(+iso.substr(0, 4), +iso.substr(5, 2), 0)).toISOString().substr(0, 10);
+  }
+  function rngMonths(from, to) {
+    var out = [], y = +from.substr(0, 4), m = +from.substr(5, 2), ey = +to.substr(0, 4), em = +to.substr(5, 2);
+    while (y < ey || (y === ey && m <= em)) {
+      out.push(y + '-' + (m < 10 ? '0' : '') + m);
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    return out;
+  }
+
+  function rngCalc() {
+    var type = $('rtype').value, from = $('rfrom').value, to = '';
+    if (!from) return null;
+    if (type === 'daily') to = from;
+    else if (type === 'weekly') to = rngAddDays(from, 6);
+    else if (type === 'fortnight') to = rngAddDays(from, 14);
+    else if (type === 'monthly') { from = from.substr(0, 8) + '01'; to = rngLastDay(from); }
+    else to = $('rto').value;
+    if (!to) return null;
+    return { type: type, from: from, to: to };
+  }
+
+  function rngNote() {
+    $('rtoBox').style.display = $('rtype').value === 'custom' ? '' : 'none';
+    var r = rngCalc();
+    if (!r) { setNote('rrnote', ''); return; }
+    if (r.to < r.from) { setNote('rrnote', 'End date cannot be before start date.', true); return; }
+    var n = rngDiff(r.from, r.to) + 1;
+    if (n > 62) { setNote('rrnote', 'Maximum range is 62 days।', true); return; }
+    setNote('rrnote', 'রেঞ্জ: ' + fmtFull(r.from) + ' থেকে ' + fmtFull(r.to) + ' (' + bn(n) + ' দিন)');
+  }
+
+  function printRange() {
+    var cls = $('mcls').value;
+    if (!cls) { toast('আগে উপরে Select class', true); return; }
+    var r = rngCalc();
+    if (!r || r.to < r.from) { toast('Fix the date', true); return; }
+    var n = rngDiff(r.from, r.to) + 1;
+    if (n > 62) { toast('Maximum range is 62 days', true); return; }
+
+    // খালি সিট: রেঞ্জের সব দিনের কলাম, ঘর ফাঁকা (ছুটির দিনেও কাজ করে)
+    if ($('rkind').value === 'blank') {
+      loading(true, 'Loading student list...');
+      google.script.run
+        .withSuccessHandler(function (list) {
+          loading(false);
+          if (!list || !list.length) { toast('No student list found for this class', true); return; }
+          var dates = [];
+          for (var i = 0; i < n; i++) dates.push(rngAddDays(r.from, i));
+          var rows = sortByRoll(list.map(function (s) { return { roll: s.roll, name: s.name, cells: {} }; }), 'roll');
+          rngRender(cls, r, dates, rows, true);
+        })
+        .withFailureHandler(fail)
+        .getClassStudents(TOKEN, cls);
+      return;
+    }
+
+    // রিপোর্ট: প্রতি মাসের তথ্য এনে রেঞ্জে কেটে জোড়া লাগানো
+    var months = rngMonths(r.from, r.to), map = {}, order = [], dset = {}, idx = 0;
+    loading(true, 'Fetching attendance data...');
+
+    function finish() {
+      loading(false);
+      var dates = Object.keys(dset).sort();
+      if (!dates.length) { toast('No attendance taken in this range', true); return; }
+      rngRender(cls, r, dates, sortByRoll(order.map(function (k) { return map[k]; }), 'roll'), false);
+    }
+
+    function next() {
+      if (idx >= months.length) { finish(); return; }
+      var m = months[idx++];
+      google.script.run
+        .withSuccessHandler(function (rep) {
+          rep.dates.forEach(function (d) { if (d >= r.from && d <= r.to) dset[d] = 1; });
+          rep.rows.forEach(function (x) {
+            if (!map[x.roll]) { map[x.roll] = { roll: x.roll, name: x.name, cells: {} }; order.push(x.roll); }
+            for (var d in x.cells) {
+              if (d >= r.from && d <= r.to && x.cells[d]) map[x.roll].cells[d] = x.cells[d];
+            }
+          });
+          next();
+        })
+        .withFailureHandler(fail)
+        .getMonthReport(TOKEN, m, cls, cur.period);
+    }
+    next();
+  }
+
+  function rngRender(cls, r, dates, rows, blank) {
+    var multi = r.from.substr(0, 7) !== r.to.substr(0, 7);
+
+    // প্রতি শিক্ষার্থীর হিসাব (উপস্থিত = P, মোট = হাজিরা নেওয়া দিন — Code.gs-এর মাসিক নিয়মের মতোই)
+    rows.forEach(function (x) {
+      var c = {}, tot = 0;
+      STATUS.forEach(function (s) { c[s] = 0; });
+      dates.forEach(function (d) {
+        var st = x.cells[d];
+        if (st && c[st] !== undefined) { c[st]++; tot++; }
+      });
+      x.counts = c; x.total = tot;
+      x.present = c[STATUS[0]] + (STATUS[3] ? c[STATUS[3]] : 0);
+      x.percent = tot ? Math.round(x.present * 1000 / tot) / 10 : null;
+    });
+
+    var T = { daily: 'Daily attendance sheet', weekly: 'Weekly attendance sheet', fortnight: 'Fortnightly attendance sheet',
+              monthly: 'Monthly attendance sheet', custom: 'হাজিরা সিট (তারিখ অনুযায়ী)' };
+    var title = T[r.type] + (blank ? ' (খালি)' : '');
+
+    var pa = $('printArea');
+    pa.innerHTML = '';
+    pa.appendChild(prHead(title, [
+      'Class: ' + clsPlain(cls) + '   |   ' + (r.from === r.to ? 'Date: ' + fmtFull(r.from) : 'Date: ' + fmtFull(r.from) + ' থেকে ' + fmtFull(r.to)),
+      periodLine(cur.period),
+      blank ? 'Students: ' + bn(rows.length) + ' students' : 'হাজিরা নেওয়া হয়েছে: ' + bn(dates.length) + ' days   |   Students: ' + bn(rows.length) + ' students'
+    ]));
+
+    var t = el('table', attCls(dates.length));
+    var thead = el('thead');
+    var hc = [el('th', null, 'Roll'), el('th', null, 'Name')];
+    dates.forEach(function (d) {
+      hc.push(el('th', multi ? 'dt' : null, multi ? fmtDM(d) : bn(parseInt(d.substr(8, 2), 10))));
+    });
+    if (!blank) {
+      STATUS.forEach(function (s) { hc.push(el('th', null, s)); });
+      hc.push(el('th', null, 'Total days'));
+      hc.push(el('th', null, '%'));
+    }
+    thead.appendChild(prRow(hc));
+    t.appendChild(thead);
+
+    var tb = el('tbody');
+    rows.forEach(function (x) {
+      var cells = [el('td', null, x.roll), el('td', 'l', x.name)];
+      dates.forEach(function (d) {
+        if (blank) { cells.push(el('td', 'bx', '')); return; }
+        var st = x.cells[d];
+        cells.push(el('td', st === cfg.absentStatus ? 'ab' : '', st ? st : '–'));
+      });
+      if (!blank) {
+        var low = x.percent !== null && x.percent < cfg.lowPercent;
+        STATUS.forEach(function (s) { cells.push(el('td', null, bn(x.counts[s]))); });
+        cells.push(el('td', null, bn(x.total)));
+        cells.push(el('td', low ? 'ab' : '', x.percent === null ? '–' : bn(x.percent) + (low ? '*' : '')));
+      }
+      tb.appendChild(prRow(cells));
+    });
+    t.appendChild(tb);
+    pa.appendChild(t);
+
+    pa.appendChild(el('div', 'pr-note',
+      'Hint: ' + STATUS.map(function (s) { return s + ' = ' + cfg.labels[s]; }).join(', ') +
+      (blank ? '' : '   |   * চিহ্নিত = Attendance ' + bn(cfg.lowPercent) + '%-এর কম')));
+    pa.appendChild(prSign());
+    doPrint(dates.length > 8);
+  }
+
+
+  // ===== ৬. প্রোমোশন (শুধু অ্যাডমিন) =====
+  var proData = null, proState = {}, proSel = {}, proInp = {};
+
+  function proInit(d) {
+    var hasCls = !!(d.classes && d.classes.length);        // Class teacherও নিজের class প্রোমোশন দিতে পারবেন
+    $('proTab').style.display = hasCls ? '' : 'none';
+    $('proChip').style.display = hasCls ? '' : 'none';
+    $('arCard').style.display = d.isAdmin ? '' : 'none';  // আর্কাইভ শুধু অ্যাডমিন
+    var secs = [], grps = [];
+    (d.classMeta || []).forEach(function (m) {
+      if (m.section && secs.indexOf(m.section) === -1) secs.push(m.section);
+      if (m.group && grps.indexOf(m.group) === -1) grps.push(m.group);
+    });
+    // শাখা ড্রপডাউন: ছাত্র/ছাত্রী (Boys/Girls) + Students ট্যাবে থাকা অন্য শাখা (A, B...)
+    var allSec = ['Boys', 'Girls'];
+    secs.forEach(function (x) { if (allSec.indexOf(x) === -1) allSec.push(x); });
+    var ss = $('proSec');
+    ss.innerHTML = '<option value="">-- No section --</option>';
+    allSec.forEach(function (x) {
+      var o = document.createElement('option');
+      o.value = x; o.textContent = secText(x);
+      ss.appendChild(o);
+    });
+    // গ্রুপ ড্রপডাউন: পরিচিত তিন গ্রুপ + Students ট্যাবে থাকা অন্য গ্রুপ
+    var all = Object.keys(GRP_BN);
+    grps.forEach(function (g) { if (all.indexOf(g) === -1) all.push(g); });
+    var gs = $('proGrp');
+    gs.innerHTML = '<option value="">-- No group --</option>';
+    all.forEach(function (g) {
+      var o = document.createElement('option');
+      o.value = g; o.textContent = grpText(g);
+      gs.appendChild(o);
+    });
+    $('arLabel').value = d.session || '';
+    $('proSes').oninput = proPreview;
+    $('proSec').onchange = proPreview;
+    $('proGrp').onchange = proPreview;
+  }
+
+  // ড্রপডাউনে মান না থাকলে যোগ করে বাছাই করা
+  function proSetGrp(v) {
+    var gs = $('proGrp');
+    if (v) {
+      var has = false;
+      for (var i = 0; i < gs.options.length; i++) if (gs.options[i].value === v) has = true;
+      if (!has) {
+        var o = document.createElement('option');
+        o.value = v; o.textContent = grpText(v);
+        gs.appendChild(o);
+      }
+    }
+    gs.value = v || '';
+  }
+
+  function proSetSec(v) {
+    var ss = $('proSec');
+    if (v) {
+      var has = false;
+      for (var i = 0; i < ss.options.length; i++) if (ss.options[i].value === v) has = true;
+      if (!has) {
+        var o = document.createElement('option');
+        o.value = v; o.textContent = secText(v);
+        ss.appendChild(o);
+      }
+    }
+    ss.value = v || '';
+  }
+
+  function loadPromo() {
+    var cls = $('proCls').value;
+    proData = null; proState = {}; proSel = {}; proInp = {};
+    $('proBox').innerHTML = '';
+    $('proBtn').disabled = true;
+    $('proOpt').style.display = 'none';
+    $('proFT').style.display = 'none';
+    $('proBar').style.display = 'none';
+    setNote('pnote', '');
+    if (!cls) return;
+    loading(true, 'শিক্ষার্থী ও হাজিরা তথ্য আনা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (d) { loading(false); renderPromo(d); })
+      .withFailureHandler(fail)
+      .getPromotionPreview(TOKEN, cls);
+  }
+
+  function renderPromo(d) {
+    sortByRoll(d.students, 'roll');
+    proData = d;
+    var box = $('proBox');
+    box.innerHTML = '';
+    if (!d.students.length) { box.appendChild(el('div', 'empty', 'No students in this class')); return; }
+
+    var canUp = d.base !== d.lastClass;
+    var nb = parseInt(d.base, 10) + 1;
+    var p = clsParts(d.cls);
+    var ses = /^\d+$/.test(String(cfg.session || '')) ? String(parseInt(cfg.session, 10) + 1) : '';
+    $('proSes').value = ses;
+    var from8 = parseInt(d.base, 10) === 8;          // ৮→৯ এ শাখা/গ্রুপ নতুন করে বাছাই
+    proSetSec(from8 ? '' : p.section);
+    proSetGrp(from8 ? '' : p.group);
+    $('proOpt').style.display = 'block';
+    $('proFT').style.display = 'flex';
+    $('proBar').style.display = 'block';
+    $('proAllUp').style.display = canUp ? '' : 'none';
+    setNote('pnote', canUp
+      ? 'Class ' + bn(d.base) + ' → Class ' + bn(nb) + ' | টিক দেওয়া শিক্ষার্থীরাই প্রোমোশন পাবে'
+      : 'This is the highest class (' + bn(d.base) + '). There is no next class — ticked failed students go to "একই class" of the new session.');
+
+    var h3 = el('div', 'pro-step');
+    h3.innerHTML = '<i>৩</i><div><b>শিক্ষার্থী ও নতুন রোল</b><small>টিক দেওয়াদের প্রোমোশন হবে</small></div>';
+    box.appendChild(h3);
+
+    // সব বাছাই বার
+    var bar = el('div', 'card reg-bulk');
+    var top = el('div', 'reg-bk-top');
+    var all = document.createElement('input');
+    all.type = 'checkbox'; all.id = 'proAll'; all.className = 'reg-cb';
+    all.setAttribute('aria-label', 'Select everyone');
+    all.onchange = function () { proToggleAll(all.checked); };
+    top.appendChild(all);
+    top.appendChild(el('b', null, 'Select all'));
+    var cnt = el('span', null, ''); cnt.id = 'proCnt';
+    top.appendChild(cnt);
+    bar.appendChild(top);
+    box.appendChild(bar);
+
+    d.students.forEach(function (s, idx) {
+      var st = proState[s.roll] = { on: canUp, action: canUp ? 'up' : 'same', newRoll: '' };
+      var row = stg(el('div', 'row pro'), idx);
+      var segBtns = {};
+
+      function paint() {
+        row.setAttribute('data-a', st.on ? st.action : 'off');
+        row.style.opacity = st.on ? '' : '.6';
+      }
+      function setAct(a) {
+        st.action = a;
+        for (var k in segBtns) { segBtns[k].classList.toggle('on', k === a); segBtns[k].setAttribute('aria-pressed', k === a ? 'true' : 'false'); }
+        paint();
+      }
+      function setOn(on) { st.on = on; cb.checked = on; paint(); }
+
+      // টিক | পূর্ব রোল (স্থির) | নাম + হাজিরা | → | নতুন রোল
+      var main = el('div', 'pro-main');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'reg-cb'; cb.checked = st.on;
+      cb.setAttribute('aria-label', s.name + ' — প্রোমোশনের জন্য বাছাই');
+      cb.onchange = function () { st.on = cb.checked; paint(); proUpdateCnt(); };
+      main.appendChild(cb);
+
+      var old = el('div', 'pro-old');
+      old.appendChild(el('small', null, 'পূর্ব রোল'));
+      old.appendChild(el('div', 'roll', s.roll));
+      main.appendChild(old);
+
+      var nm = el('div', 'pro-nm');
+      nm.appendChild(el('div', 'name', s.name));
+      var att = el('div', 'pro-att');
+      if (s.days) {
+        var tr = el('div', 'pro-track');
+        var fl = el('i'); fl.style.width = Math.max(0, Math.min(100, s.percent)) + '%';
+        if (s.percent < cfg.lowPercent) fl.className = 'low';
+        tr.appendChild(fl);
+        att.appendChild(tr);
+        att.appendChild(el('span', null, 'হাজিরা ' + bn(s.percent) + '%'));
+      } else {
+        att.appendChild(el('span', null, 'No attendance data'));
+      }
+      nm.appendChild(att);
+      main.appendChild(nm);
+
+      main.appendChild(el('div', 'pro-arrow', '→'));
+
+      var nw = el('div', 'pro-new');
+      nw.appendChild(el('small', null, 'New roll'));
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.value = ''; inp.autocomplete = 'off';
+      inp.placeholder = '—';
+      inp.setAttribute('inputmode', 'numeric');
+      inp.setAttribute('enterkeyhint', 'next');
+      inp.setAttribute('aria-label', 'নতুন রোল — ' + s.name);
+      inp.oninput = function () { st.newRoll = inp.value; proCheckDup(); proPreview(); };
+      inp.onkeydown = function (ev) {                 // Enter চাপলে পরের জনের ঘরে যাবে
+        if (ev.key !== 'Enter') return;
+        ev.preventDefault();
+        var nx = d.students[idx + 1];
+        if (nx) { proInp[nx.roll].focus(); proInp[nx.roll].select(); }
+      };
+      nw.appendChild(inp);
+      main.appendChild(nw);
+      row.appendChild(main);
+
+      // প্রোমোশনের ধরন: দুই-ভাগের বোতাম
+      var seg = el('div', 'seg' + (canUp ? '' : ' one'));
+      var acts = canUp
+        ? [['up', '⬆️ Next class'], ['same', '🔁 Same class']]
+        : [['same', '🔁 Same class (failed)']];
+      acts.forEach(function (a) {
+        var b = el('button', a[0], a[1]);
+        b.type = 'button';
+        b.onclick = function () { setAct(a[0]); proUpdateCnt(); };
+        seg.appendChild(b);
+        segBtns[a[0]] = b;
+      });
+      row.appendChild(seg);
+
+      proSel[s.roll] = { row: row, cb: cb, setAct: setAct, setOn: setOn };
+      proInp[s.roll] = inp;
+      setAct(st.action);
+      box.appendChild(row);
+    });
+    proUpdateCnt();
+  }
+
+  function proLabel(base, sec, grp) {
+    var p = (String(base) === '9' || String(base) === '10') ? [base, sec] : [base, sec, grp];
+    while (p.length > 1 && !p[p.length - 1]) p.pop();
+    return p.join(' | ');
+  }
+
+  // একই ধরনে একই নতুন রোল দুইবার বা ফাঁকা থাকলে ঘর লাল; সংখ্যা ফেরত
+  function proCheckDup() {
+    if (!proData) return 0;
+    var cnt = {}, bad = 0;
+    function val(st) { return edBn2en(st.newRoll || '').trim(); }
+    proData.students.forEach(function (s) {
+      var st = proState[s.roll], v = val(st);
+      if (st.on && v) { var k = st.action + '|' + v; cnt[k] = (cnt[k] || 0) + 1; }
+    });
+    proData.students.forEach(function (s) {
+      var st = proState[s.roll], v = val(st);
+      var isBad = st.on && v && cnt[st.action + '|' + v] > 1;
+      proInp[s.roll].classList.toggle('dup', isBad);
+      if (isBad) bad++;
+    });
+    return bad;
+  }
+
+  // নতুন class ও sessionের লাইভ প্রিভিউ (উপরের ব্যানার, চিপ ও নিচের বার)
+  function proPreview() {
+    var box = $('proPrev'), ft = $('proFT');
+    box.innerHTML = '';
+    if (!proData) { ft.innerHTML = ''; return; }
+    var d = proData, ses = $('proSes').value.trim(), sec = $('proSec').value, grp = $('proGrp').value;
+    var canUp = d.base !== d.lastClass;
+    var n = { up: 0, same: 0, out: 0 }, empty = 0;
+    d.students.forEach(function (s) {
+      var st = proState[s.roll];
+      if (st.on) { n[st.action]++; if (!edBn2en(st.newRoll || '').trim()) empty++; } else n.out++;
+    });
+    function esc(t) { return String(t).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+
+    var toLbl = canUp ? proLabel(String(parseInt(d.base, 10) + 1), sec, grp) : d.cls;
+    ft.innerHTML =
+      '<div class="pf-box"><small>Current</small><b>Class ' + esc(clsPlain(d.cls)) + '</b><span>Session ' + esc(bn(cfg.session || '—')) + '</span></div>' +
+      '<div class="pf-arrow">➜</div>' +
+      '<div class="pf-box to"><small>New</small><b>Class ' + esc(clsPlain(toLbl)) + '</b><span>Session ' + esc(ses ? bn(ses) : '—') + '</span></div>';
+
+    function chip(cls, txt) { box.appendChild(el('span', 'pchip ' + cls, txt)); }
+    if (n.up) chip('up', '⬆️ Next class ' + bn(n.up) + ' students');
+    if (n.same) chip('same', '🔁 Same class ' + bn(n.same) + ' students');
+    if (n.out) chip('off', '⏹️ বাদ ' + bn(n.out) + ' students');
+    if (empty) chip('todo', '✏️ ' + bn(empty) + ' new rolls pending');
+    var bad = proCheckDup();
+    if (bad) chip('warn', '⚠️ ' + bn(bad) + ' new rolls duplicated (red fields)');
+
+    $('proBarT').textContent = 'পরের class ' + bn(n.up) + ' · একই class ' + bn(n.same) + ' · বাদ ' + bn(n.out);
+    $('proBtn').textContent = 'Promote (' + bn(n.up + n.same) + ' students)';
+  }
+
+  function proUpdateCnt() {
+    if (!proData) return;
+    var n = 0, tot = proData.students.length;
+    proData.students.forEach(function (s) { if (proState[s.roll].on) n++; });
+    $('proCnt').textContent = bn(n) + '/' + bn(tot) + ' জন বাছাই করা';
+    $('proAll').checked = n === tot;
+    $('proBtn').disabled = n === 0;
+    proPreview();
+  }
+
+  function proSetOn(roll, on) { proSel[roll].setOn(on); }
+
+  function proToggleAll(on) {
+    if (!proData) return;
+    proData.students.forEach(function (s) { proSetOn(s.roll, on); });
+    proUpdateCnt();
+  }
+
+  // সবাইকে "পরের class" ধরে বাছাই
+  function proSetAction(a) {
+    if (!proData) return;
+    proData.students.forEach(function (s) {
+      proSel[s.roll].setAct(a);
+      proSetOn(s.roll, true);
+    });
+    proUpdateCnt();
+  }
+
+  // রোল: অপরিবর্তিত, অথবা বাছাই করাদের ১ থেকে ক্রমিক (ধরন অনুযায়ী আলাদা গণনা)
+  function proRolls(mode) {
+    if (!proData) return;
+    var c = { up: 0, same: 0 };
+    proData.students.forEach(function (s) {
+      var st = proState[s.roll], v = s.roll;
+      if (mode === 'seq' && st.on) { c[st.action]++; v = String(c[st.action]); }
+      st.newRoll = v; proInp[s.roll].value = v;
+    });
+    proPreview();
+  }
+
+  function runPromo() {
+    var d = proData;
+    if (!d) return;
+    var ses = $('proSes').value.trim(), sec = $('proSec').value.trim(), grp = $('proGrp').value.trim();
+    if (!ses) { toast('Enter the new session', true); $('proSes').focus(); return; }
+
+    var items = [], cnt = { up: 0, same: 0, out: 0 }, seen = {};
+    for (var i = 0; i < d.students.length; i++) {
+      var s = d.students[i], st = proState[s.roll];
+      if (!st.on) { cnt.out++; continue; }
+      cnt[st.action]++;
+      var nr = edBn2en(st.newRoll || '').trim();
+      if (!nr) { toast('Roll ' + s.roll + '-এর নতুন রোল দিন', true); proInp[s.roll].focus(); return; }
+      var k = st.action + '|' + nr;
+      if (seen[k]) { toast('নতুন রোল ' + nr + ' দুইবার দেওয়া হয়েছে', true); proInp[s.roll].focus(); return; }
+      seen[k] = true;
+      items.push({ roll: s.roll, action: st.action, newRoll: nr });
+    }
+    if (!items.length) { toast('No one selected', true); return; }
+    if (cnt.up && parseInt(d.base, 10) + 1 >= 9 && !grp &&
+        !confirm('New group is empty. A group is recommended for classes 9–10.\nContinue without a group?')) return;
+
+    var msg = 'Class ' + clsPlain(d.cls) + ' → Session ' + ses + '\n' +
+      'পরের class: ' + bn(cnt.up) + ' জন (' + clsPlain(proLabel(String(parseInt(d.base, 10) + 1), sec, grp)) + ')\nএকই class: ' + bn(cnt.same) + ' জন\nবাদ (টিক নেই): ' + bn(cnt.out) + ' জন\n\n' +
+      'Students ট্যাবে নতুন সারি যোগ হবে (পুরোনো সারি থাকবে)। চালিয়ে যাবেন?';
+    if (!confirm(msg)) return;
+
+    var opts = { fromCls: d.cls, toSession: ses, toSection: sec, toGroup: grp };
+    var size = 25, pos = 0, done = 0, issues = [];
+    $('proBtn').disabled = true;
+
+    function next() {
+      if (pos >= items.length) {
+        loading(false);
+        attStale = true;
+        proUpdateCnt();
+        toast(bn(done) + ' জন যুক্ত হয়েছে', false);
+        var m = 'যুক্ত হয়েছে: ' + bn(done) + ' জন\n';
+        if (issues.length) m += '\nবাদ গেছে:\n' + issues.join('\n') + '\n';
+        m += '\nমনে রাখবেন: সব class কাজ শেষে অ্যাডমিন হাজিরা সিট আর্কাইভ করবেন, তারপর Code.gs-এ SESSION = \'' + ses + '\' করবেন।';
+        alert(m);
+        return;
+      }
+      var chunk = items.slice(pos, pos + size);
+      pos += size;
+      loading(true, 'প্রোমোশন হচ্ছে... ' + bn(Math.min(pos, items.length)) + '/' + bn(items.length));
+      google.script.run
+        .withSuccessHandler(function (res) {
+          done += res.done;
+          res.results.forEach(function (r) { if (r.status !== 'ok') issues.push('Roll ' + r.roll + ': ' + r.msg); });
+          next();
+        })
+        .withFailureHandler(function (e) { proUpdateCnt(); fail(e); })
+        .promoteBatch(TOKEN, opts, chunk);
+    }
+    next();
+  }
+
+  function doArchive() {
+    var lb = $('arLabel').value.trim();
+    if (!lb) { toast('আর্কাইভ লেবেল দিন (যেমন 2026)', true); return; }
+    if (!confirm('সব Attendance-N ট্যাব "Archive-' + lb + '-Attendance-N" নামে সরে যাবে এবং নতুন খালি ট্যাব তৈরি হবে।\nনতুন session শুরুর আগে এটি করবেন। চালিয়ে যাবেন?')) return;
+    loading(true, 'আর্কাইভ হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        loading(false);
+        attStale = true;
+        toast(bn(res.archived.length) + 'টি ট্যাব আর্কাইভ হয়েছে', false);
+        alert('আর্কাইভ হয়েছে:\n' + res.archived.join('\n'));
+      })
+      .withFailureHandler(fail)
+      .archiveAttendanceSheets(TOKEN, lb);
+  }
+
+  // ===== ৭. ফরম ফিলাপ (পরীক্ষার ফরম পূরণ ও ফি আদায়) =====
+  var ffType = 'annual', ffCfg = null, ffCur = '', ffData = null, ffRec = {}, ffOrig = {}, ffDirty = {}, ffEls = {}, ffFilter = '';
+
+  function ffNum(v) {
+    var x = parseFloat(edBn2en(String(v === undefined || v === null ? '' : v)).replace(/,/g, ''));
+    return isNaN(x) ? 0 : x;
+  }
+  function ffMoney(n) { return '৳' + bn(String(Math.round(n * 100) / 100)); }
+  function ffDirtyCount() { return Object.keys(ffDirty).length; }
+  function ffLeaveOk() { return !ffDirtyCount() || confirm('সাবমিট না করা পরিবর্তন মুছে যাবে। চালিয়ে যাবেন?'); }
+
+  function ffNormRec(o) {
+    o = o || {};
+    function s(v, d) { return (v === undefined || v === null || v === '') ? d : String(v); }
+    return { regNo: s(o.regNo, ''), boardRoll: s(o.boardRoll, ''), fourth: s(o.fourth, ''),
+             fee: s(o.fee, '0'), paid: s(o.paid, '0'), receipt: s(o.receipt, ''),
+             paidDate: s(o.paidDate, ''), status: s(o.status, 'pending'), remarks: s(o.remarks, '') };
+  }
+
+  // paid = পূর্ণ/বেশি জমা, part = আংশিক, due = কিছুই জমা নেই, nofee = Fee not set
+  function ffFeeState(r) {
+    var fee = ffNum(r.fee), paid = ffNum(r.paid);
+    if (paid > 0 && (fee <= 0 || paid >= fee)) return 'paid';
+    if (paid > 0) return 'part';
+    if (fee > 0) return 'due';
+    return 'nofee';
+  }
+
+  // দেখানো হবে কি না ঠিক করে: class বেস ফরম ফিলাপের তালিকায় আছে কি না
+  function ffInit(d) {
+    var bases = d.formBases || [];
+    var ok = (d.classes || []).some(function (c) { return bases.indexOf(clsParts(c).base) !== -1; });
+    $('ffTab').style.display = ok ? '' : 'none';
+    $('ffChip').style.display = ok ? '' : 'none';
+  }
+
+  function ffTypeLabel(base) {
+    if (ffType === 'annual') return (ffCfg.exams && ffCfg.exams[base]) || 'বার্ষিক পরীক্ষা';
+    var t = (ffCfg.types || []).filter(function (x) { return x.code === ffType; })[0];
+    return t ? t.label : '';
+  }
+
+  function ffClsLabels() {
+    var sel = $('ffCls');
+    for (var i = 0; i < sel.options.length; i++) {
+      var o = sel.options[i];
+      if (o.value) o.textContent = 'Class ' + clsPlain(o.value) + ' — ' + ffTypeLabel(clsParts(o.value).base);
+    }
+  }
+
+  function ffTypeRender() {
+    var box = $('ffType');
+    box.innerHTML = '';
+    var types = ffCfg.types || [];
+    box.className = 'seg ft' + (types.length < 2 ? ' one' : '');
+    types.forEach(function (t) {
+      var b = el('button', ffType === t.code ? 'on' : '', t.label);
+      b.type = 'button';
+      b.onclick = function () { onFfType(t.code); };
+      box.appendChild(b);
+    });
+  }
+
+  function onFfType(code) {
+    if (code === ffType) return;
+    if (!ffLeaveOk()) return;
+    ffType = code;
+    ffTypeRender();
+    ffClsLabels();
+    if ($('ffCls').value) loadFf();
+  }
+
+  // ===== সবার জন্য একসাথে চেক: ফরম পূরণ ও (৯ম-১০ম) ৪র্থ বিষয় =====
+  var ffAllSubj = '';
+  var FF_PICK = 10;   // 'পরের N জন' বোতাম একবারে যতজন নতুন শিক্ষার্থী সিলেক্ট করবে
+
+  function ffAllBar() {
+    var box = $('ffAll');
+    box.innerHTML = '';
+    var has = !!(ffData && ffData.students.length);
+    box.style.display = has ? 'flex' : 'none';
+    if (!has) return;
+    function mk(id, text, on) {
+      var lb = el('label', 'ff-allck');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.id = id;
+      cb.onchange = function () { ffSetAll(on, cb.checked); };
+      lb.appendChild(cb);
+      lb.appendChild(el('span', null, text));
+      box.appendChild(lb);
+    }
+    var pk = el('label', 'ff-pick');
+    pk.title = 'টিক দিলে পরের ' + bn(FF_PICK) + ' জন নতুন শিক্ষার্থী ফরম পূরণ হিসেবে সিলেক্ট হবে';
+    var pc = document.createElement('input');
+    pc.type = 'checkbox'; pc.id = 'ffAllF';
+    pc.onchange = function () {
+      var n = ffData.students.length, f = 0;
+      ffData.students.forEach(function (s) { if (ffRec[s.key].status !== 'pending') f++; });
+      if (f >= n) ffSetAll('form', false); else ffNextN(FF_PICK);
+      ffAllSync();
+    };
+    pk.appendChild(pc);
+    pk.appendChild(el('span', 'ff-box', ''));
+    pk.appendChild(el('span', 'ff-pick-t', 'পরের ' + bn(FF_PICK) + ' জন (ফরম পূরণ)'));
+    var pcnt = el('span', 'ff-pick-c', ''); pcnt.id = 'ffAllFc';
+    pk.appendChild(pcnt);
+    box.appendChild(pk);
+    var rb = el('button', 'chipbtn ff-reset', '↩️ সবাইকে Form pending');
+    rb.type = 'button';
+    rb.onclick = function () { ffSetAll('form', false); };
+    box.appendChild(rb);
+    if (ffIsHigh()) {
+      mk('ffAll4', 'সবার ৪র্থ বিষয়', 'fourth');
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.id = 'ffAllSubj'; inp.autocomplete = 'off';
+      inp.setAttribute('list', 'ffFourth');
+      inp.placeholder = '4th subject name';
+      inp.value = ffAllSubj || ((ffCfg && ffCfg.fourth && ffCfg.fourth[0]) || '');
+      ffAllSubj = inp.value;
+      inp.oninput = function () { ffAllSubj = inp.value; };
+      box.appendChild(inp);
+    }
+    ffAllSync();
+  }
+
+  function ffAllSync() {
+    if (!ffData || !ffData.students.length) return;
+    var n = ffData.students.length, f = 0, q = 0;
+    ffData.students.forEach(function (s) {
+      var r = ffRec[s.key];
+      if (r.status !== 'pending') f++;
+      if (String(r.fourth || '').trim()) q++;
+    });
+    var cf = $('ffAllF'), c4 = $('ffAll4');
+    if (cf) { cf.checked = f === n; cf.indeterminate = f > 0 && f < n; }
+    var fc = $('ffAllFc'); if (fc) fc.textContent = bn(f) + '/' + bn(n);
+    var pkEl = document.querySelector('#ffAll .ff-pick'); if (pkEl) pkEl.style.setProperty('--pc', Math.round(f / n * 100) + '%');
+    if (c4) { c4.checked = q === n; c4.indeterminate = q > 0 && q < n; }
+  }
+
+  function ffSetAll(what, on) {
+    if (!ffData) return;
+    var list = ffData.students;
+    if (what === 'form') {
+      var sub = list.filter(function (s) { return ffRec[s.key].status === 'submitted'; }).length;
+      if (!on && sub && !confirm(bn(sub) + ' জন "Submitted to Result System" অবস্থায় আছে। সবাইকে "Form pending" করবেন?')) { ffAllSync(); return; }
+      list.forEach(function (s) {
+        var r = ffRec[s.key];
+        r.status = on ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
+      });
+    } else {
+      var subj = String(ffAllSubj || '').trim();
+      if (on && !subj) { toast('আগে 4th subject name লিখুন', true); ffAllSync(); return; }
+      list.forEach(function (s) { ffRec[s.key].fourth = on ? subj : ''; });
+    }
+    list.forEach(function (s) {
+      if (JSON.stringify(ffRec[s.key]) !== ffOrig[s.key]) ffDirty[s.key] = true; else delete ffDirty[s.key];
+    });
+    ffRender();
+    toast('সবার জন্য প্রয়োগ হয়েছে — সাবমিট করুন', false);
+  }
+
+  // এক বারে পরের FF_PICK জন নতুন (Form pending) শিক্ষার্থীকে ফরম পূরণ হিসেবে চিহ্নিত করে
+  function ffNextN(n) {
+    if (!ffData) return;
+    var picked = [];
+    ffData.students.forEach(function (s) {
+      if (picked.length < n && ffRec[s.key].status === 'pending') picked.push(s);
+    });
+    if (!picked.length) { toast('আর কোনো নতুন (Form pending) শিক্ষার্থী নেই', true); return; }
+    picked.forEach(function (s) {
+      ffRec[s.key].status = 'filled';
+      if (JSON.stringify(ffRec[s.key]) !== ffOrig[s.key]) ffDirty[s.key] = true; else delete ffDirty[s.key];
+    });
+    ffRender();
+    var first = ffEls[picked[0].key];
+    if (first && first.card && first.card.scrollIntoView) first.card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    toast(bn(picked.length) + ' জন সিলেক্ট হয়েছে (Roll ' + picked[0].roll + ' – ' + picked[picked.length - 1].roll + ') — সাবমিট করুন', false);
+  }
+
+  function ffOpen() {
+    if (ffCfg) return;
+    loading(true, 'Loading...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        loading(false);
+        ffCfg = d;
+        if (d && d.labels) d.labels.submitted = 'Submitted to Result System';
+        ffType = d.defaultType || 'annual';
+        ffTypeRender();
+        var sel = $('ffCls');
+        sel.innerHTML = '<option value="">-- Select --</option>';
+        d.classes.forEach(function (c) {
+          var o = document.createElement('option');
+          o.value = c;
+          o.textContent = 'Class ' + clsPlain(c) + ' — ' + (d.exams[clsParts(c).base] || '');
+          sel.appendChild(o);
+        });
+        ffClsLabels();
+        var dl = $('ffFourth');
+        dl.innerHTML = '';
+        (d.fourth || []).forEach(function (x) {
+          var o = document.createElement('option');
+          o.value = x;
+          dl.appendChild(o);
+        });
+        if (!d.classes.length) { setNote('ffNote', 'Your account has no class for form fill-up.', true); return; }
+        if (d.classes.length === 1) { sel.value = d.classes[0]; onFfCls(); }
+      })
+      .withFailureHandler(fail)
+      .getFormInit(TOKEN);
+  }
+
+  function onFfCls() {
+    if (!ffLeaveOk()) { $('ffCls').value = ffCur; return; }
+    ffCur = $('ffCls').value;
+    loadFf();
+  }
+
+  function loadFf() {
+    var cls = $('ffCls').value, type = ffType;
+    ffData = null; ffRec = {}; ffOrig = {}; ffDirty = {}; ffFilter = '';
+    $('ffQ').value = '';
+    setNote('ffNote', '');
+    ffRender();
+    if (!cls) return;
+    loading(true, 'Student info আনা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        loading(false);
+        if ($('ffCls').value !== cls || ffType !== type) return;
+        sortByRoll(d.students, 'roll');
+        ffData = d;
+        setNote('ffNote', d.exam + ' — Session ' + bn(d.session || ''));
+        d.students.forEach(function (s) {
+          var rec = ffNormRec(s.saved ? s.saved : { fee: s.defFee });
+          if (!rec.regNo && s.sid) rec.regNo = s.sid;     // Students ট্যাব থেকে স্বয়ংক্রিয় রেজি. নম্বর
+          rec.sRoll = String(s.roll == null ? '' : s.roll); rec.sNameEn = String(s.nameEn || ''); rec.sFather = String(s.father || ''); rec.sMother = String(s.mother || '');   // পরিচয়ের ঘর (সম্পাদনাযোগ্য)
+          ffRec[s.key] = rec;
+          ffOrig[s.key] = JSON.stringify(rec);
+        });
+        ffRender();
+      })
+      .withFailureHandler(fail)
+      .getFormData(TOKEN, cls, type);
+  }
+
+  function ffRender() {
+    var box = $('ffBox');
+    box.innerHTML = '';
+    ffEls = {};
+    var has = !!(ffData && ffData.students.length);
+    $('ffSearchCard').style.display = has && ffData.students.length > 8 ? 'block' : 'none';
+    $('ffTools').style.display = has ? 'flex' : 'none';
+    $('ffFbar').style.display = has ? 'flex' : 'none';
+    ffAllBar();
+    if (!has) {
+      box.appendChild(el('div', 'empty', ffData ? 'No students in this class' : 'Select class'));
+      ffStatsUpdate();
+      return;
+    }
+    sortByRoll(ffData.students, 'roll');   // সবসময় রোল ক্রমানুসারে (১, ২, ৩ … সংখ্যা ধরে)
+    ffData.students.forEach(function (s, ix) { box.appendChild(stg(ffCard(s), ix)); });
+    ffFbar();
+    ffApplyFilter();
+    ffStatsUpdate();
+  }
+
+  function ffFbar() {
+    var fb = $('ffFbar');
+    fb.innerHTML = '';
+    [['', 'All'], ['pending', 'Form pending'], ['submitted', 'Submitted to Result System']].forEach(function (f) {
+      var b = el('button', 'chipbtn' + (ffFilter === f[0] ? ' on' : ''), f[1]);
+      b.type = 'button';
+      b.onclick = function () { ffFilter = f[0]; ffFbar(); ffApplyFilter(); };
+      fb.appendChild(b);
+    });
+  }
+
+  function ffApplyFilter() {
+    if (!ffData) return;
+    var q = $('ffQ').value.trim().toLowerCase();
+    ffData.students.forEach(function (s) {
+      var e = ffEls[s.key];
+      if (!e) return;
+      var r = ffRec[s.key], st = ffFeeState(r), ok = true;
+      if (ffFilter === 'due') ok = (st === 'due' || st === 'part');
+      else if (ffFilter === 'paid') ok = (st === 'paid');
+      else if (ffFilter) ok = (r.status === ffFilter);
+      if (ok && q) ok = e.text.indexOf(q) !== -1;
+      e.card.style.display = ok ? '' : 'none';
+    });
+  }
+
+  function ffIsHigh() { return !!ffData && parseInt(clsParts(ffData.cls).base, 10) >= 9; }
+
+  // ছোট চেকবক্স (নিচে ক্যাপশনসহ); ক্লিকে কার্ড খোলা/বন্ধ হয় না
+  function ffCheck(caption, onchange) {
+    var lb = el('label', 'ff-ck');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.onchange = function () { onchange(cb); };
+    lb.onclick = function (ev) { ev.stopPropagation(); };
+    lb.appendChild(cb);
+    lb.appendChild(el('span', null, caption));
+    return { box: lb, cb: cb };
+  }
+
+  function ffCard(s) {
+    var key = s.key;
+    var card = el('div', 'row ff');
+    var head = el('div', 'ff-head');
+    head.appendChild(el('div', 'roll', s.roll));
+    var ckF = ffCheck('ফরম', function (cb) {
+      var r = ffRec[key];
+      if (!cb.checked && r.status === 'submitted' && !confirm('"Submitted to Result System" অবস্থা বদলে "Form pending" করবেন?')) { cb.checked = true; return; }
+      r.status = cb.checked ? (r.status === 'pending' ? 'filled' : r.status) : 'pending';
+      var ee = ffEls[key];
+      if (ee && ee.ins && ee.ins.status) ee.ins.status.value = r.status;
+      ffTouch(key);
+    });
+    head.appendChild(ckF.box);
+    var nm = el('div', 'ff-nm');
+    nm.appendChild(el('div', 'name', s.nameEn));
+    var sub = [];
+    if (s.father) sub.push('Father: ' + s.father);
+    if (s.mother) sub.push('Mother: ' + s.mother);
+    if (sub.length) nm.appendChild(el('div', 'ff-sub', sub.join(' · ')));
+    var meta = el('div', 'ff-meta');
+    nm.appendChild(meta);
+
+    // দ্রুত ফি এন্ট্রি: কার্ড না খুলেই "Paid" লেখা বা "Full fee" চাপা
+    var qk = el('div', 'ff-qk');
+    qk.onclick = function (ev) { ev.stopPropagation(); };
+    var qlb = el('label', 'q-in');
+    qlb.appendChild(el('span', null, '৳'));
+    var qIn = document.createElement('input');
+    qIn.type = 'text'; qIn.autocomplete = 'off'; qIn.placeholder = 'Paid';
+    qIn.setAttribute('inputmode', 'decimal');
+    qIn.setAttribute('enterkeyhint', 'next');
+    qIn.setAttribute('aria-label', 'Fee paid — ' + (s.nameEn));
+    qlb.appendChild(qIn);
+    var qFull = el('button', 'q-full', 'Full fee');
+    qFull.type = 'button';
+    qk.appendChild(qlb); qk.appendChild(qFull);
+    nm.appendChild(qk);
+    var qBar = el('div', 'ff-fee'), qFill = el('i');
+    qBar.appendChild(qFill); nm.appendChild(qBar);
+    var autoDate = false;
+    function qApply(v) {
+      var r = ffRec[key], ee = ffEls[key];
+      r.paid = v;
+      var n = ffNum(v);
+      if (n > 0 && !r.paidDate) {
+        r.paidDate = cfg.today; autoDate = true;
+        if (ee && ee.ins && ee.ins.paidDate) ee.ins.paidDate.value = r.paidDate;
+      } else if (n <= 0 && autoDate && r.paidDate === cfg.today) {
+        r.paidDate = ''; autoDate = false;
+        if (ee && ee.ins && ee.ins.paidDate) ee.ins.paidDate.value = '';
+      }
+      if (ee && ee.ins && ee.ins.paid) ee.ins.paid.value = v;
+      ffTouch(key);
+    }
+    qIn.oninput = function () { qApply(qIn.value.trim() === '' ? '0' : qIn.value); };
+    qFull.onclick = function () { qApply(ffRec[key].fee); };
+    qIn.onkeydown = function (ev) {                 // Enter চাপলে পরের (দৃশ্যমান) জনের "Paid" ঘরে যাবে
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      var list = ffData ? ffData.students : [], i0 = -1;
+      list.forEach(function (x, k) { if (x.key === key) i0 = k; });
+      for (var j = i0 + 1; j < list.length; j++) {
+        var nx = ffEls[list[j].key];
+        if (nx && nx.qpaid && nx.card.style.display !== 'none') {
+          nx.qpaid.focus(); nx.qpaid.select();
+          if (nx.card.scrollIntoView) nx.card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          return;
+        }
+      }
+    };
+    head.appendChild(nm);
+    var ck4 = null;
+    if (ffIsHigh()) {
+      ck4 = ffCheck('৪র্থ', function (cb) {
+        var r = ffRec[key], ee = ffEls[key];
+        if (cb.checked) {
+          cb.checked = false;                       // বিষয় না লেখা পর্যন্ত টিক বসবে না
+          if (!body) { body = ffBody(s); card.appendChild(body); }
+          card.classList.add('open');
+          caret.setAttribute('aria-expanded', 'true');
+          if (ee && ee.ins && ee.ins.fourth) ee.ins.fourth.focus();
+        } else {
+          r.fourth = '';
+          if (ee && ee.ins && ee.ins.fourth) ee.ins.fourth.value = '';
+          ffTouch(key);
+        }
+      });
+      head.appendChild(ck4.box);
+    }
+    var caret = el('button', 'ff-caret', '▾');
+    caret.type = 'button';
+    caret.setAttribute('aria-expanded', 'false');
+    caret.setAttribute('aria-label', 'বিস্তারিত খুলুন বা বন্ধ করুন — ' + (s.nameEn));
+    head.appendChild(caret);
+    card.appendChild(head);
+    var body = null;
+    head.onclick = function () {                 // ভারী ঘরগুলো প্রথম খোলার সময় তৈরি হয়
+      if (!body) { body = ffBody(s); card.appendChild(body); }
+      card.classList.toggle('open');
+      caret.setAttribute('aria-expanded', card.classList.contains('open') ? 'true' : 'false');
+    };
+    ffEls[key] = { card: card, meta: meta, qpaid: qIn, qfull: qFull, qfill: qFill, ckF: ckF.cb, ck4: ck4 ? ck4.cb : null, text: (s.roll + ' ' + (s.nameEn || '')).toLowerCase() };
+    ffMeta(key);
+    return card;
+  }
+
+  function ffBody(s) {
+    var key = s.key, r = ffRec[key];
+    var body = el('div', 'ff-body');
+
+    var ins = {};
+    function field(f, label, opt) {
+      opt = opt || {};
+      var w = el('div', 'ed-f');
+      w.appendChild(el('label', null, label));
+      var inp;
+      if (opt.select) {
+        inp = document.createElement('select');
+        opt.select.forEach(function (o) {
+          var op = document.createElement('option');
+          op.value = o[0]; op.textContent = o[1];
+          inp.appendChild(op);
+        });
+      } else {
+        inp = document.createElement('input');
+        inp.type = opt.type || 'text';
+        inp.autocomplete = 'off';
+        if (opt.num) inp.setAttribute('inputmode', 'decimal');
+        if (opt.int) inp.setAttribute('inputmode', 'numeric');
+        if (opt.list) inp.setAttribute('list', opt.list);
+      }
+      inp.value = r[f];
+      inp.setAttribute('aria-label', label + ' — ' + (s.nameEn));
+      inp.oninput = inp.onchange = function () { r[f] = inp.value; ffTouch(key); };
+      ins[f] = inp;
+      w.appendChild(inp);
+      return w;
+    }
+    function pair(a, b) {
+      var g = el('div', 'grid');
+      g.appendChild(a); g.appendChild(b);
+      body.appendChild(g);
+    }
+
+    function sec(t) { body.appendChild(el('div', 'ff-sec', t)); }
+    sec('👤 শিক্ষার্থীর পরিচয়');
+    pair(field('sRoll', 'রোল', { int: true }), field('sNameEn', 'নাম (ইংরেজি)'));
+    pair(field('sFather', 'পিতার নাম'), field('sMother', 'মাতার নাম'));
+    sec('🧾 ব্যক্তিগত');
+    var gw = el('div', 'ed-f');
+    gw.appendChild(el('label', null, 'বিভাগ (group)'));
+    var gi = document.createElement('input');
+    gi.type = 'text'; gi.disabled = true; gi.value = s.group ? grpText(s.group) : '';
+    gw.appendChild(gi);
+    body.appendChild(gw);
+    sec('✍️ পূরণযোগ্য');
+    var stOpts = ffCfg.statuses.map(function (x) { return [x, ffCfg.labels[x]]; });
+    pair(field('regNo', 'রেজিস্ট্রেশন নম্বর', { int: true }), field('boardRoll', 'Board roll', { int: true }));
+    if (ffIsHigh()) pair(field('fourth', '৪র্থ বিষয়', { list: 'ffFourth' }), field('status', 'অবস্থা', { select: stOpts }));
+    else pair(field('status', 'অবস্থা', { select: stOpts }), el('div'));
+
+    var delBtn = el('button', 'act rej', '🗑 এই শিক্ষার্থীর ফরম ফিলাপ মুছুন');
+    delBtn.type = 'button';
+    delBtn.style.width = '100%';
+    delBtn.style.marginTop = '10px';
+    delBtn.onclick = function (ev) { ev.stopPropagation(); ffDeleteOne(s); };
+    body.appendChild(delBtn);
+
+    if (ffEls[key]) ffEls[key].ins = ins;
+    return body;
+  }
+
+  function ffTouch(key) {
+    if (JSON.stringify(ffRec[key]) !== ffOrig[key]) ffDirty[key] = true; else delete ffDirty[key];
+    ffMeta(key);
+    ffStatsUpdate();
+  }
+
+  function ffDeleteOne(s) {
+    var key = s.key, nm = s.nameEn || '';
+    if (!ffData) return;
+    if (!confirm(nm + ' (Roll ' + s.roll + ')-এর ফরম ফিলাপের তথ্য মুছে যাবে।\n(ব্যাকআপ থাকবে; রেজাল্ট সিস্টেমের তথ্য অপরিবর্তিত থাকবে।)\n\nচালিয়ে যাবেন?')) return;
+    loading(true, 'মুছে ফেলা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        loading(false);
+        var rec = ffNormRec({ fee: s.defFee });
+        if (s.sid) rec.regNo = s.sid;
+        rec.sRoll = String(s.roll == null ? '' : s.roll); rec.sNameEn = String(s.nameEn || '');
+        rec.sFather = String(s.father || ''); rec.sMother = String(s.mother || '');
+        ffRec[key] = rec; ffOrig[key] = JSON.stringify(rec); delete ffDirty[key];
+        var ee = ffEls[key];
+        if (ee && ee.ins) Object.keys(ee.ins).forEach(function (f) { if (rec[f] !== undefined) ee.ins[f].value = rec[f]; });
+        ffMeta(key); ffStatsUpdate();
+        toast(res && res.deleted ? '🗑 ফরম ফিলাপ মুছে ফেলা হয়েছে' : 'এই শিক্ষার্থীর কোনো সংরক্ষিত ফরম ছিল না', false);
+      })
+      .withFailureHandler(fail)
+      .deleteFormFillup(TOKEN, ffData.cls, ffData.type || ffType, [key]);
+  }
+
+  function ffMeta(key) {
+    var e = ffEls[key];
+    if (!e) return;
+    var r = ffRec[key], st = ffFeeState(r), due = Math.max(0, ffNum(r.fee) - ffNum(r.paid));
+    e.card.setAttribute('data-f', st);
+    if (e.ckF) e.ckF.checked = r.status !== 'pending';
+    if (e.ck4) e.ck4.checked = !!String(r.fourth || '').trim();
+    e.meta.innerHTML = '';
+    function chip(c, t) { e.meta.appendChild(el('span', 'pchip ' + c, t)); }
+    if (st === 'paid') chip('up', 'ফি পরিশোধিত ' + ffMoney(ffNum(r.paid)));
+    else if (st === 'part') chip('same', 'আংশিক — বকেয়া ' + ffMoney(due));
+    else if (st === 'due') chip('warn', 'ফি বকেয়া ' + ffMoney(due));
+    else chip('off', 'Fee not set');
+    chip(r.status === 'pending' ? 'todo' : 'up', ffCfg.labels[r.status] || r.status);
+    if (ffDirty[key]) chip('same', '● Not submitted');
+    if (e.qpaid) {                                   // দ্রুত-এন্ট্রি ঘর ও ফি-প্রগ্রেস মেলানো
+      if (document.activeElement !== e.qpaid) e.qpaid.value = ffNum(r.paid) > 0 ? r.paid : '';
+      var fee = ffNum(r.fee), pd = ffNum(r.paid);
+      e.qfull.disabled = fee <= 0;
+      e.qfill.style.width = (fee > 0 ? Math.min(100, pd * 100 / fee) : (pd > 0 ? 100 : 0)) + '%';
+    }
+  }
+
+  function ffStatsUpdate() {
+    var hero = $('ffHero');
+    if (!ffData || !ffData.students.length) { hero.style.display = 'none'; ffBar(); return; }
+    var n = ffData.students.length, done = 0, paid = 0, due = 0;
+    ffData.students.forEach(function (s) {
+      var r = ffRec[s.key];
+      if (r.status !== 'pending') done++;
+      paid += ffNum(r.paid);
+      due += Math.max(0, ffNum(r.fee) - ffNum(r.paid));
+    });
+    var pct = Math.round(done * 100 / n);
+    ffAllSync();
+    hero.style.display = 'flex';
+    $('ffRing').style.setProperty('--pc', pct);
+    $('ffRingPct').textContent = bn(pct) + '%';
+    var hc = $('ffHc');
+    hc.innerHTML = '';
+    [['s0', bn(done), 'ফরম পূরণ'], ['s1', bn(n - done), 'Form pending'], ['s3', ffMoney(paid), 'ফি আদায়'], ['s2', ffMoney(due), 'Due']].forEach(function (x) {
+      var d = el('div', 'hc ' + x[0]);
+      d.appendChild(el('i'));
+      d.appendChild(el('b', null, x[1]));
+      d.appendChild(document.createTextNode(x[2]));
+      hc.appendChild(d);
+    });
+    ffBar();
+  }
+
+  function ffDoneCount() {
+    var c = 0;
+    if (ffData) ffData.students.forEach(function (s) {
+      var r = ffRec[s.key];
+      if (r && r.status !== 'pending') c++;
+    });
+    return c;
+  }
+
+  function ffBar() {
+    var n = ffDirtyCount();
+    var tot = ffData ? ffData.students.length : 0;
+    var ratio = bn(ffDoneCount()) + '/' + bn(tot);
+    $('ffBar').style.display = tot ? 'block' : 'none';
+    $('ffBarT').textContent = (n ? 'সাবমিট বাকি: ' + bn(n) + ' জন' : 'সব সাবমিটেড') + ' • ফরম পূরণ: ' + ratio;
+    $('ffSaveBtn').disabled = !n;
+    $('ffSaveBtn').textContent = 'সাবমিট (' + ratio + ')';
+  }
+
+  // ---- পরিচয়ের ঘর (রোল, নাম, পিতা, মাতা): Students ব্যবস্থাপনার একই function দিয়ে সংরক্ষণ ----
+  function ffStuChanged(keys, byKey) {
+    return keys.filter(function (k) {
+      var r = ffRec[k], s = byKey[k];
+      return edBn2en(r.sRoll).trim() !== String(s.roll) || edNorm('en', r.sNameEn) !== String(s.nameEn || '') ||
+             edNorm('text', r.sFather) !== String(s.father || '') || edNorm('text', r.sMother) !== String(s.mother || '');
+    });
+  }
+
+  function ffStuCheck(stuKeys, byKey) {
+    var i, k, r, c, rolls = {};
+    for (i = 0; i < stuKeys.length; i++) {
+      k = stuKeys[i]; r = ffRec[k];
+      c = edCheck('nameEn', 'en', edNorm('en', r.sNameEn));
+      if (c.err) return 'Roll ' + byKey[k].roll + ': নাম — ' + c.err;
+      c = edCheck('roll', 'num', edBn2en(r.sRoll).trim());
+      if (c.err) return 'Roll ' + byKey[k].roll + ': ' + c.err;
+    }
+    for (k in byKey) {
+      var rr = ffRec[k], rl = rr ? edBn2en(rr.sRoll).trim() : String(byKey[k].roll);
+      if (rolls[rl]) return 'রোল ' + rl + ' একাধিক শিক্ষার্থীর জন্য দেওয়া আছে';
+      rolls[rl] = true;
+    }
+    return '';
+  }
+
+  function ffStuSave(stuKeys, byKey, cls, done) {
+    loading(true, 'শিক্ষার্থীর তথ্য সাবমিট হচ্ছে...');
+    function stop(e, msg) {
+      loading(false);
+      if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+      toast((msg || 'শিক্ষার্থীর তথ্য সাবমিট হয়নি: ') + friendlyErr(e), true);
+      loadFf();
+    }
+    google.script.run.withSuccessHandler(function (list) {
+      var i = 0;
+      function one() {
+        if (i >= stuKeys.length) { loading(false); toast('✅ ফরম ফিলাপ ও শিক্ষার্থীর তথ্য সাবমিটেড', false); loadFf(); return; }
+        var k = stuKeys[i++], r = ffRec[k], s = byKey[k];
+        var m = (list || []).filter(function (x) { return String(x.roll) === String(s.roll); })[0];
+        if (!m) { stop('Roll ' + s.roll + ' পাওয়া যায়নি', 'Error: '); return; }
+        var data = {};
+        STU_FIELDS.forEach(function (x) { data[x[0]] = edNorm(x[2], m[x[0]] || ''); });
+        data.nameEn = edNorm('en', r.sNameEn); data.father = edNorm('text', r.sFather); data.mother = edNorm('text', r.sMother);
+        var newRoll = edBn2en(r.sRoll).trim();
+        google.script.run.withSuccessHandler(function () {
+          if (newRoll === String(s.roll)) { one(); return; }
+          google.script.run.withSuccessHandler(one)
+            .withFailureHandler(function (e) { stop(e, 'Roll ' + s.roll + ' সরানো যায়নি: '); })
+            .moveStudent(TOKEN, m.id, cls, newRoll);
+        }).withFailureHandler(function (e) { stop(e, 'Roll ' + s.roll + ': '); }).updateStudentInfo(TOKEN, m.id, data);
+      }
+      one();
+    }).withFailureHandler(function (e) { stop(e); }).getStudentsForEdit(TOKEN, cls);
+  }
+
+  function ffSave() {
+    var keys = Object.keys(ffDirty);
+    if (!keys.length || !ffData) return;
+    var byKey = {};
+    ffData.students.forEach(function (s) { byKey[s.key] = s; });
+    for (var i = 0; i < keys.length; i++) {
+      var r0 = ffRec[keys[i]];
+      if (ffNum(r0.fee) < 0 || ffNum(r0.paid) < 0) {
+        toast('Roll ' + byKey[keys[i]].roll + ': টাকার অঙ্ক ঋণাত্মক হতে পারে না', true);
+        return;
+      }
+      if (ffNum(r0.paid) > 0 && !r0.paidDate) {             // জমা আছে কিন্তু তারিখ নেই → আজকের তারিখ
+        r0.paidDate = cfg.today;
+        var e0 = ffEls[keys[i]];
+        if (e0 && e0.ins && e0.ins.paidDate) e0.ins.paidDate.value = r0.paidDate;
+      }
+      if (ffNum(r0.fee) > 0 && ffNum(r0.paid) > ffNum(r0.fee)) {
+        toast('Roll ' + byKey[keys[i]].roll + ': জমা Fee setর চেয়ে বেশি', true);
+        return;
+      }
+    }
+    var stuKeys = ffStuChanged(keys, byKey);                  // পরিচয়ের ঘর (রোল/নাম/পিতা/মাতা) বদলেছে এমন শিক্ষার্থী
+    var stuErr = ffStuCheck(stuKeys, byKey);
+    if (stuErr) { toast(stuErr, true); return; }
+    if (stuKeys.some(function (k) { return edBn2en(ffRec[k].sRoll).trim() !== String(byKey[k].roll); }) &&
+        !confirm('রোল বদলালে পুরোনো হাজিরা সহ নতুন রোলে সরানো হবে। চালিয়ে যাবেন?')) return;
+    var rcCnt = {};                                           // একই রসিদ নম্বর একাধিকজনে থাকলে নিশ্চিত করা
+    ffData.students.forEach(function (s0) {
+      var rc = String((ffRec[s0.key] || {}).receipt || '').trim().toLowerCase();
+      if (rc) rcCnt[rc] = (rcCnt[rc] || 0) + 1;
+    });
+    var dupRc = '';
+    keys.forEach(function (k0) {
+      var rc = String(ffRec[k0].receipt || '').trim().toLowerCase();
+      if (!dupRc && rc && rcCnt[rc] > 1) dupRc = String(ffRec[k0].receipt).trim();
+    });
+    if (dupRc && !confirm('রসিদ নম্বর "' + dupRc + '" একাধিক জনের জন্য আছে (ভাইবোন হলে ঠিক আছে)। তবুও সাবমিট করবেন?')) return;
+    var cls = ffData.cls, type = ffData.type || ffType, size = 10, pos = 0, ok = 0, syncOk = 0, syncBad = '', qdone = false, both = !!$('ffBoth').checked;
+    $('ffSaveBtn').disabled = true;
+
+    function next() {
+      if (pos >= keys.length) {
+        function finish() {
+          loading(false);
+          ffStatsUpdate();
+          if (qdone) toast('📴 Saved offline — will be submitted automatically when online', false);
+          else if (syncBad) toast(bn(ok) + ' জন সাবমিটেড, কিন্তু শিটে জমা হয়নি: ' + syncBad, true);
+          else toast(bn(ok) + ' জনের তথ্য সাবমিটেড' + (syncOk ? ' (class sheet-এও জমা হয়েছে)' : ''), false);
+        }
+        if (!stuKeys.length || qdone) { finish(); return; }
+        ffStuSave(stuKeys, byKey, cls, finish);
+        return;
+      }
+      var chunk = keys.slice(pos, pos + size);
+      pos += size;
+      loading(true, 'সাবমিট হচ্ছে... সাবমিটেড ' + bn(ok) + '/' + bn(keys.length) + ' জন');
+      var items = chunk.map(function (k) {
+        var r = ffRec[k];
+        return { key: k, regNo: r.regNo, boardRoll: r.boardRoll, fourth: r.fourth, fee: r.fee, paid: r.paid,
+                 receipt: r.receipt, paidDate: r.paidDate, status: r.status, remarks: r.remarks };
+      });
+      google.script.run
+        .withSuccessHandler(function (r) {
+          if (r && r.queued) qdone = true;
+          else if (r && r.synced === true) syncOk++;
+          else if (r && r.synced === false) syncBad = r.syncMsg || 'Unknown reason';
+          chunk.forEach(function (k) { ffOrig[k] = JSON.stringify(ffRec[k]); delete ffDirty[k]; ffMeta(k); });
+          ok += chunk.length;
+          ffStatsUpdate();                                  // লাইভ: নিচের বার ও কার্ড হালনাগাদ
+          toast('✅ সাবমিটেড ' + bn(ok) + '/' + bn(keys.length) + ' জন', false);
+          next();
+        })
+        .withFailureHandler(function (e) { ffStatsUpdate(); fail(e); })
+        .saveFormData(TOKEN, cls, items, type, both);
+    }
+    next();
+  }
+
+  // --- print: ফরম ফিলাপ তালিকা (বোর্ডে পাঠানোর খসড়া মেলানোর জন্য) ---
+  function ffPrintList() {
+    if (!ffData || !ffData.students.length) { toast('Nothing to print', true); return; }
+    var n = ffData.students.length;
+    var pa = $('printArea');
+    pa.innerHTML = '';
+    pa.appendChild(prHead(ffData.exam + ' — ফরম ফিলাপ তালিকা', [
+      'Class: ' + clsPlain(ffData.cls) + '   |   Session: ' + bn(ffData.session || ''),
+      'Students: ' + bn(n) + ' জন   |   Print date: ' + fmtFull(cfg.today)
+    ]));
+    var t = el('table', 'pt dense');
+    var thead = el('thead');
+    thead.appendChild(prRow(['No.', 'Roll', 'Name', 'Father’s name', 'Mother’s name', 'Birth certificate', 'Date of birth',
+                             'Group', 'Reg. no.', '4th subject', 'Status'].map(function (h) { return el('th', null, h); })));
+    t.appendChild(thead);
+    var tb = el('tbody');
+    ffData.students.forEach(function (s, i) {
+      var r = ffRec[s.key];
+      tb.appendChild(prRow([
+        el('td', null, bn(i + 1)), el('td', null, s.roll), el('td', 'l', s.nameEn),
+        el('td', 'l', s.father), el('td', 'l', s.mother), el('td', null, s.birth), el('td', null, s.dob),
+        el('td', null, s.group ? grpText(s.group) : ''), el('td', null, r.regNo), el('td', null, r.fourth),
+        el('td', null, ffCfg.labels[r.status] || r.status)
+      ]));
+    });
+    t.appendChild(tb);
+    pa.appendChild(t);
+    pa.appendChild(prSign());
+    doPrint(true);
+  }
+
+  // --- print: ফি আদায় তালিকা (মোট সহ) ---
+  function ffPrintFee() {
+    if (!ffData || !ffData.students.length) { toast('Nothing to print', true); return; }
+    var pa = $('printArea');
+    pa.innerHTML = '';
+    pa.appendChild(prHead(ffData.exam + ' — ফি আদায় তালিকা', [
+      'Class: ' + clsPlain(ffData.cls) + '   |   Session: ' + bn(ffData.session || ''),
+      'Print date: ' + fmtFull(cfg.today)
+    ]));
+    var t = el('table', 'pt');
+    var thead = el('thead');
+    thead.appendChild(prRow(['No.', 'Roll', 'Name', 'Fee set', 'Paid', 'Due', 'Receipt no.', 'Payment date', 'Signature']
+      .map(function (h) { return el('th', null, h); })));
+    t.appendChild(thead);
+    var tb = el('tbody'), tf = 0, tp = 0, td = 0;
+    ffData.students.forEach(function (s, i) {
+      var r = ffRec[s.key], fee = ffNum(r.fee), paid = ffNum(r.paid), due = Math.max(0, fee - paid);
+      tf += fee; tp += paid; td += due;
+      tb.appendChild(prRow([
+        el('td', null, bn(i + 1)), el('td', null, s.roll), el('td', 'l', s.nameEn),
+        el('td', null, bn(fee)), el('td', null, bn(paid)), el('td', due ? 'ab' : '', bn(due)),
+        el('td', null, r.receipt), el('td', null, r.paidDate ? fmtFull(r.paidDate) : ''), el('td', 'bx', '')
+      ]));
+    });
+    var tot = prRow([el('td', null, 'Total'), el('td', null, ''), el('td', null, ''),
+                     el('td', null, bn(tf)), el('td', null, bn(tp)), el('td', null, bn(td)),
+                     el('td', null, ''), el('td', null, ''), el('td', null, '')]);
+    tot.className = 'tot';
+    tb.appendChild(tot);
+    t.appendChild(tb);
+    pa.appendChild(t);
+    pa.appendChild(prSign());
+    doPrint(false);
+  }
+
+
+  // ===== স্মার্ট তারিখ ও Select class =====
+  function lastClsGet() { try { return localStorage.getItem('att_last_cls') || ''; } catch (e) { return ''; } }
+  function lastClsSet(v) { try { if (v) localStorage.setItem('att_last_cls', v); } catch (e) {} }
+  function takenMap() {
+    var m = null;
+    if (dashData && cfg && $('date').value === cfg.today) { m = {}; dashData.classes.forEach(function (c) { m[c.cls] = !!c.taken; }); }
+    return m;
+  }
+  function syncChips() {
+    var box = $('clsChips'); if (!box || !cfg) return;
+    var tm = takenMap(), now = $('cls').value, opts = [].slice.call($('cls').options).filter(function (o) { return o.value; });
+    var gb = $('grpChips');
+    if (!gb) { gb = el('div', 'clschips'); gb.id = 'grpChips'; box.parentNode.insertBefore(gb, box.nextSibling); }
+    box.innerHTML = ''; gb.innerHTML = '';
+    var curP = clsParts(now), secs = [], seenS = {};
+    opts.forEach(function (o) {
+      var p = clsParts(o.value), k = p.group ? p.base + '|' + p.section : o.value;
+      if (!seenS[k]) { seenS[k] = { key: k, members: [] }; secs.push(seenS[k]); }
+      seenS[k].members.push(o.value);
+    });
+    var curKey = curP.group ? curP.base + '|' + curP.section : now;
+    function dot(list) {
+      if (!tm) return null;
+      var any = list.some(function (m) { return tm[m] !== undefined; });
+      if (!any) return null;
+      return el('i', 'st ' + (list.every(function (m) { return tm[m] === true; }) ? 'ok' : 'wait'));
+    }
+    // ১ম সারি: শ্রেণি/সেকশন (Class 9 — Boys, Class 9 — Girls, Class 6 A ...)
+    secs.forEach(function (sg) {
+      var isOn = sg.key === curKey, p0 = clsParts(sg.members[0]);
+      var b = el('button', 'cc' + (isOn ? ' on' : '')); b.type = 'button';
+      var d0 = dot(sg.members); if (d0) b.appendChild(d0);
+      b.appendChild(document.createTextNode(p0.group ? 'Class ' + bn(p0.base) + ' — ' + secText(p0.section) : 'Class ' + clsPlain(sg.members[0])));
+      b.onclick = function () {
+        if (isOn) return;
+        if (!confirmLeave()) return;
+        var pick = sg.members[0];   // একই গ্রুপ নতুন সেকশনে থাকলে সেটিই খোলা হবে
+        if (curP.group) sg.members.forEach(function (m) { if (clsParts(m).group === curP.group) pick = m; });
+        $('cls').value = pick; loadClass();
+      };
+      box.appendChild(b);
+      if (isOn && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
+    });
+    // ২য় সারি: সেকশনে ঢুকলে তার গ্রুপগুলো আলাদা
+    var cur = seenS[curKey], gmem = cur && curP.group ? cur.members : [];
+    gmem.forEach(function (m) {
+      var b = el('button', 'cc' + (m === now ? ' on' : '')); b.type = 'button';
+      if (tm && tm[m] !== undefined) b.appendChild(el('i', 'st ' + (tm[m] ? 'ok' : 'wait')));
+      b.appendChild(document.createTextNode(grpText(clsParts(m).group)));
+      b.onclick = function () {
+        if (m === $('cls').value) return;
+        if (!confirmLeave()) return;
+        $('cls').value = m; loadClass();
+      };
+      gb.appendChild(b);
+      if (m === now && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {} }
+    });
+    box.style.display = (secs.length > 1 || gmem.length) ? 'flex' : 'none';
+    gb.style.display = gmem.length > 1 ? 'flex' : 'none';
+    var d = $('date').value, lb = $('dateLbl'); lb.innerHTML = '';
+    if (d) {
+      lb.appendChild(document.createTextNode(fmtLong(d)));
+      var wd = new Date(d + 'T00:00:00Z').getUTCDay();
+      if (d === cfg.today) lb.appendChild(el('span', 'tg ok', 'Today'));
+      else if (d > cfg.today) lb.appendChild(el('span', 'tg', 'Future date'));
+      if (wd === 5 || wd === 6) lb.appendChild(el('span', 'tg', 'Weekly holiday?'));
+    }
+    var np = $('nextPend'); if (np) np.style.display = tm ? '' : 'none';
+  }
+  // আজকের তারিখে হাজিরা বাকি এমন পরের class যান
+  function nextPending() {
+    var tm = takenMap();
+    if (!tm) { toast('Pending classes are shown for today only', true); return; }
+    var opts = [].slice.call($('cls').options).filter(function (o) { return o.value && tm[o.value] === false; });
+    if (!opts.length) { toast('Attendance taken for all classes ✅', false); return; }
+    var now = $('cls').value, nx = null;
+    for (var i = 0; i < opts.length; i++) { if (opts[i].value !== now) { nx = opts[i]; if (opts[i].value > now) break; } }
+    if (!nx) { toast('This is the only pending class', false); return; }
+    if (!confirmLeave()) return;
+    $('cls').value = nx.value; loadClass();
+  }
+  (function () {
+    var _lc = loadClass;
+    loadClass = function () { _lc(); lastClsSet($('cls').value); syncChips(); };
+    var _rd = renderDash;
+    renderDash = function (d) {
+      _rd(d); syncChips();
+      // প্রথমবার খুললে: শেষবারের class, না থাকলে প্রথম বাকি class আগে থেকেই বাছাই
+      if (!$('cls').value && !window._autoCls) {
+        window._autoCls = 1;
+        var opts = [].slice.call($('cls').options).filter(function (o) { return o.value; }), pick = '';
+        var l = lastClsGet(); opts.forEach(function (o) { if (o.value === l) pick = l; });
+        if (!pick) { var w = d.classes.filter(function (c) { return !c.taken; })[0]; if (w) pick = w.cls; }
+        if (pick) { $('cls').value = pick; if (curTab === 'att') loadClass(); else syncChips(); }
+      }
+    };
+    var _oc = onAttChange;
+    onAttChange = function () { _oc(); syncChips(); };
+    var _st = showTab;
+    showTab = function (t) { _st(t); if (t === 'att') { if ($('cls').value && cur.cls !== $('cls').value) loadClass(); else syncChips(); } };
+    var _io = initOk;
+    initOk = function (d) { _io(d); if (cfg) syncChips(); };
+  })();
+
+  // ===== অফিস মোড: নির্দিষ্ট ইমেইলের ইউজার শুধু রিপোর্ট ট্যাব দেখবে =====
+  // সার্ভার getInitData-তে officeOnly: true পাঠালে চালু হয় (সার্ভারেও আলাদা পারমিশন চেক থাকতে হবে)
+  (function () {
+    var _show = showTab, _io2 = initOk, _ld = loadDash, _wc = warmCache;
+    function isOffice() { return !!(cfg && cfg.officeOnly); }
+    showTab = function (t) { _show(isOffice() ? 'mon' : t); };
+    loadDash = function () { if (isOffice()) return; _ld(); };
+    warmCache = function () { if (isOffice()) return; _wc(); };
+    initOk = function (d) {
+      _io2(d);
+      if (d && d.officeOnly && !d.denied && !d.needLogin) {
+        document.body.classList.add('office-only');
+        var tabs = document.querySelectorAll('.tab');
+        for (var i = 0; i < tabs.length; i++) tabs[i].style.display = tabs[i].getAttribute('data-t') === 'mon' ? '' : 'none';
+        $('periodBar').style.display = 'none';
+        $('pendBanner').style.display = 'none';
+        showTab('mon');
+      }
+    };
+  })();
+
+  // ===== ৪. সতর্কতা =====
+  function loadAlerts() {
+    var month = $('amonth').value;
+    var box = $('alrBox');
+    box.innerHTML = '';
+    if (!month) return;
+    var id = ++rq.alr;
+    loading(true, 'তালিকা তৈরি হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if (id !== rq.alr) return;
+        renderAlerts(d);
+        loading(false);
+      })
+      .withFailureHandler(function (e) { if (id === rq.alr) fail(e); })
+      .getAlerts(TOKEN, month, cur.period);
+  }
+
+  function renderAlerts(d) {
+    sortByClsRoll(d.streak); sortByClsRoll(d.low);
+    var box = $('alrBox');
+    box.innerHTML = '';
+
+    box.appendChild(el('h3', null, 'Streak ' + bn(d.minStreak) + ' days or more absent (' + bn(d.streak.length) + ' students)'));
+    if (!d.streak.length) box.appendChild(el('div', 'empty', '🎉 None'));
+    d.streak.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'abs'), i)); });
+
+    box.appendChild(el('h3', null, 'Attendance ' + bn(d.threshold) + '% or below (' + bn(d.low.length) + ' students)'));
+    if (!d.low.length) box.appendChild(el('div', 'empty', '🎉 None'));
+    d.low.forEach(function (o, i) { box.appendChild(stg(alertCard(o, 'low'), i)); });
+  }
+
+  function buildMsg(kind, o) {
+    var tpl = kind === 'abs' ? cfg.msgAbsent : cfg.msgLow;
+    var vals = {
+      name: o.name, cls: clsPlain(o.cls), roll: o.roll,
+      n: bn(o.n || ''), percent: bn(o.percent === undefined ? '' : o.percent),
+      school: cfg.school || ''
+    };
+    var out = tpl.replace(/\{(\w+)\}/g, function (m, k) { return vals[k] !== undefined ? vals[k] : m; });
+    return out.replace(/\s*—\s*$/, '');
+  }
+
+  // মোবাইল নম্বর → WhatsApp-এর আন্তর্জাতিক রূপ (বাংলাদেশি 01XXXXXXXXX হলে), নইলে ফাঁকা
+  function waNumber(p) {
+    var d = edBn2en(String(p || '')).replace(/[^\d]/g, '');
+    if (/^01\d{9}$/.test(d)) return '88' + d;
+    if (/^8801\d{9}$/.test(d)) return d;
+    return '';
+  }
+
+  function alertCard(o, kind) {
+    var card = el('div', 'row al');
+    card.setAttribute('data-s', kind === 'abs' ? '1' : '2');
+
+    var top = el('div', 'al-top');
+    var bd = el('div', 'al-bd');
+    bd.setAttribute('aria-hidden', 'true');
+    if (kind === 'abs') { bd.appendChild(document.createTextNode(bn(o.n))); bd.appendChild(el('small', null, 'days')); }
+    else { var pc = parseFloat(o.percent); bd.appendChild(document.createTextNode(isNaN(pc) ? '–' : bn(Math.round(pc)) + '%')); }
+    top.appendChild(bd);
+    var inf = el('div', 'al-in');
+    inf.appendChild(el('div', 'name', o.name));
+    inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
+    top.appendChild(inf);
+    card.appendChild(top);
+
+    var detail = kind === 'abs'
+      ? 'Streak ' + bn(o.n) + ' দিন অনুপস্থিত (' + fmtDM(o.since) + ' থেকে; সর্বশেষ হাজিরা ' + fmtDM(o.last) + ')'
+      : 'Attendance ' + bn(o.percent) + '% (' + bn(o.present) + '/' + bn(o.total) + ' দিন)';
+    var dt = el('div', 'detail', detail);
+    dt.style.marginTop = '8px';
+    card.appendChild(dt);
+    if (kind !== 'abs' && !isNaN(parseFloat(o.percent))) {
+      var bar = el('div', 'al-bar'), fi = el('i');
+      fi.style.width = Math.max(0, Math.min(100, parseFloat(o.percent))) + '%';
+      bar.appendChild(fi); card.appendChild(bar);
+    }
+
+    var msg = buildMsg(kind, o);
+    var acts = el('div', 'acts');
+    if (o.phone) {
+      var a = el('a', 'abtn', '✉️ SMS');
+      a.href = 'sms:' + o.phone + '?body=' + encodeURIComponent(msg);
+      acts.appendChild(a);
+      var wn = waNumber(o.phone);
+      if (wn) {
+        var w = el('a', 'abtn wa', 'WhatsApp');
+        w.href = 'https://wa.me/' + wn + '?text=' + encodeURIComponent(msg);
+        w.target = '_blank'; w.rel = 'noopener';
+        acts.appendChild(w);
+      }
+      var tl = el('a', 'abtn alt', '📞 Call');
+      tl.href = 'tel:' + o.phone;
+      acts.appendChild(tl);
+      acts.appendChild(el('span', 'ph', o.phone));
+    } else {
+      acts.appendChild(el('span', 'ph', 'No mobile number'));
+    }
+    var cp = el('button', 'abtn alt', '📋 Copy message');
+    cp.type = 'button';
+    cp.onclick = function () { copyText(msg); };
+    acts.appendChild(cp);
+    card.appendChild(acts);
+    return card;
+  }
+
+  function copyText(txt) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      toast(ok ? 'Message copied' : 'Could not copy', !ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { toast('Message copied', false); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  // ===== ড্যাশবোর্ড ধাঁচ: শুভেচ্ছা, থিম, রিফ্রেশ =====
+  // ===== রিপোর্ট ট্যাব: সব রিপোর্ট এক জায়গা থেকে print =====
+  function rpWait(ok, run) {
+    var t0 = Date.now();
+    (function tick() {
+      if (ok()) { run(); return; }
+      if (Date.now() - t0 > 20000) { loading(false); toast('Timed out, try again', true); return; }
+      setTimeout(tick, 200);
+    })();
+  }
+  function rpDateVal() { return $('rpDate').value || cfg.today; }
+
+  function rpDaily(mode) {
+    var cls = $('mcls').value;
+    if (!cls) { toast('Select a class above first', true); return; }
+    if (dirty && !confirmLeave()) return;
+    var date = rpDateVal();
+    $('cls').value = cls; $('date').value = date;
+    if ($('cls').value !== cls) { toast('Class not found in the attendance list', true); return; }
+    loadClass();
+    rpWait(function () { return cur.cls === cls && cur.date === date && (students.length || blocked); },
+           function () { printAttendance(mode); });
+  }
+
+  function rpSummary(dt) {
+    var date = dt || rpDateVal();
+    $('sdate').value = date;
+    loadSummary();
+    rpWait(function () { return sumData && sumData.date === date; }, function () { printSummary(); });
+  }
+
+  // "তারিখ রেঞ্জ" ভাঁজ খুলে সেখানে নিয়ে যায়
+  function rpOpenRange() {
+    var dt = $('rpRange'); if (dt) dt.open = true;
+    var t = $('rtype'); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function rpMonth() {
+    if (!$('mcls').value || !$('mmonth').value) { toast('Select month and class first', true); return; }
+    loadMonth();
+    rpWait(function () { return monData; }, function () {
+      if (!monData.dates.length) { toast('No attendance for this class this month', true); return; }
+      printMonth();
+    });
+  }
+
+  function rpAlerts() {
+    var month = $('mmonth').value || cfg.today.substr(0, 7);
+    loading(true, 'Preparing alert list...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        loading(false);
+        var pa = $('printArea');
+        pa.innerHTML = '';
+        pa.appendChild(prHead('Alert Report', ['Month: ' + monthLabel(month), periodLine(cur.period), 'Print date: ' + fmtFull(cfg.today)]));
+        function table(title, heads, rows) {
+          pa.appendChild(el('h3', null, title));
+          var t = el('table', 'pt'), th = el('thead');
+          th.appendChild(prRow(heads.map(function (h) { return el('th', null, h); })));
+          t.appendChild(th);
+          var tb = el('tbody');
+          if (!rows.length) { var c = el('td', null, 'None'); c.colSpan = heads.length; tb.appendChild(prRow([c])); }
+          rows.forEach(function (r, i) { tb.appendChild(prRow([el('td', null, bn(i + 1))].concat(r.map(function (v, k) { return el('td', k === 2 ? 'l' : null, v); })))); });
+          t.appendChild(tb);
+          pa.appendChild(t);
+        }
+        table('Streak ' + bn(d.minStreak) + ' days or more absent (' + bn(d.streak.length) + ' students)',
+          ['Serial', 'Class', 'Roll', 'Name', 'Streak (days)', 'Start', 'Latest'],
+          d.streak.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.n), fmtFull(o.since), fmtFull(o.last)]; }));
+        table('Attendance ' + bn(d.threshold) + '% or below (' + bn(d.low.length) + ' students)',
+          ['Serial', 'Class', 'Roll', 'Name', 'Present', 'Total days', '%'],
+          d.low.map(function (o) { return [clsPlain(o.cls), o.roll, o.name, bn(o.present), bn(o.total), bn(o.percent)]; }));
+        pa.appendChild(prSign());
+        doPrint(false);
+      })
+      .withFailureHandler(fail)
+      .getAlerts(TOKEN, month, cur.period);
+  }
+
+  // ===== ড্যাশবোর্ডে Today’s summary (কার্ড) =====
+  var dashData = null, dashReq = 0, dashBusy = false, dashFail = false, dashLast = { pct: 0, prog: 0, cnt: {}, mini: {} };
+  // ===== ড্যাশবোর্ড v15: skeleton, স্বয়ংক্রিয় রিফ্রেশ, animation (ক্যাশ shim-এ আগে থেকেই আছে) =====
+  function loadDash() {
+    if (!cfg || !TOKEN) return;
+    var id = ++dashReq;
+    dashBusy = true; dashFail = false;
+    dsSync();
+    loadDashAlr();
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if (id !== dashReq) return;
+        dashBusy = false; dashFail = false; sortSummaryAbsent(d); dashData = d; renderDash(d);
+      })
+      .withFailureHandler(function () {
+        if (id !== dashReq) return;
+        dashBusy = false; dashFail = true;
+        if (dashData) $('dsInfo').textContent = '⚠️ Connection problem — showing previous data';
+        dsSync();
+      })
+      .getDaySummary(TOKEN, cfg.today, cur.period);
+  }
+  function dsSync() {
+    var home = curTab === 'home';
+    document.body.classList.toggle('on-home', home);
+    var b = $('dashSum'); if (b) b.style.display = (home && dashData) ? 'block' : 'none';
+    var sk = $('dsSkel'); if (sk) sk.style.display = (home && !dashData && dashBusy && !dashFail) ? 'grid' : 'none';
+    var er = $('dsErr'); if (er) er.style.display = (home && !dashData && dashFail) ? 'block' : 'none';
+    var rf = $('dsRef'); if (rf) rf.classList.toggle('spin', dashBusy);
+  }
+
+  // অ্যাপে ফিরলে ও প্রতি ৫ মিনিটে নিজে থেকে নতুন তথ্য
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && curTab === 'home') loadDash(); });
+  setInterval(function () { if (!document.hidden && curTab === 'home') loadDash(); }, 5 * 60 * 1000);
+
+  // কার্ডকে ক্রমান্বয়ে (≤১০টি) আসার জন্য সূচক বসায়
+  function stg(n, i) { n.style.setProperty('--i', Math.min(i, 10)); return n; }
+
+  // সংখ্যা/রিং ধীরে ভরার animation (reduced-motion চালু থাকলে সরাসরি বসে)
+  var DS_REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function dsTween(from, to, ms, cb) {
+    if (DS_REDUCE || from === to || !window.requestAnimationFrame) { cb(to); return; }
+    var t0 = null;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+      cb(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  // হাজিরা বাকি class আগে, তারপর বাকিগুলো (আগের ক্রম বজায় রেখে)
+  // কার্ড ব্লক: ৯–১০ম-এ একই সেকশনের গ্রুপগুলো একসাথে (শিরোনামসহ); বাকিরা একা। বাকি-থাকা ব্লক আগে
+  function dsBlocks(list) {
+    var blocks = [], seen = {};
+    list.forEach(function (c, i) {
+      var p = clsParts(c.cls), k = p.group ? p.base + '|' + p.section : c.cls;
+      if (!seen[k]) { seen[k] = { head: p.group ? 'Class ' + bn(p.base) + ' — ' + secText(p.section) : '', items: [], i: i }; blocks.push(seen[k]); }
+      seen[k].items.push(c);
+    });
+    blocks.sort(function (a, b) {
+      var pa = a.items.some(function (c) { return !c.taken; }) ? 0 : 1, pb = b.items.some(function (c) { return !c.taken; }) ? 0 : 1;
+      return (pa - pb) || (a.i - b.i);
+    });
+    return blocks;
+  }
+  function dsSorted(list) {
+    return list.map(function (c, i) { return { c: c, i: i }; })
+      .sort(function (a, b) { return ((a.c.taken ? 1 : 0) - (b.c.taken ? 1 : 0)) || (a.i - b.i); })
+      .map(function (x) { return x.c; });
+  }
+  // পুরো স্কুলের সামগ্রিক রিং কার্ড
+  function dsOverview(d, cnt, tot, done, pct, nCls, nDone) {
+    var box = $('dsTot'); box.innerHTML = '';
+    if (!nCls) { box.style.display = 'none'; return; }
+    box.style.display = 'block'; box.style.marginBottom = '14px';
+    var ov = el('div', 'ds-ov');
+    var ring = el('div', 'ds-ring'); ring.setAttribute('role', 'img');
+    ring.setAttribute('aria-label', done ? 'আজকের Attendance ' + bn(pct) + ' শতাংশ' : 'Attendance not taken yet today');
+    var rb = el('b', null, done ? bn(pct) + '%' : '—');
+    ring.appendChild(rb); ring.appendChild(el('span', null, done ? 'Present' : 'Attendance not started'));
+    ring.style.setProperty('--pc', done ? dashLast.pct : 0);
+    var r = el('div', 'ds-ovr');
+    r.appendChild(el('div', 'ds-ovt', 'পুরো স্কুল · মোট ' + bn(tot) + ' students'));
+    var nums = [];
+    STATUS.forEach(function (x, k) {
+      var row = el('div', 'ds-ovrow s' + k);
+      row.appendChild(el('i'));
+      row.appendChild(el('span', null, cfg.labels[x] || x));
+      var b = el('b', null, bn(dashLast.cnt[x] || 0));
+      row.appendChild(b); r.appendChild(row);
+      nums.push([b, dashLast.cnt[x] || 0, cnt[x] || 0]);
+    });
+    var pr = el('div', 'ds-prog');
+    pr.appendChild(el('div', 'ds-pt', bn(nDone) + '/' + bn(nCls) + ' classes completed'));
+    var bar = el('div', 'ds-bar'), fi = el('i');
+    fi.style.width = (dashLast.prog || 0) + '%';
+    bar.appendChild(fi); pr.appendChild(bar); r.appendChild(pr);
+    var pend = null;
+    d.classes.some(function (c) { if (!c.taken) { pend = c; return true; } return false; });
+    if (pend) {
+      var go = el('button', 'ds-go', 'বাকি: ' + clsPlain(pend.cls) + ' — হাজিরা নিন ›');
+      go.type = 'button';
+      go.onclick = function () { dashPick(pend.cls); };
+      r.appendChild(go);
+    }
+    ov.appendChild(ring); ov.appendChild(r); box.appendChild(ov);
+
+    var prog = nDone * 100 / nCls;
+    if (done) dsTween(dashLast.pct, pct, 800, function (v) { ring.style.setProperty('--pc', v); rb.textContent = bn(Math.round(v * 10) / 10) + '%'; });
+    nums.forEach(function (n) { dsTween(n[1], n[2], 700, function (v) { n[0].textContent = bn(Math.round(v)); }); });
+    if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(function () { fi.style.width = prog + '%'; }); });
+    else fi.style.width = prog + '%';
+    dashLast.pct = done ? pct : 0; dashLast.prog = prog;
+    dashLast.cnt = {}; STATUS.forEach(function (x) { dashLast.cnt[x] = cnt[x] || 0; });
+  }
+  function dashPick(cls) {
+    if (dirty && !confirmLeave()) return;
+    showTab('att');
+    $('date').value = cfg.today;
+    $('cls').value = cls;
+    onAttChange();
+    var a = $('cls'); if (a && a.scrollIntoView) a.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function renderDash(d) {
+    var P = STATUS[0], tot = 0, pend = 0, cnt = {}, absList = [];
+    STATUS.forEach(function (x) { cnt[x] = 0; });
+    d.classes.forEach(function (c) {
+      tot += c.total;
+      if (c.taken) {
+        STATUS.forEach(function (x) { cnt[x] += c.counts[x] || 0; });
+        if (c.absent.length) absList.push({ cls: c.cls, n: c.absent.length });     // শুধু সংখ্যা — নাম রাখা হয় না
+      } else pend++;
+    });
+    var done = STATUS.reduce(function (a, x) { return a + cnt[x]; }, 0);
+    var pct = done ? Math.round(cnt[P] * 1000 / done) / 10 : 0;
+    var nCls = d.classes.length, nDone = nCls - pend;
+    var nowT = new Date();
+    $('dsInfo').textContent = 'Updated ' + bn(('0' + nowT.getHours()).slice(-2) + ':' + ('0' + nowT.getMinutes()).slice(-2));
+    var hol = $('dsHol');
+    hol.style.display = d.holiday ? 'block' : 'none';
+    hol.textContent = d.holiday ? '🌴 Today is a holiday — ' + d.holiday : '';
+
+    // দ্রুত কাজ
+    var q = $('dsQuick'); q.innerHTML = '';
+    var qs = [['✅', 'Take attendance', 'att'], ['🗓️', 'Reports', 'mon'], ['🔔', 'Alerts', 'alr']];
+    if ($('regChip').style.display !== 'none') qs.push(['🧾', 'Registration', 'reg']);
+    if ($('proChip').style.display !== 'none') qs.push(['🎓', 'Promotion', 'pro']);
+    if ($('ffChip').style.display !== 'none') qs.push(['📝', 'Form Fill-Up', 'ff']);
+    qs.push(['✏️', 'Edit info', 'stuedit']);
+    qs.forEach(function (x) {
+      var b = el('button', 'ds-q' + (x[2] === 'ff' ? ' ds-q-ff' : '')); b.type = 'button';
+      b.onclick = function () { showTab(x[2]); };
+      var qi = el('span', 'qi', x[2] === 'ff' ? '' : x[0]);
+      if (x[2] === 'ff') qi.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9.2 14.2l2 2 3.8-4"/></svg>';   // স্থির SVG আইকন
+      b.appendChild(qi); b.appendChild(el('span', 'qt', x[1]));
+      q.appendChild(b);
+    });
+
+    dsOverview(d, cnt, tot, done, pct, nCls, nDone);
+
+    // class কার্ড
+    var g = $('dsGrid'); g.innerHTML = '';
+    var dsOpen = window.__dsOpen = window.__dsOpen || {};
+    function buildCard(c, sub) {
+      var card = el('button', 'ds-card bc-card' + (c.taken ? '' : ' wait')); card.type = 'button';
+      card.onclick = function () { dashPick(c.cls); };
+      var l = el('div', 'ds-l');
+      l.appendChild(el('div', 'ds-cn', sub ? grpText(clsParts(c.cls).group) : clsPlain(c.cls)));
+      var mini = el('div', 'ds-mini'), pc = 0;
+      var chips = el('div', 'bc-chips');
+      if (!c.taken) {
+        chips.appendChild(el('span', 'bc-chip pend', '⏳ Attendance pending'));
+        l.appendChild(chips);
+        l.appendChild(el('div', 'ds-sub', 'Total ' + bn(c.total) + ' students'));
+        mini.style.setProperty('--pc', 0); mini.appendChild(el('b', null, '–'));
+      } else {
+        var n = STATUS.reduce(function (a, x) { return a + (c.counts[x] || 0); }, 0);
+        pc = n ? Math.round((c.counts[P] || 0) * 100 / n) : 0;
+        STATUS.forEach(function (x, k) {
+          var kind = x === P ? 'pres' : (x === cfg.absentStatus ? 'abs' : 'oth');
+          chips.appendChild(el('span', 'bc-chip ' + kind, cfg.labels[x] + ' ' + bn(c.counts[x] || 0)));
+        });
+        l.appendChild(chips);
+        var stk = el('div', 'ds-stack');
+        STATUS.forEach(function (x, k) { if (c.counts[x]) { var seg = el('i', 's' + k); seg.style.flex = c.counts[x]; stk.appendChild(seg); } });
+        l.appendChild(stk);
+        l.appendChild(el('div', 'ds-sub', 'Total ' + bn(c.total) + ' students' + (c.absent.length ? ' · ' + bn(c.absent.length) + ' absent' : '')));
+        mini.style.setProperty('--pc', pc); mini.appendChild(el('b', null, bn(pc) + '%'));
+        if (pc < cfg.lowPercent) mini.className += ' low';
+      }
+      if (c.groups && c.groups.length) {
+        var gl = el('div', 'ds-grps');
+        c.groups.forEach(function (g) {
+          var sc = el('div', 'ds-sc' + (g.taken ? '' : ' wait'));
+          sc.setAttribute('role', 'button'); sc.tabIndex = 0;
+          var gn = STATUS.reduce(function (a, x) { return a + (g.counts[x] || 0); }, 0);
+          var gp = gn ? Math.round((g.counts[P] || 0) * 100 / gn) : 0;
+          var top = el('div', 'ds-sc-top');
+          top.appendChild(el('span', 'ds-sc-n', grpText(g.name)));
+          top.appendChild(el('span', 'ds-sc-p' + (g.taken && gp < cfg.lowPercent ? ' low' : ''), g.taken ? bn(gp) + '%' : '⏳'));
+          sc.appendChild(top);
+          sc.appendChild(el('div', 'ds-sc-s', bn(g.total) + ' জন'));
+          if (g.taken) {
+            var gch = el('div', 'bc-chips');
+            STATUS.forEach(function (x) {
+              var kind = x === P ? 'pres' : (x === cfg.absentStatus ? 'abs' : 'oth');
+              gch.appendChild(el('span', 'bc-chip ' + kind, cfg.labels[x] + ' ' + bn(g.counts[x] || 0)));
+            });
+            sc.appendChild(gch);
+          } else sc.appendChild(el('div', 'ds-sc-w', 'Attendance pending'));
+          var go = function (e) {
+            e.stopPropagation();
+            dashPick(c.cls);
+            attGroup = g.name;
+          };
+          sc.onclick = go;
+          sc.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } };
+          gl.appendChild(sc);
+        });
+        l.appendChild(gl);
+      }
+      card.appendChild(l); card.appendChild(mini);
+      mini.setAttribute('aria-hidden', 'true');
+      card.setAttribute('aria-label', clsPlain(c.cls) + (c.taken ? ': attendance ' + bn(pc) + '%' : ': attendance pending'));
+      if (c.taken) {
+        (function (m, key, to) {
+          dsTween(dashLast.mini[key] || 0, to, 700, function (v) { m.style.setProperty('--pc', v); });
+          dashLast.mini[key] = to;
+        })(mini, c.cls, pc);
+      }
+      return card;
+    }
+    function sumItems(items) {
+      var r = { total: 0, taken: 0, counts: {} };
+      STATUS.forEach(function (x) { r.counts[x] = 0; });
+      items.forEach(function (c) {
+        r.total += c.total;
+        if (c.taken) { r.taken++; STATUS.forEach(function (x) { r.counts[x] += c.counts[x] || 0; }); }
+      });
+      return r;
+    }
+    dsBlocks(d.classes).forEach(function (bl) {
+      if (!bl.head) { bl.items.forEach(function (c) { g.appendChild(buildCard(c, false)); }); return; }
+      var sm = sumItems(bl.items);
+      var n = STATUS.reduce(function (a, x) { return a + sm.counts[x]; }, 0);
+      var wp = n ? Math.round(sm.counts[P] * 100 / n) : 0;
+      var wkey = bl.head, isOpen = !!dsOpen[wkey];
+      var wrap = el('div', 'ds-wrap' + (sm.taken < bl.items.length ? ' wait' : '') + (isOpen ? ' open' : ''));
+      var wt = el('button', 'ds-wrap-t'); wt.type = 'button';
+      wt.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      var wl = el('div', 'ds-wrap-l');
+      wl.appendChild(el('div', 'ds-wrap-n', bl.head));
+      wl.appendChild(el('div', 'ds-wrap-s', 'Total ' + bn(sm.total) + ' students · ' + bn(bl.items.length) + ' groups'));
+      wl.appendChild(el('div', 'ds-wrap-s', sm.taken ? bn(wp) + '% present' : '⏳ Attendance pending'));
+      wt.appendChild(wl);
+      wt.appendChild(el('span', 'ds-wrap-c', '▾'));
+      wrap.appendChild(wt);
+      var inner = el('div', 'ds-wrap-g');
+      bl.items.forEach(function (c) { inner.appendChild(buildCard(c, true)); });
+      wrap.appendChild(inner);
+      wt.onclick = function () {
+        var o = !wrap.classList.contains('open');
+        wrap.classList.toggle('open', o); dsOpen[wkey] = o;
+        wt.setAttribute('aria-expanded', o ? 'true' : 'false');
+      };
+      g.appendChild(wrap);
+    });
+
+    // আজকের অনুপস্থিত — নাম ছাড়া, শুধু classভিত্তিক সংখ্যা (নামসহ তালিকা হাজিরা ট্যাবে)
+    var ah = $('dsAbsH'), ab = $('dsAbs'); ab.innerHTML = '';
+    var absTot = absList.reduce(function (s, x) { return s + x.n; }, 0);
+    ah.style.display = absTot ? 'block' : 'none';
+    ah.textContent = 'Absent today (' + bn(absTot) + ' students)';
+    if (absTot) dsChips(ab, absList, function (o) { dashPick(o.cls); }, '');
+    dashAgg = { nDone: nDone, nCls: nCls, rate: done ? Math.round(cnt[cfg.absentStatus] * 1000 / done) / 10 : null };
+    renderKpi();
+    dsSync();
+    dashToday = { pct: pct, done: done, abs: cnt[cfg.absentStatus] || 0 };
+    renderCmp();
+    renderBday(d);
+    loadDashPrev();
+    loadDashMonth(false);
+  }
+
+  // ===== ড্যাশবোর্ড: আগের কর্মদিবসের সাথে তুলনা ও আজকের জন্মদিন =====
+  var dashPrev = null, dashToday = null, prevReq = 0;
+
+  // আজ থেকে পিছিয়ে (সর্বোচ্চ ৭ দিন) প্রথম যে দিনে হাজিরা নেওয়া হয়েছে সেটি খোঁজে; ছুটির দিন বাদ
+  function loadDashPrev() {
+    if (!cfg || !TOKEN) return;
+    if (dashPrev && dashPrev.forDay === cfg.today && !dashPrev.none) return;   // আজকের জন্য আগেই বের করা আছে
+    var id = ++prevReq, k = 1;
+    (function step() {
+      if (id !== prevReq) return;
+      if (k > 7) { dashPrev = { none: true }; renderCmp(); return; }
+      var date = rngAddDays(cfg.today, -k), seen = 0;
+      google.script.run
+        .withSuccessHandler(function (s) {
+          if (id !== prevReq) return;
+          seen++;
+          var P = STATUS[0], cnt = {}, done = 0;
+          STATUS.forEach(function (x) { cnt[x] = 0; });
+          if (!s.holiday) s.classes.forEach(function (c) {
+            if (c.taken) STATUS.forEach(function (x) { cnt[x] += c.counts[x] || 0; });
+          });
+          STATUS.forEach(function (x) { done += cnt[x]; });
+          if (done > 0) {
+            dashPrev = { forDay: cfg.today, date: date, back: k, pct: Math.round(cnt[P] * 1000 / done) / 10, abs: cnt[cfg.absentStatus] || 0 };
+            renderCmp();
+            return;
+          }
+          if (seen === 1) { k++; step(); }     // এই দিনে হাজিরা নেই বা ছুটি — আরও আগের দিনে যাও
+        })
+        .withFailureHandler(function () { if (id === prevReq) { dashPrev = { none: true }; renderCmp(); } })
+        .getDaySummary(TOKEN, date, cur.period);
+    })();
+  }
+
+  function renderCmp() {
+    var box = $('dsCmp'); if (!box) return;
+    box.innerHTML = '';
+    var p = dashPrev, t = dashToday;
+    if (!p || p.none || !t) return;
+    var lbl = p.back === 1 ? 'Yesterday' : 'আগের কর্মদিবস (' + fmtDM(p.date) + ')';
+    var card = el('div', 'ds-cmp');
+    if (!t.done) {                       // আজ এখনো Attendance not started
+      card.appendChild(el('div', 'ds-cmp-t', lbl + ' Attendance ছিল ' + bn(p.pct) + '%, অনুপস্থিত ' + bn(p.abs) + ' students'));
+      box.appendChild(card);
+      return;
+    }
+    var dp = Math.round((t.pct - p.pct) * 10) / 10, da = t.abs - p.abs;
+    var cls = dp > 0 ? 'up' : (dp < 0 ? 'down' : 'same');
+    var arrow = dp > 0 ? '▲ +' : (dp < 0 ? '▼ −' : '＝ ');
+    var main = el('div', 'ds-cmp-m ' + cls);
+    main.appendChild(el('b', null, arrow + bn(Math.abs(dp)) + '%'));
+    main.appendChild(el('span', null, ' ' + (p.back === 1 ? 'গতকালের' : 'আগের কর্মদিবসের (' + fmtDM(p.date) + ')') + ' চেয়ে ' + (dp > 0 ? 'বেশি' : (dp < 0 ? 'কম' : 'একই'))));
+    card.appendChild(main);
+    card.appendChild(el('div', 'ds-cmp-t',
+      lbl + ': Attendance ' + bn(p.pct) + '% · অনুপস্থিত ' + bn(p.abs) + ' জন   →   আজ: ' + bn(t.pct) + '% · অনুপস্থিত ' + bn(t.abs) + ' students' +
+      (da ? ' (' + (da > 0 ? '+' : '−') + bn(Math.abs(da)) + ' students)' : '')));
+    box.appendChild(card);
+  }
+
+  function renderBday(d) {
+    var box = $('dsBday'); if (!box) return;
+    box.innerHTML = '';
+    var list = sortByClsRoll((d && d.birthdays) || []);
+    if (!list.length) return;
+    var card = el('div', 'ds-bd');
+    card.appendChild(el('div', 'ds-bd-h', '🎂 Birthdays today (' + bn(list.length) + ' students)'));
+    var wrap = el('div', 'ds-bd-l');
+    list.forEach(function (b) {
+      var c = el('div', 'ds-bd-c');
+      c.appendChild(el('b', null, b.name));
+      c.appendChild(el('small', null, 'Class ' + clsPlain(b.cls) + ' · Roll ' + b.roll + ' · ' + bn(b.age) + ' yrs'));
+      wrap.appendChild(c);
+    });
+    card.appendChild(wrap);
+    box.appendChild(card);
+  }
+
+  // ===== ড্যাশবোর্ডের বাড়তি তথ্য: KPI + সতর্কতা তালিকা =====
+  var dashAgg = null, dashAlr = null, alrReq = 0;
+  function loadDashAlr() {
+    if (!cfg || !TOKEN) return;
+    var id = ++alrReq;
+    google.script.run
+      .withSuccessHandler(function (d) { if (id !== alrReq) return; dashAlr = d; renderKpi(); renderDashAlr(); })
+      .withFailureHandler(function () { })
+      .getAlerts(TOKEN, cfg.today.substr(0, 7), cur.period);
+  }
+  function renderKpi() {
+    var k = $('dsKpi'); if (!k || !dashAgg) return; k.innerHTML = '';
+    var low = dashAlr ? dashAlr.low.length : null, str = dashAlr ? dashAlr.streak.length : null;
+    [['📋', dashAgg.nCls ? bn(dashAgg.nDone) + '/' + bn(dashAgg.nCls) : '–', 'Classes completed', dashAgg.nDone < dashAgg.nCls ? 'warn' : 'good'],
+     ['📉', dashAgg.rate === null ? '–' : bn(dashAgg.rate) + '%', 'আজ অনুপস্থিতির হার', ''],
+     ['🔁', str === null ? '…' : bn(str) + ' students', 'Streak ' + bn(cfg.absentStreak) + '+ দিন অনুপস্থিত', str ? 'bad' : (str === 0 ? 'good' : '')]
+    ].forEach(function (x) {
+      var d = el('div', 'ds-k ' + x[3]);
+      d.appendChild(el('span', 'ki', x[0]));
+      var t = el('div', 'kt'); t.appendChild(el('b', null, x[1])); t.appendChild(el('small', null, x[2]));
+      d.appendChild(t); k.appendChild(d);
+    });
+  }
+  function renderDashAlr() {
+    var box = $('dsAlr'); box.innerHTML = '';
+    if (!dashAlr) return;
+    function sect(title, items, mod) {                 // নাম নয়, classভিত্তিক সংখ্যা
+      if (!items.length) return;
+      box.appendChild(el('div', 'ds-sec', title + ' (' + bn(items.length) + ' students)'));
+      var by = {};
+      items.forEach(function (o) { by[o.cls] = (by[o.cls] || 0) + 1; });
+      var list = Object.keys(by).map(function (k) { return { cls: k, n: by[k] }; });
+      var w = el('div', 'ds-abs');
+      dsChips(w, list, function () { showTab('alr'); }, mod);
+      box.appendChild(w);
+    }
+    sect('Consecutive absences', dashAlr.streak, '');
+    if (dashAlr.streak.length) box.appendChild(el('div', 'ds-more', 'নামসহ তালিকা "Alerts" ট্যাবে'));
+  }
+
+  // classভিত্তিক সংখ্যার চিপ (ট্যাপ করলে সংশ্লিষ্ট ট্যাবে যায়)
+  function dsChips(box, items, onTap, mod) {
+    var wrap = el('div', 'ds-cg');
+    items.slice().sort(function (a, b) { return b.n - a.n; }).forEach(function (o) {
+      var b = el('button', 'ds-cgc' + (mod ? ' ' + mod : '')); b.type = 'button';
+      b.appendChild(el('span', null, clsPlain(o.cls)));
+      b.appendChild(el('b', null, bn(o.n)));
+      b.setAttribute('aria-label', clsPlain(o.cls) + ': ' + bn(o.n) + ' students');
+      b.onclick = function () { onTap(o); };
+      wrap.appendChild(b);
+    });
+    box.appendChild(wrap);
+  }
+
+  // ===== ড্যাশবোর্ডে মাসিক সারাংশ (পুরো স্কুল, নাম ছাড়া) =====
+  // classগুলোর মাসিক ছক ২টি করে একসাথে এনে যোগ করা হয়; একই মাস/পিরিয়ডে একবারই, ↻ চাপলে আবার
+  var dashMon = null, monReq = 0;
+  function tdPhoto(s) {
+    var u = s && (s.photo || s.image || s.img || s.photoUrl || s.photo_url || '');
+    return (typeof u === 'string' && (u.indexOf('data:image/') === 0 || /^https?:\/\//.test(u))) ? u : '';
+  }
+  function loadDashMonth(force) {
+    if (!cfg || !TOKEN || !cfg.classes || !cfg.classes.length) return;
+    var key = cfg.today + '|' + (cur.period || '');
+    if (!force && dashMon && dashMon.key === key) { renderDashMonth(); return; }
+    var id = ++monReq, list = cfg.classes.slice(), next = 0, seen = {};
+    dashMon = { key: key, busy: true, byCls: {}, total: list.length, fin: 0, fails: 0, tab: (dashMon && dashMon.tab) || 'A' };
+    renderDashMonth();
+    function done(cls, ok) {
+      if (!seen[cls]) { seen[cls] = 1; dashMon.fin++; if (!ok) dashMon.fails++; }
+      if (dashMon.fin >= list.length) dashMon.busy = false;
+      renderDashMonth();
+      pump();
+    }
+    function pump() {
+      if (id !== monReq || next >= list.length) return;
+      var cls = list[next++];
+      google.script.run
+        .withSuccessHandler(function (d) {
+          if (id !== monReq) return;
+          dashMon.byCls[cls] = { students: d.students || [], saved: d.saved || {}, blocked: !!d.blocked };
+          done(cls, true);
+        })
+        .withFailureHandler(function () { if (id !== monReq) return; done(cls, false); })
+        .getClassData(TOKEN, cfg.today, cls, cur.period);
+    }
+    pump(); pump();
+  }
+  function renderDashMonth() {
+    var box = $('dsMon'); if (!box) return;
+    box.innerHTML = '';
+    if (!dashMon) return;
+    var m = dashMon, card = el('div', 'ds-mon td-wrap');
+    var P = STATUS[0], A = cfg.absentStatus;
+    var pl = [], ab = [], taken = 0;
+    cfg.classes.forEach(function (c) {
+      var d = m.byCls[c]; if (!d || d.blocked || !Object.keys(d.saved).length) return;
+      taken++;
+      sortByRoll(d.students.slice(), 'roll').forEach(function (s) {
+        var st = d.saved[s.roll];
+        var o = { cls: c, roll: s.roll, name: s.name, photo: tdPhoto(s) };
+        if (st === P) pl.push(o); else if (st === A) ab.push(o);
+      });
+    });
+    var h = el('div', 'ds-mon-h');
+    h.appendChild(el('b', null, '👥 Today’s attendance'));
+    h.appendChild(el('span', null, m.busy ? 'Loading ' + bn(m.fin) + '/' + bn(m.total) : ''));
+    var rf = el('button', 'ds-ref' + (m.busy ? ' spin' : ''), '↻');
+    rf.type = 'button'; rf.setAttribute('aria-label', 'Refresh');
+    rf.onclick = function () { loadDashMonth(true); };
+    h.appendChild(rf);
+    card.appendChild(h);
+
+    var seg = el('div', 'td-seg');
+    [['A', 'Absent (' + ab.length + ')'], ['P', 'Present (' + pl.length + ')']].forEach(function (t) {
+      var b = el('button', 'td-tab' + (m.tab === t[0] ? ' on ' + (t[0] === 'A' ? 'a' : 'p') : ''), t[1]);
+      b.type = 'button';
+      b.onclick = function () { m.tab = t[0]; renderDashMonth(); };
+      seg.appendChild(b);
+    });
+    card.appendChild(seg);
+
+    var list = m.tab === 'A' ? ab : pl;
+    if (!list.length) {
+      card.appendChild(el('div', 'ds-mon-note' + (!m.busy && m.fails ? ' bad' : ''),
+        m.busy ? 'Fetching students…' : (!taken ? 'Attendance not taken yet today' : (m.tab === 'A' ? '🎉 No one is absent' : 'No present students'))));
+      box.appendChild(card); return;
+    }
+    var grid = el('div', 'td-grid');
+    list.slice(0, 120).forEach(function (o) {
+      var c = el('div', 'td-card ' + (m.tab === 'A' ? 'a' : 'p'));
+      var av = el('div', 'td-av');
+      if (o.photo) { var im = document.createElement('img'); im.src = o.photo; im.alt = ''; im.loading = 'lazy'; av.appendChild(im); }
+      else av.textContent = Array.from(String(o.name || '?').trim())[0] || '?';
+      c.appendChild(av);
+      c.appendChild(el('b', null, o.name));
+      c.appendChild(el('small', null, clsPlain(o.cls) + ' · Roll ' + o.roll));
+      grid.appendChild(c);
+    });
+    card.appendChild(grid);
+    if (list.length > 120) card.appendChild(el('div', 'ds-mon-note', '+' + (list.length - 120) + ' more'));
+    box.appendChild(card);
+  }
+  // রিপোর্ট ট্যাব খুললে তারিখের ঘরে আজকের তারিখ বসবে
+  (function () {
+    var orig = showTab;
+    showTab = function (t) { orig(t); dsSync(); if (t === 'mon' && !$('rpDate').value && cfg) $('rpDate').value = cfg.today; };
+  })();
+
+  var PG_TITLES = { home: 'Dashboard', att: 'Attendance', sum: 'Summary', mon: 'Reports', alr: 'Alerts', reg: 'Registration', pro: 'Promotion', ff: 'Form Fill-Up' };
+
+  // ===== বাংলা ও হিজরি তারিখ =====
+  var HIJRI_ADJ = 0;   // চাঁদ দেখা অনুযায়ী মিলাতে -1 বা +1 দিন
+  var BN_MONTHS = ['বৈশাখ', 'জ্যৈষ্ঠ', 'আষাঢ়', 'শ্রাবণ', 'ভাদ্র', 'আশ্বিন', 'কার্তিক', 'অগ্রহায়ণ', 'পৌষ', 'মাঘ', 'ফাল্গুন', 'চৈত্র'];
+  var HIJRI_M = ['মুহাররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জমাদিউল আউয়াল', 'জমাদিউস সানি', 'রজব', 'শা\u2019বান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'];
+
+  // বাংলাদেশের সংশোধিত বাংলা পঞ্জিকা (বছর শুরু ১৪ এপ্রিল)
+  function banglaText(iso) {
+    try {
+      var p = iso.split('-'), y = +p[0], m = +p[1], d = +p[2];
+      var sy = (m > 4 || (m === 4 && d >= 14)) ? y : y - 1;
+      var diff = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(sy, 3, 14)) / 86400000);
+      var ly = sy + 1;
+      var leap = (ly % 4 === 0 && ly % 100 !== 0) || ly % 400 === 0;
+      var len = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap ? 30 : 29, 30];
+      var k = 0;
+      while (k < 11 && diff >= len[k]) { diff -= len[k]; k++; }
+      return { t: bnD(diff + 1) + ' ' + BN_MONTHS[k] + ' ' + bnD(sy - 593) + ' বঙ্গাব্দ', k: k };
+    } catch (e) { return null; }
+  }
+
+  function hijriText(iso) {
+    try {
+      var p = iso.split('-');
+      var dt = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + HIJRI_ADJ, 12));
+      var parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn',
+        { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).formatToParts(dt);
+      var o = {};
+      parts.forEach(function (x) { o[x.type] = x.value; });
+      var y = o.relatedYear || o.year;
+      if (!o.day || !o.month || !y || +y < 1000) return '';
+      return bnD(o.day) + ' ' + HIJRI_M[+o.month - 1] + ' ' + bnD(y) + ' হিজরি';
+    } catch (e) { return ''; }
+  }
+
+  // দুই মাস করে এক ঋতু: বৈশাখ-জ্যৈষ্ঠ = গ্রীষ্ম, আষাঢ়-শ্রাবণ = বর্ষা, ভাদ্র-আশ্বিন = শরৎ,
+  // কার্তিক-অগ্রহায়ণ = হেমন্ত, পৌষ-মাঘ = শীত, ফাল্গুন-চৈত্র = বসন্ত
+  var SEASONS = ['গ্রীষ্ম', 'বর্ষা', 'শরৎ', 'হেমন্ত', 'শীত', 'বসন্ত'];
+
+  function fillDates(iso) {
+    $('dhDate').textContent = fmtLong(iso);
+    var b = banglaText(iso);
+    $('dhBn').textContent = b ? b.t + ', ' + SEASONS[Math.floor(b.k / 2)] + ' কাল' : '';
+    $('dhAr').textContent = hijriText(iso);
+  }
+
+  function setupDash(d) {
+    var h = new Date().getHours();
+    var g = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 15 ? 'Good noon' : h < 18 ? 'Good afternoon' : h < 20 ? 'Good evening' : 'Good night';
+    $('greet').textContent = g + '! ' + (d.teacher || d.school || d.title);
+    fillDates(d.today);
+    $('sbTitle').textContent = d.school || d.title;
+    $('regChip').style.display = d.canConfirm ? '' : 'none';
+    $('hbtns').style.display = 'inline-flex';
+    setTimeout(loadDash, 80);
+    $('pgTitle').textContent = PG_TITLES[curTab] || '';
+  }
+
+  function toggleTheme() {
+    var root = document.documentElement;
+    var cur = root.getAttribute('data-theme');
+    if (!cur) cur = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('att_theme', next); } catch (e) {}
+  }
+
+  function doRefresh() {
+    if (curTab === 'att' && !confirmLeave()) return;
+    if (curTab === 'att') { dirty = false; attStale = false; }
+    refreshTab();
+  }
+
+  // ===== ৫. নিবন্ধন নিশ্চিতকরণ =====
+  var regSel = {};
+  var regItems = [];
+
+  function updateBulk() {
+    var n = Object.keys(regSel).length;
+    $('bkCnt').textContent = n ? bn(n) + ' selected' : 'No one selected';
+    $('bkOk').disabled = !n;
+    $('bkNo').disabled = !n;
+    $('bkAll').checked = n > 0 && n === regItems.length;
+  }
+
+  // বাছাইকৃতদের একে একে কনফার্ম (kind='ok') বা বাতিল (kind='no')
+  function bulkRun(kind) {
+    var ids = Object.keys(regSel);
+    if (!ids.length) return;
+    var verb = kind === 'ok' ? 'Confirm' : 'Cancel';
+    if (!confirm(bn(ids.length) + ' জনকে ' + verb + ' করবেন?' + (kind === 'no' ? '\nসারিগুলো মুছবে না; Status "Cancelled" হিসেবে থাকবে (বাতিল তালিকা থেকে ফিরিয়ে আনা যাবে)।' : ''))) return;
+    var i = 0, done = 0, skipped = [], skippedObjs = [], failed = [];
+
+    // বাদ পড়াদের আগের শিক্ষার্থীর জায়গায় একে একে Replace
+    function replaceSkipped() {
+      var j = 0, rep = 0;
+      (function step() {
+        if (j >= skippedObjs.length) {
+          loading(false);
+          attStale = true; dashData = null;
+          toast(bn(rep) + ' জনের Replace সম্পন্ন', false);
+          if (failed.length) alert('ত্রুটি:\n' + failed.join('\n'));
+          loadPending();
+          return;
+        }
+        var o = skippedObjs[j++], nm = o.nameEn || o.id;
+        loading(true, 'Replace হচ্ছে... ' + bn(j) + '/' + bn(skippedObjs.length));
+        regFindDup(o, function (hits) {
+          if (!hits.length) { failed.push(nm + ': আগের শিক্ষার্থী খুঁজে পাওয়া যায়নি'); step(); return; }
+          regReplace(o, hits, function (err) {
+            if (err) failed.push(nm + ': ' + friendlyErr(err)); else rep++;
+            step();
           });
         });
-      }).catch(function () {});
-    })).then(function () { if (any) return notifyUpdated(); });
-  }).catch(function () {}).then(function () { checking = false; });
-}
-
-var lastApp = 0;
-function appPage(req) {
-  return caches.open(SHELL).then(function (c) {
-    return c.match(APP).then(function (hit) {
-      // ক্যাশে থাকলে তাৎক্ষণিক খোলে; পেছনের হালনাগাদ ১০ মিনিটে একবার (ডেটার নেট দখল না করতে)
-      if (hit && Date.now() - lastApp < 600000) return hit.clone();
-      lastApp = Date.now();
-      var net = fetchT(req.url, { credentials: 'same-origin' }, hit ? 20000 : 45000).then(function (r) {
-        if (r && r.ok) {
-          var store = r.clone(), cmp = r.clone();
-          changed(hit, cmp).then(function () { return c.put(APP, clean(store)); });
-        }
-        return r;
-      }).catch(function () { return null; });
-      return hit ? hit.clone() : net.then(function (r) { return r || offlinePage(); });
-    });
-  });
-}
-
-function netFirst(req, key, cacheName, fallbackFn, watch) {
-  return new Promise(function (resolve) {
-    var done = false;
-    function fallback() {
-      caches.open(cacheName).then(function (c) { return c.match(key, { ignoreSearch: true }); })
-        .then(function (hit) { resolve(hit || fallbackFn()); });
+      })();
     }
-    var timer = setTimeout(function () {
-      if (done) return;
-      caches.open(cacheName).then(function (c) { return c.match(key, { ignoreSearch: true }); }).then(function (hit) {
-        if (hit && !done) { done = true; resolve(hit); }
-      });
-    }, 4000);
-    fetch(req).then(function (res) {
-      // পরিবর্তন: অন্য সাইটের (CDN) script/style-ও (opaque) ক্যাশ হবে, যাতে অফলাইনে চলে
-      if (res && (res.ok || res.type === 'opaque')) {
-        var store = res.clone(), cmp = res.clone();
-        caches.open(cacheName).then(function (c) {
-          return c.match(key).then(function (old) {
-            return (watch ? changed(old, cmp) : Promise.resolve()).then(function () {
-              return c.put(key, clean(store));
-            }).then(function () { return cacheName === SHELL ? trim(c, MAX_PAGES, true) : trim(c, MAX_RUNTIME, false); });
-          });
-        }).catch(function () {});
+
+    function finish() {
+      loading(false);
+      attStale = true;
+      toast(bn(done) + ' students ' + verb + ' done', false);
+      if (kind === 'ok' && skippedObjs.length &&
+          confirm('রোল/নাম আগে থেকেই আছে, তাই এগুলো বাদ গেছে:\n' + skipped.join('\n') +
+                  '\n\nআগের শিক্ষার্থীদের সরিয়ে এদের Replace করবেন?\n(OK = Replace · Cancel = বাদ থাকবে)')) {
+        replaceSkipped();
+        return;
       }
-      if (done) return;
-      done = true; clearTimeout(timer); resolve(res);
-    }).catch(function () {
-      if (done) return;
-      done = true; clearTimeout(timer); fallback();
-    });
-  });
-}
+      var msg = '';
+      if (skipped.length) msg += 'রোল আগে থেকেই আছে, তাই বাদ গেছে (এগুলো আলাদাভাবে Confirm):\n' + skipped.join('\n') + '\n\n';
+      if (failed.length) msg += 'ত্রুটি:\n' + failed.join('\n');
+      if (msg) alert(msg);
+      loadPending();
+    }
 
-function swr(req) {
-  return caches.open(RUNTIME).then(function (c) {
-    return c.match(req).then(function (hit) {
-      var net = fetch(req).then(function (res) {
-        if (res && (res.ok || res.type === 'opaque')) c.put(req, res.clone()).then(function () { trim(c, MAX_RUNTIME, false); });
-        return res;
-      }).catch(function () { return null; });
-      return hit || net.then(function (r) { return r || Response.error(); });
-    });
-  });
-}
-
-self.addEventListener('fetch', function (e) {
-  var req = e.request;
-  if (req.method !== 'GET' || req.headers.has('range')) return;
-  var url = new URL(req.url);
-  if (url.hostname === 'script.google.com' || /googleusercontent\.com$/.test(url.hostname)) return;
-  var same = url.origin === location.origin;
-  if (same && url.pathname.indexOf(BASE) !== 0) return;
-  if (same && url.pathname.indexOf('/api/') === 0) return;
-
-  if (req.mode === 'navigate') {
-    if (!same) return;
-    if (isApp(url)) { e.respondWith(appPage(req)); return; }
-    e.respondWith(netFirst(req, cacheKey(url), SHELL, offlinePage, isHome(url)));
-    return;
+    function next() {
+      if (i >= ids.length) { finish(); return; }
+      var o = regSel[ids[i++]];
+      var nm = o.nameEn || o.id;
+      loading(true, verb + ' হচ্ছে... ' + bn(i) + '/' + bn(ids.length));
+      var run = google.script.run
+        .withSuccessHandler(function (res) {
+          if (res && res.warn) { skipped.push(nm + ' (Roll ' + o.roll + ')'); skippedObjs.push(o); } else done++;
+          next();
+        })
+        .withFailureHandler(function (e) {
+          if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+          failed.push(nm + ': ' + friendlyErr(e));
+          next();
+        });
+      if (kind === 'ok') run.confirmRegistration(TOKEN, o.id, false);
+      else run.rejectRegistration(TOKEN, o.id);
+    }
+    next();
   }
-  var d = req.destination;
-  if (d === 'image' || d === 'font') { e.respondWith(swr(req)); return; }
-  if (d === 'style' && !same) { e.respondWith(swr(req)); return; }   // Google Fonts CSS: ক্যাশ থেকে তাৎক্ষণিক
-  if (d === 'script' || d === 'style') { e.respondWith(netFirst(req, req, RUNTIME, function () { return Response.error(); }, false)); return; }
-});
+
+  // ===== Pending Edit info (উন্নত) =====
+  // [key, লেবেল, ধরন]  ধরন: num | en | birth | mob | text
+  var EDIT_FIELDS = [
+    ['roll', 'রোল নম্বর', 'num'], ['nameEn', 'Student Name (English)', 'en'], 
+    ['birthCert', 'Birth certificate no.', 'birth'], ['dob', 'Date of birth', 'text'], ['sex', 'Gender', 'text'], ['mobile', 'Mobile', 'mob'],
+    ['fathers', 'Father’s name', 'text'], ['fathersMobile', 'Father’s mobile', 'mob'],
+    ['mothers', 'Mother’s name', 'text'], ['mothersMobile', 'Mother’s mobile', 'mob']
+  ];
+  var ED_SEC = { roll: 'Student info', fathers: 'Guardian info' };
+  var editing = null;
+  var edOrig = {};
+  var lastPend = null;
+
+  function edBn2en(v) {
+    return String(v).replace(/[০-৯]/g, function (d) { return '০১২৩৪৫৬৭৮৯'.indexOf(d); });
+  }
+
+  // ইনপুটের মান পরিষ্কার করা (বাংলা সংখ্যা → ইংরেজি, বাড়তি ফাঁকা বাদ)
+  function edNorm(kind, v) {
+    v = String(v === undefined || v === null ? '' : v).trim();
+    if (kind === 'num' || kind === 'birth') return edBn2en(v).replace(/\s+/g, '');
+    if (kind === 'mob') return edBn2en(v).replace(/[\s-]/g, '');
+    if (kind === 'en') return v.replace(/\s+/g, ' ');
+    return v.replace(/\s+/g, ' ');
+  }
+
+  // ত্রুটি (err) বা সতর্কতা (warn) — server-এর নিয়মের সাথে মিল রাখা হয়েছে
+  function edCheck(key, kind, v) {
+    if (key === 'roll' && !v) return { err: 'Enter roll number' };
+    if (key === 'nameEn') {
+      if (!v) return { err: 'Enter English name' };
+      if (!/^[A-Za-z ]+$/.test(v)) return { err: 'Use English letters and spaces only' };
+    }
+    if (kind === 'birth' && v) {
+      if (!/^[0-9]+$/.test(v)) return { err: 'Digits only' };
+      if (v.length !== 17) return { warn: 'সাধারণত ১৭ সংখ্যার হয় (আপনি দিয়েছেন ' + bn(v.length) + ' সংখ্যা)' };
+    }
+    if (kind === 'mob' && v && !/^(\+?88)?01[3-9][0-9]{8}$/.test(v)) return { err: 'Invalid mobile (e.g. 01712345678)' };
+    return {};
+  }
+
+  function edFieldEls(key) {
+    return { inp: $('ed_' + key), err: $('edE_' + key), wrap: $('ed_' + key).parentNode };
+  }
+
+  // এক ফিল্ড যাচাই ও রঙ বদল; ত্রুটি থাকলে true ফেরত
+  function edValidateOne(f, live) {
+    var e = edFieldEls(f[0]);
+    var v = edNorm(f[2], e.inp.value);
+    var r = edCheck(f[0], f[2], v);
+    e.inp.classList.toggle('bad', !!r.err);
+    e.err.textContent = r.err || r.warn || '';
+    e.err.className = 'ferr' + (r.warn && !r.err ? ' warn2' : '');
+    e.wrap.classList.toggle('chg', v !== edNorm(f[2], edOrig[f[0]]));
+    return !!r.err;
+  }
+
+  function edChangedCount() {
+    var n = 0;
+    EDIT_FIELDS.forEach(function (f) {
+      if (edNorm(f[2], $('ed_' + f[0]).value) !== edNorm(f[2], edOrig[f[0]])) n++;
+    });
+    return n;
+  }
+
+  function edRefresh() {
+    var n = edChangedCount();
+    var bad = 0;
+    EDIT_FIELDS.forEach(function (f) { if (edCheck(f[0], f[2], edNorm(f[2], $('ed_' + f[0]).value)).err) bad++; });
+    $('edCnt').textContent = bad ? bn(bad) + 'টি ঘরে ভুল আছে' : (n ? bn(n) + 'টি ঘর পরিবর্তিত' : 'No changes');
+    $('edSave').disabled = !n || !!bad;
+    $('edSaveOk').disabled = !!bad;
+  }
+
+  function openEdit(o) {
+    editing = o;
+    edOrig = {};
+    EDIT_FIELDS.forEach(function (f) { edOrig[f[0]] = o[f[0]] || ''; });
+
+    $('edRo').textContent = 'Class ' + clsPlain(o.cls) + ' · Session ' + o.session + ' (class/section cannot be changed)';
+    var ph = $('edPh');
+    ph.innerHTML = '';
+    if (o.photo && o.photo.indexOf('data:image/') === 0) {
+      var im = document.createElement('img'); im.src = o.photo; im.alt = ''; ph.appendChild(im);
+    } else { ph.textContent = 'No photo'; }
+
+    var box = $('edForm');
+    box.innerHTML = '';
+    EDIT_FIELDS.forEach(function (f) {
+      if (ED_SEC[f[0]]) box.appendChild(el('div', 'ed-sec', ED_SEC[f[0]]));
+      var w = el('div', 'ed-f');
+      var lb = el('label', null, f[1]);
+      lb.setAttribute('for', 'ed_' + f[0]);
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.id = 'ed_' + f[0]; inp.value = o[f[0]] || '';
+      inp.autocomplete = 'off';
+      if (f[2] === 'mob' || f[2] === 'birth' || f[2] === 'num') inp.setAttribute('inputmode', 'numeric');
+      if (f[2] === 'en') { inp.setAttribute('autocapitalize', 'words'); inp.spellcheck = false; }
+      inp.oninput = function () { edValidateOne(f, true); edRefresh(); };
+      inp.onblur = function () {              // ছাড়ার সময় পরিষ্কার মান বসানো
+        inp.value = edNorm(f[2], inp.value);
+        edValidateOne(f, false); edRefresh();
+      };
+      var er = el('div', 'ferr'); er.id = 'edE_' + f[0];
+      w.appendChild(lb); w.appendChild(inp); w.appendChild(er);
+      box.appendChild(w);
+    });
+    EDIT_FIELDS.forEach(function (f) { edValidateOne(f, false); });
+    edRefresh();
+    $('edModal').classList.add('on');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { $('ed_roll').focus(); }, 60);
+  }
+
+  // force=true হলে পরিবর্তনের সতর্কতা ছাড়াই বন্ধ হবে
+  function closeEdit(force) {
+    if (editing && force !== true && edChangedCount() &&
+        !confirm('Unsaved changes will be lost. Close?')) return;
+    $('edModal').classList.remove('on');
+    document.body.style.overflow = '';
+    editing = null;
+  }
+
+  // Esc = বন্ধ, Enter = সংরক্ষণ
+  document.addEventListener('keydown', function (ev) {
+    if (!$('edModal').classList.contains('on')) return;
+    if (ev.key === 'Escape') { ev.preventDefault(); closeEdit(); }
+    else if (ev.key === 'Enter' && ev.target && ev.target.tagName === 'INPUT') {
+      ev.preventDefault();
+      if (!$('edSave').disabled) saveEdit(false);
+    }
+  });
+
+  // thenConfirm=true হলে সংরক্ষণের পরই কনফার্ম
+  function saveEdit(thenConfirm) {
+    if (!editing) return;
+    var data = {}, firstBad = null;
+    EDIT_FIELDS.forEach(function (f) {
+      var inp = $('ed_' + f[0]);
+      inp.value = edNorm(f[2], inp.value);
+      data[f[0]] = inp.value;
+      if (edValidateOne(f, false) && !firstBad) firstBad = inp;
+    });
+    if (firstBad) { firstBad.focus(); toast('Fix the fields marked red', true); return; }
+
+    var o = editing;
+    var changed = edChangedCount() > 0;
+    if (!changed) {                              // কিছু বদলায়নি
+      closeEdit(true);
+      if (thenConfirm) confirmReg(o, false);
+      else toast('No changes', false);
+      return;
+    }
+
+    $('edSave').disabled = true;
+    $('edSaveOk').disabled = true;
+    loading(true, 'Saving...');
+    google.script.run
+      .withSuccessHandler(function () {
+        loading(false);
+        EDIT_FIELDS.forEach(function (f) { o[f[0]] = data[f[0]]; });   // স্ক্রিনের কার্ড সঙ্গে সঙ্গে হালনাগাদ
+        closeEdit(true);
+        if (thenConfirm) { toast('Data saved', false); confirmReg(o, false); return; }
+        toast('Data saved', false);
+        if (lastPend) renderPending(lastPend);
+      })
+      .withFailureHandler(function (e) {
+        loading(false);
+        $('edSave').disabled = false;
+        $('edSaveOk').disabled = false;
+        if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+        toast('Error: ' + friendlyErr(e), true);
+      })
+      .updatePending(TOKEN, o.id, data);
+  }
+
+  function setRegBadge(n) {
+    var b = $('regBdg');
+    b.textContent = n > 99 ? '৯৯+' : bn(n);
+    b.style.display = n > 0 ? 'block' : 'none';
+    var pb = $('pendBanner');
+    pb.style.display = n > 0 ? 'block' : 'none';
+    pb.textContent = '⚠️ ' + bn(n) + ' জন নিবন্ধন অপেক্ষমাণ — দেখতে ক্লিক করুন';
+  }
+
+  var regStatus = 'pending';
+
+  function regFbar() {
+    var fb = $('regFbar');
+    fb.innerHTML = '';
+    [['pending', 'Pending'], ['confirmed', 'নিশ্চিত (Confirmed)'], ['cancelled', 'বাতিল (Cancelled)']].forEach(function (f) {
+      var b = el('button', 'chipbtn' + (regStatus === f[0] ? ' on' : ''), f[1]);
+      b.type = 'button';
+      b.onclick = function () { if (regStatus === f[0]) return; regStatus = f[0]; loadPending(); };
+      fb.appendChild(b);
+    });
+  }
+
+  function loadPending() {
+    regFbar();
+    $('regBox').innerHTML = '';
+    setNote('rnote', '');
+    var id = ++rq.reg;
+    loading(true, 'অপেক্ষমাণ নিবন্ধন Loading...');
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if (id !== rq.reg) return;
+        renderPending(d);
+        loading(false);
+      })
+      .withFailureHandler(function (e) { if (id === rq.reg) fail(e); })
+      .getPending(TOKEN, regStatus);
+  }
+
+  function renderPending(d) {
+    lastPend = d;
+    var box = $('regBox');
+    box.innerHTML = '';
+    regFbar();
+    if ((d.status || 'pending') !== 'pending') { renderRegHistory(d); return; }
+    setRegBadge(d.total);
+    sortByClsRoll(d.items);
+    if (!d.items.length) {
+      box.appendChild(el('div', 'empty', 'No pending registrations'));
+      return;
+    }
+    setNote('rnote', 'Pending: ' + bn(d.total) + ' students' +
+      (d.total > d.items.length ? ' (প্রথম ' + bn(d.items.length) + ' shown)' : ''));
+
+    regSel = {};
+    regItems = d.items;
+    var bulk = el('div', 'card reg-bulk');
+    var bt0 = el('div', 'reg-bk-top');
+    var all = document.createElement('input');
+    all.type = 'checkbox'; all.id = 'bkAll'; all.className = 'reg-cb';
+    all.setAttribute('aria-label', 'Select everyone');
+    all.onchange = function () {
+      regSel = {};
+      var cbs = document.querySelectorAll('#regBox .reg-card-cb');
+      for (var k = 0; k < cbs.length; k++) {
+        cbs[k].checked = all.checked;
+        var cc = cbs[k].closest ? cbs[k].closest('.card') : null;
+        if (cc) cc.classList.toggle('sel', all.checked);
+        if (all.checked) regSel[regItems[k].id] = regItems[k];
+      }
+      updateBulk();
+    };
+    bt0.appendChild(all);
+    bt0.appendChild(el('b', null, 'Select all'));
+    bt0.appendChild(el('span', null, '')).id = 'bkCnt';
+    bulk.appendChild(bt0);
+    var bb = el('div', 'btn2');
+    var bok = el('button', 'act', 'বাছাইকৃত কনফার্ম');
+    bok.type = 'button'; bok.id = 'bkOk'; bok.disabled = true;
+    bok.onclick = function () { bulkRun('ok'); };
+    var bno = el('button', 'act rej', 'বাছাইকৃত বাতিল');
+    bno.type = 'button'; bno.id = 'bkNo'; bno.disabled = true;
+    bno.onclick = function () { bulkRun('no'); };
+    bb.appendChild(bok); bb.appendChild(bno);
+    bulk.appendChild(bb);
+    box.appendChild(bulk);
+    updateBulk();
+
+    d.items.forEach(function (o, ix) {
+      var card = stg(el('div', 'card'), ix);
+
+      var top = el('div', 'reg-top');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'reg-cb reg-card-cb';
+      cb.setAttribute('aria-label', 'Select');
+      cb.onchange = function () {
+        if (cb.checked) regSel[o.id] = o; else delete regSel[o.id];
+        card.classList.toggle('sel', cb.checked);
+        updateBulk();
+      };
+      top.onclick = function (ev) { if (ev.target === cb) return; cb.checked = !cb.checked; cb.onchange(); };   // ছবি/নামে ট্যাপ = বাছাই
+      top.appendChild(cb);
+      var ph = el('div', 'reg-ph');
+      if (o.photo && o.photo.indexOf('data:image/') === 0) {
+        var im = document.createElement('img');
+        im.src = o.photo; im.alt = '';
+        ph.appendChild(im);
+      } else {
+        ph.className += ' noimg';
+        ph.textContent = Array.from(String(o.nameEn || '?').trim())[0] || '?';
+        ph.setAttribute('aria-label', 'No photo');
+      }
+      top.appendChild(ph);
+
+      var inf = el('div', 'reg-inf');
+      inf.appendChild(el('div', 'name', o.nameEn));
+      inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
+      top.appendChild(inf);
+      card.appendChild(top);
+
+      var dl = el('div', 'reg-dl');
+      [['Birth certificate', o.birthCert], ['Date of birth', o.dob], ['Gender', o.sex], ['Mobile', o.mobile],
+       ['Father', o.fathers], ['Father’s mobile', o.fathersMobile],
+       ['Mother', o.mothers], ['Mother’s mobile', o.mothersMobile], ['Submitted at', o.submitted]
+      ].forEach(function (r) {
+        if (!r[1]) return;
+        var ln = el('div', 'reg-ln');
+        ln.appendChild(el('span', 'k', r[0]));
+        ln.appendChild(el('span', 'v', r[1]));
+        dl.appendChild(ln);
+      });
+      card.appendChild(dl);
+
+      var ed = el('button', 'act alt', '✏️ সম্পাদনা (Edit)');
+      ed.type = 'button';
+      ed.style.marginBottom = '10px';
+      ed.onclick = function () { openEdit(o); };
+      card.appendChild(ed);
+
+      var bt = el('div', 'btn2');
+      var ok = el('button', 'act', 'Confirm');
+      ok.type = 'button';
+      ok.onclick = function () { confirmReg(o, false); };
+      var no = el('button', 'act rej', 'Cancel');
+      no.type = 'button';
+      no.onclick = function () { rejectReg(o); };
+      bt.appendChild(ok);
+      bt.appendChild(no);
+      card.appendChild(bt);
+      box.appendChild(card);
+    });
+  }
+
+  // নিশ্চিত / বাতিল তালিকা (শুধু দেখা; বাতিল থেকে ফিরিয়ে আনা যায়)
+  function renderRegHistory(d) {
+    var box = $('regBox');
+    var isOk = d.status === 'confirmed';
+    var lbl = isOk ? 'নিশ্চিত' : 'Cancel';
+    if (!d.items.length) {
+      setNote('rnote', '');
+      box.appendChild(el('div', 'empty', 'কোনো ' + lbl + ' নিবন্ধন নেই'));
+      return;
+    }
+    setNote('rnote', lbl + ': ' + bn(d.total) + ' students' +
+      (d.total > d.items.length ? ' (latest ' + bn(d.items.length) + ' shown)' : ''));
+
+    sortByClsRoll(d.items);
+    d.items.forEach(function (o) {      // ক্লাস ও রোল ক্রমে
+      var card = el('div', 'card');
+      var top = el('div', 'reg-top');
+      var ph = el('div', 'reg-ph');
+      if (o.photo && o.photo.indexOf('data:image/') === 0) {
+        var im = document.createElement('img');
+        im.src = o.photo; im.alt = '';
+        ph.appendChild(im);
+      } else {
+        ph.className += ' noimg';
+        ph.textContent = Array.from(String(o.nameEn || '?').trim())[0] || '?';
+        ph.setAttribute('aria-label', 'No photo');
+      }
+      top.appendChild(ph);
+      var inf = el('div', 'reg-inf');
+      inf.appendChild(el('div', 'name', o.nameEn));
+      inf.appendChild(el('div', 'detail', 'Class ' + clsPlain(o.cls) + ' · Roll ' + o.roll));
+      inf.appendChild(el('span', 'pchip ' + (isOk ? 'up' : 'warn'), isOk ? 'Confirmed' : 'Cancelled'));
+      top.appendChild(inf);
+      card.appendChild(top);
+
+      var dl = el('div', 'reg-dl');
+      [['Birth certificate', o.birthCert], ['Date of birth', o.dob], ['Mobile', o.mobile],
+       ['Father', o.fathers], ['Mother', o.mothers], ['Submitted at', o.submitted]
+      ].forEach(function (r) {
+        if (!r[1]) return;
+        var ln = el('div', 'reg-ln');
+        ln.appendChild(el('span', 'k', r[0]));
+        ln.appendChild(el('span', 'v', r[1]));
+        dl.appendChild(ln);
+      });
+      card.appendChild(dl);
+
+      if (!isOk) {
+        var rb = el('button', 'act alt', '↩️ Mark pending again');
+        rb.type = 'button';
+        rb.onclick = function () { restoreReg(o); };
+        card.appendChild(rb);
+      }
+      box.appendChild(card);
+    });
+  }
+
+  function restoreReg(o) {
+    if (!confirm((o.nameEn) + ' (Roll ' + o.roll + ')’s registration — move back to pending?')) return;
+    loading(true, 'Restoring...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        toast('Moved back to pending', false);
+        if (res && res.remaining !== undefined) setRegBadge(res.remaining);
+        loadPending();
+      })
+      .withFailureHandler(fail)
+      .restoreRegistration(TOKEN, o.id);
+  }
+
+  // ===== একই রোল/নাম থাকলে আগেরজনের জায়গায় Replace =====
+  function regNormName(x) { return String(x || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+  // ওই ক্লাসে একই রোল বা একই নামের শিক্ষার্থী খোঁজে; পাওয়া গেলে cb(hits), ব্যর্থ হলে cb([])
+  function regFindDup(o, cb) {
+    google.script.run
+      .withSuccessHandler(function (list) {
+        var nm = regNormName(o.nameEn), r = edBn2en(String(o.roll)).trim();
+        cb((list || []).filter(function (s) {
+          return edBn2en(String(s.roll)).trim() === r || (nm && regNormName(s.nameEn) === nm);
+        }));
+      })
+      .withFailureHandler(function () { cb([]); })
+      .getStudentsForEdit(TOKEN, o.cls);
+  }
+  // আগের শিক্ষার্থী(দের) মুছে নতুন রেজিস্ট্রেশন কনফার্ম; done(err, res)
+  function regReplace(o, hits, done) {
+    google.script.run
+      .withSuccessHandler(function () {
+        google.script.run
+          .withSuccessHandler(function (res) { done(null, res); })
+          .withFailureHandler(function (e) { done(e); })
+          .confirmRegistration(TOKEN, o.id, true);
+      })
+      .withFailureHandler(function (e) { done(e); })
+      .deleteStudents(TOKEN, hits.map(function (x) { return x.id; }), 'DELETE');
+  }
+  function regDupText(hits) {
+    return hits.map(function (x) { return '• Roll ' + x.roll + ' — ' + x.nameEn; }).join('\n');
+  }
+
+  function confirmReg(o, force) {
+    if (!force && !confirm((o.nameEn) + ' (class ' + clsPlain(o.cls) + ', রোল ' + o.roll + ')\nAdd this student to the Students list?')) return;
+    loading(true, 'Confirming...');
+    google.script.run
+      .withSuccessHandler(function (res) {
+        loading(false);
+        if (res.warn) {
+          loading(true, 'আগের শিক্ষার্থী খোঁজা হচ্ছে...');
+          regFindDup(o, function (hits) {
+            loading(false);
+            if (hits.length && confirm('এই ক্লাসে আগে থেকেই আছে:\n' + regDupText(hits) +
+                '\n\nনতুন: Roll ' + o.roll + ' — ' + o.nameEn +
+                '\n\nআগেরজনকে সরিয়ে নতুনটি বসাবেন (Replace)?\n(হাজিরার পুরোনো রেকর্ড মুছবে না; ব্যাকআপ থাকবে।)\n\nOK = Replace · Cancel = অন্য অপশন')) {
+              loading(true, 'Replace হচ্ছে...');
+              regReplace(o, hits, function (err, r2) {
+                loading(false);
+                if (err) { fail(err); return; }
+                attStale = true; dashData = null;
+                toast((o.nameEn || 'Students') + ' — Replace সম্পন্ন', false);
+                loadPending();
+              });
+              return;
+            }
+            if (confirm(res.message + '\n\nAdd anyway?')) confirmReg(o, true);
+          });
+          return;
+        }
+        attStale = true;
+        toast((res.name || 'Students') + ' — confirmed', false);
+        loadPending();
+      })
+      .withFailureHandler(fail)
+      .confirmRegistration(TOKEN, o.id, !!force);
+  }
+
+  function rejectReg(o) {
+    if (!confirm((o.nameEn) + ' (Roll ' + o.roll + ')’s registration — cancel?\nসারিটি মুছবে না; Status "Cancelled" হিসেবে থাকবে (বাতিল তালিকা থেকে ফিরিয়ে আনা যাবে)।')) return;
+    loading(true, 'Cancelling...');
+    google.script.run
+      .withSuccessHandler(function () {
+        toast('Registration cancelled', false);
+        loadPending();
+      })
+      .withFailureHandler(fail)
+      .rejectRegistration(TOKEN, o.id);
+  }
+
+  // ===== ✏️ শিক্ষার্থী ব্যবস্থাপনা (সংশোধন · ট্রান্সফার · মোছা) =====
+  var stuList = null, stuCur = null, stuSel = {}, stuShown = [];
+  var STU_GROUPS = [
+    ['👤 ব্যক্তিগত তথ্য', [['nameEn', 'Student Name (English)', 'en'], 
+      ['dob', 'Date of birth (YYYY-MM-DD)', 'text'], ['birth', 'Birth certificate no.', 'birth'], ['mobile', 'Mobile', 'mob']]],
+    ['👪 অভিভাবকের তথ্য', [['father', 'Father’s name', 'text'], ['fatherMobile', 'Father’s mobile', 'mob'],
+      ['mother', 'Mother’s name', 'text'], ['motherMobile', 'Mother’s mobile', 'mob']]]
+  ];
+  var STU_FIELDS = [].concat(STU_GROUPS[0][1], STU_GROUPS[1][1]);
+
+  (function () {
+    var _s = showTab;
+    showTab = function (t) { if (t === 'stuedit') { openStuEdit(); return; } _s(t); };
+  })();
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Escape' || !$('stuModal').classList.contains('on')) return;
+    if ($('stuFormWrap').style.display !== 'none') stuBack(); else closeStuEdit();
+  });
+
+  function openStuEdit() {
+    if (!cfg || !cfg.classes || !cfg.classes.length) { toast('No class found', true); return; }
+    var s = $('stuCls');
+    s.innerHTML = '<option value="">-- Class বাছুন --</option>';
+    cfg.classes.forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c; o.textContent = 'Class ' + clsPlain(c);
+      s.appendChild(o);
+    });
+    if (cfg.classes.length === 1) s.value = cfg.classes[0];
+    $('stuQ').value = '';
+    stuList = []; stuCur = null; stuSel = {};
+    stuBack();
+    $('stuModal').classList.add('on');
+    document.body.style.overflow = 'hidden';
+    if (s.value) stuLoad(); else stuRender();
+  }
+
+  function closeStuEdit() {
+    $('stuModal').classList.remove('on');
+    document.body.style.overflow = '';
+    stuCur = null;
+  }
+
+  function stuLoad() {
+    var cls = $('stuCls').value;
+    stuList = cls ? null : []; stuSel = {};
+    stuRender();
+    if (!cls) return;
+    google.script.run
+      .withSuccessHandler(function (d) {
+        if ($('stuCls').value !== cls) return;
+        stuList = sortByRoll(d, 'roll'); stuRender();
+      })
+      .withFailureHandler(function (e) { stuList = []; stuRender(); fail(e); })
+      .getStudentsForEdit(TOKEN, cls);
+  }
+
+  function stuInit(n) { return Array.from(String(n || '?').trim())[0] || '?'; }
+
+  function stuRender() {
+    var box = $('stuBox'); box.innerHTML = '';
+    var canDel = !!(cfg && cfg.canDeleteClass), has = !!(stuList && stuList.length);
+    $('stuDanger').style.display = (canDel && has && $('stuCls').value) ? '' : 'none';
+    $('stuAllWrap').style.display = (canDel && has) ? 'flex' : 'none';
+    if (!$('stuCls').value) { stuShown = []; $('stuStats').textContent = ''; box.appendChild(el('div', 'empty', 'প্রথমে Class বাছুন')); stuBulkUpdate(); return; }
+    if (stuList === null) { stuShown = []; $('stuStats').textContent = ''; box.appendChild(el('div', 'empty', 'Loading...')); stuBulkUpdate(); return; }
+    var q = $('stuQ').value.trim().toLowerCase();
+    var list = stuList.filter(function (s) { return !q || (s.roll + ' ' + s.nameEn).toLowerCase().indexOf(q) !== -1; });
+    stuShown = list;
+    $('stuStats').textContent = 'মোট ' + bn(stuList.length) + ' জন' + (q ? ' · পাওয়া গেছে ' + bn(list.length) + ' জন' : '');
+    if (!list.length) { box.appendChild(el('div', 'empty', stuList.length ? 'কিছু মেলেনি' : 'এই class-এ কোনো শিক্ষার্থী নেই')); stuBulkUpdate(); return; }
+    list.forEach(function (s) {
+      var card = el('div', 'su-card' + (stuSel[s.id] ? ' sel' : ''));
+      if (canDel) {
+        var cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.className = 'reg-cb'; cb.checked = !!stuSel[s.id];
+        cb.setAttribute('aria-label', 'বাছুন — ' + (s.nameEn));
+        cb.onchange = function () { if (cb.checked) stuSel[s.id] = true; else delete stuSel[s.id]; card.classList.toggle('sel', cb.checked); stuBulkUpdate(); };
+        card.appendChild(cb);
+      }
+      card.appendChild(el('div', 'su-av', stuInit(s.nameEn)));
+      var main = el('div', 'su-main');
+      main.appendChild(el('b', null, s.nameEn));
+      main.appendChild(el('small', null, 'Roll ' + s.roll + (s.mobile ? ' · ' + s.mobile : '')));
+      main.onclick = function () { stuOpen(s); };
+      card.appendChild(main);
+      var ch = el('div', 'su-chev', '›'); ch.onclick = function () { stuOpen(s); };
+      card.appendChild(ch);
+      box.appendChild(card);
+    });
+    stuBulkUpdate();
+  }
+
+  function stuBulkUpdate() {
+    var n = Object.keys(stuSel).length;
+    $('stuBulk').classList.toggle('on', n > 0);
+    $('stuSelCnt').textContent = bn(n) + ' জন বাছাই করা';
+    var a = $('stuAll'), vis = stuShown.length, on = stuShown.filter(function (s) { return stuSel[s.id]; }).length;
+    a.checked = vis > 0 && on === vis; a.indeterminate = on > 0 && on < vis;
+  }
+  function stuToggleAll(on) {
+    stuShown.forEach(function (s) { if (on) stuSel[s.id] = true; else delete stuSel[s.id]; });
+    stuRender();
+  }
+  function stuClearSel() { stuSel = {}; stuRender(); }
+
+  // ---------- সংশোধন ফর্ম ----------
+  function stuCheck(k, kind, v) {
+    if (k === 'nameEn') {
+      if (!v) return 'ইংরেজি নাম দিন';
+      if (!/^[A-Za-z .'-]+$/.test(v)) return 'ইংরেজি অক্ষর, স্পেস, . ও - ব্যবহার করুন';
+    }
+    if (!v) return '';
+    if (kind === 'mob' && !/^(\+?88)?01[3-9][0-9]{8}$/.test(v)) return 'মোবাইল নম্বর সঠিক নয় (যেমন 01712345678)';
+    if (kind === 'birth' && !/^[0-9]+$/.test(v)) return 'শুধু সংখ্যা দিন';
+    if (k === 'dob' && !/^\d{4}-\d{2}-\d{2}$/.test(edBn2en(v))) return 'YYYY-MM-DD ফরম্যাটে দিন';
+    return '';
+  }
+  function stuVal(x) { var v = edNorm(x[2], $('st_' + x[0]).value); return x[0] === 'dob' ? edBn2en(v) : v; }
+
+  function stuDirty() {
+    if (!stuCur) return;
+    var n = 0, bad = 0;
+    STU_FIELDS.forEach(function (x) {
+      var i = $('st_' + x[0]), v = stuVal(x), m = stuCheck(x[0], x[2], v);
+      var chg = v !== edNorm(x[2], stuCur[x[0]] || '');
+      if (chg) n++;
+      if (m) bad++;
+      i.classList.toggle('bad', !!m);
+      $('stE_' + x[0]).textContent = m;
+      i.parentNode.classList.toggle('chg', chg);
+    });
+    var nc = $('st_cls').value, nr = edBn2en($('st_roll').value).trim();
+    var rollBad = !/^\d+$/.test(nr);
+    $('st_roll').classList.toggle('bad', rollBad);
+    var moved = nc !== $('stuCls').value || nr !== String(stuCur.roll);
+    var p = $('stuPrev');
+    p.classList.toggle('on', moved && !rollBad);
+    p.textContent = moved ? '🔀 Class ' + clsPlain($('stuCls').value) + ' · Roll ' + stuCur.roll + '   ➜   Class ' + clsPlain(nc) + ' · Roll ' + nr : '';
+    var tot = n + (moved ? 1 : 0);
+    $('stuCnt').textContent = (bad || rollBad) ? '⚠️ ' + bn(bad + (rollBad ? 1 : 0)) + 'টি ঘরে ভুল আছে' : (tot ? '✏️ ' + bn(tot) + 'টি পরিবর্তন' : 'কোনো পরিবর্তন নেই');
+    $('stuSave').disabled = !tot || !!bad || rollBad;
+  }
+
+  function stuField(x, s, parent) {
+    var w = el('div', 'ed-f');
+    var lb = el('label', null, x[1]); lb.setAttribute('for', 'st_' + x[0]);
+    var i = document.createElement('input');
+    i.type = 'text'; i.id = 'st_' + x[0]; i.value = s[x[0]] || ''; i.autocomplete = 'off';
+    if (x[2] === 'mob' || x[2] === 'birth') i.setAttribute('inputmode', 'numeric');
+    var er = el('div', 'ferr'); er.id = 'stE_' + x[0];
+    i.oninput = stuDirty;
+    w.appendChild(lb); w.appendChild(i); w.appendChild(er);
+    parent.appendChild(w);
+  }
+
+  function stuOpen(s) {
+    stuCur = s;
+    $('stuPick').style.display = 'none';
+    $('stuFormWrap').style.display = 'flex';
+    $('stuFormWrap').style.flexDirection = 'column';
+    var ro = $('stuRo'); ro.innerHTML = '';
+    ro.appendChild(el('div', 'su-av', stuInit(s.nameEn)));
+    var t = el('div');
+    t.appendChild(el('b', null, s.nameEn));
+    t.appendChild(el('small', null, 'Class ' + clsPlain($('stuCls').value) + ' · Roll ' + s.roll));
+    ro.appendChild(t);
+    var f = $('stuForm'); f.innerHTML = '';
+    STU_GROUPS.forEach(function (g) {
+      var sec = el('div', 'su-sec'); sec.appendChild(el('h5', null, g[0]));
+      var grid = el('div', 'grid2');
+      g[1].forEach(function (x) { stuField(x, s, grid); });
+      sec.appendChild(grid); f.appendChild(sec);
+    });
+    var sec = el('div', 'su-sec'); sec.appendChild(el('h5', null, '🔀 ট্রান্সফার ও রোল'));
+    var grid = el('div', 'grid2');
+    var wc = el('div', 'ed-f');
+    var lc = el('label', null, 'Class / Section'); lc.setAttribute('for', 'st_cls');
+    var sc = document.createElement('select'); sc.id = 'st_cls';
+    cfg.classes.forEach(function (c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = 'Class ' + clsPlain(c); sc.appendChild(o);
+    });
+    sc.value = $('stuCls').value; sc.onchange = stuDirty;
+    wc.appendChild(lc); wc.appendChild(sc); grid.appendChild(wc);
+    var wr = el('div', 'ed-f');
+    var lr = el('label', null, 'Roll'); lr.setAttribute('for', 'st_roll');
+    var ir = document.createElement('input');
+    ir.type = 'text'; ir.id = 'st_roll'; ir.value = s.roll; ir.autocomplete = 'off'; ir.setAttribute('inputmode', 'numeric');
+    ir.oninput = stuDirty;
+    wr.appendChild(lr); wr.appendChild(ir); grid.appendChild(wr);
+    sec.appendChild(grid);
+    var pv = el('div', 'su-prev'); pv.id = 'stuPrev'; sec.appendChild(pv);
+    sec.appendChild(el('div', 'detail', 'রোল বা class বদলালে পুরোনো হাজিরা ও ফরম ফিলাপের তথ্যও নতুন রোলে সরে যায়। লক্ষ্য রোল ফাঁকা থাকতে হবে।'));
+    f.appendChild(sec);
+    stuDirty();
+    $('stuFormWrap').scrollTop = 0;
+  }
+
+  function stuBack() {
+    $('stuPick').style.display = '';
+    $('stuFormWrap').style.display = 'none';
+    stuCur = null;
+  }
+
+  function stuSave() {
+    if (!stuCur || $('stuSave').disabled) return;
+    var s = stuCur, data = {}, infoChanged = false;
+    STU_FIELDS.forEach(function (x) {
+      var v = stuVal(x); $('st_' + x[0]).value = v; data[x[0]] = v;
+      if (v !== edNorm(x[2], s[x[0]] || '')) infoChanged = true;
+    });
+    var oldCls = $('stuCls').value, newCls = $('st_cls').value, newRoll = edBn2en($('st_roll').value).trim();
+    var moved = newCls !== oldCls || newRoll !== String(s.roll);
+    if (moved && !confirm('Roll ' + s.roll + ' ➜ ' + (newCls !== oldCls ? 'Class ' + clsPlain(newCls) + ', ' : '') + 'Roll ' + newRoll +
+                          '\nপুরোনো হাজিরা সহ সরানো হবে। চালিয়ে যাবেন?')) return;
+    $('stuSave').disabled = true;
+    function oops(e, partial) {
+      stuDirty();
+      if (String(e && e.message ? e.message : e).indexOf('SESSION_EXPIRED') !== -1) { fail(e); return; }
+      toast((partial ? 'তথ্য সংরক্ষিত, কিন্তু সরানো যায়নি: ' : 'Error: ') + friendlyErr(e), true);
+    }
+    function fin() {
+      STU_FIELDS.forEach(function (x) { s[x[0]] = data[x[0]]; });
+      attStale = true; dashData = null;
+      if (moved) {
+        if (newCls !== oldCls) stuList = stuList.filter(function (x) { return x.id !== s.id; });
+        else { s.roll = newRoll; sortByRoll(stuList, 'roll'); }
+      }
+      toast(moved ? '✅ সংরক্ষিত ও সরানো হয়েছে' : '✅ তথ্য সংরক্ষিত হয়েছে', false);
+      stuBack(); stuRender();
+      if (moved) loadDash();
+    }
+    function doMove(partial) {
+      if (!moved) { fin(); return; }
+      google.script.run.withSuccessHandler(fin).withFailureHandler(function (e) { oops(e, partial); })
+        .moveStudent(TOKEN, s.id, newCls, newRoll);
+    }
+    if (infoChanged) {
+      google.script.run.withSuccessHandler(function () { doMove(true); }).withFailureHandler(function (e) { oops(e, false); })
+        .updateStudentInfo(TOKEN, s.id, data);
+    } else doMove(false);
+  }
+
+  // ---------- মোছা ----------
+  function stuAfterDelete(n) {
+    attStale = true; dashData = null; stuSel = {};
+    toast('🗑 ' + bn(n) + ' জন শিক্ষার্থী মুছে ফেলা হয়েছে', false);
+    loadDash();
+  }
+  function stuDeleteSelected() {
+    var pick = (stuList || []).filter(function (s) { return stuSel[s.id]; });
+    if (!pick.length) return;
+    var names = pick.slice(0, 5).map(function (s) { return s.roll + '. ' + (s.nameEn); }).join('\n');
+    if (!confirm(bn(pick.length) + ' জন শিক্ষার্থী মুছে যাবে:\n' + names + (pick.length > 5 ? '\n...আরও ' + bn(pick.length - 5) + ' জন' : '') +
+                 '\n\n(ব্যাকআপ থাকবে, হাজিরার পুরোনো রেকর্ড মুছবে না।)\nচালিয়ে যাবেন?')) return;
+    var t = prompt('নিশ্চিত করতে ইংরেজিতে DELETE লিখুন:');
+    if (t !== 'DELETE') { toast('বাতিল করা হয়েছে', true); return; }
+    loading(true, 'মুছে ফেলা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        loading(false);
+        var gone = {}; pick.forEach(function (s) { gone[s.id] = true; });
+        stuList = stuList.filter(function (s) { return !gone[s.id]; });
+        stuAfterDelete(r.deleted); stuRender();
+      })
+      .withFailureHandler(fail)
+      .deleteStudents(TOKEN, pick.map(function (s) { return s.id; }), t);
+  }
+  function stuDeleteClass() {
+    var cls = $('stuCls').value;
+    if (!cls || !stuList || !stuList.length) return;
+    if (!confirm('Class ' + clsPlain(cls) + '-এর ' + bn(stuList.length) + ' জন শিক্ষার্থী মুছে যাবে।\n' +
+                 '(ব্যাকআপ থাকবে, হাজিরার পুরোনো রেকর্ড মুছবে না।)\n\nচালিয়ে যাবেন?')) return;
+    var t = prompt('নিশ্চিত করতে ইংরেজিতে DELETE লিখুন:');
+    if (t !== 'DELETE') { toast('বাতিল করা হয়েছে', true); return; }
+    loading(true, 'মুছে ফেলা হচ্ছে...');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        loading(false);
+        cfg.classes = cfg.classes.filter(function (c) { return c !== cls; });
+        if (cfg.classMeta) cfg.classMeta = cfg.classMeta.filter(function (m) { return m.label !== cls; });
+        fillClassSelects(cfg);
+        stuAfterDelete(r.deleted);
+        closeStuEdit();
+      })
+      .withFailureHandler(fail)
+      .deleteClassStudents(TOKEN, cls, t);
+  }
+
+  // ===== Service Worker: অফলাইনে অ্যাপ খোলা ও দ্রুত লোড =====
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () {
+            function dirtyNow() { try { return typeof dirty !== 'undefined' && !!dirty; } catch (e) { return false; } }
+      function toastOk(t) {
+        var d = document.createElement('div');
+        d.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100001;background:#1f7a3a;color:#fff;padding:10px 18px;border-radius:99px;font:600 14px/1.4 inherit;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.3)';
+        d.textContent = t; document.body.appendChild(d);
+        setTimeout(function () { d.remove(); }, 3500);
+      }
+      function applyUpdate(reg) {
+        try { sessionStorage.setItem('pwa_updated', '1'); } catch (e) {}
+        var done = false;
+        function go() { if (done) return; done = true; location.reload(); }
+        navigator.serviceWorker.addEventListener('controllerchange', go);
+        if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });   // নতুন Service Worker চালু
+        else setTimeout(go, 200);                                                    // শুধু পেজ বদলেছে — রিলোড
+        setTimeout(go, 5000);                                                        // নিরাপত্তা
+      }
+      function showUpdate(reg) {
+        if (document.getElementById('updBar')) return;
+        var b = document.createElement('div');
+        b.id = 'updBar'; b.setAttribute('role', 'status');
+        b.style.cssText = 'position:fixed;top:10px;left:12px;right:12px;z-index:100000;max-width:460px;margin:0 auto;background:#0e8f98;color:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);padding:11px 14px;display:flex;align-items:center;gap:10px;font:600 14px/1.4 inherit;font-family:inherit';
+        b.innerHTML = '<span style="flex:1">🔄 New version available</span>' +
+          '<button type="button" id="updGo" style="background:#fff;color:#0e8f98;border:0;border-radius:99px;padding:7px 14px;font:700 13.5px inherit;font-family:inherit;cursor:pointer">Update</button>' +
+          '<button type="button" id="updX" aria-label="Closed" style="background:transparent;color:#fff;border:0;font-size:18px;cursor:pointer;padding:0 4px">✕</button>';
+        document.body.appendChild(b);
+        document.getElementById('updGo').onclick = function () {
+          if (dirtyNow() && !confirm('আপনার অসংরক্ষিত পরিবর্তন আছে, আপডেট করলে তা হারাবে। তবুও আপডেট করবেন?')) return;
+          this.disabled = true; this.textContent = 'আপডেট হচ্ছে…';
+          applyUpdate(reg);
+        };
+        document.getElementById('updX').onclick = function () { b.remove(); };
+      }
+      try { if (sessionStorage.getItem('pwa_updated')) { sessionStorage.removeItem('pwa_updated'); setTimeout(function () { toastOk('✅ অ্যাপ নতুন ভার্সনে আপডেট হয়েছে'); }, 600); } } catch (e) {}
+
+      navigator.serviceWorker.register('att-sw.js', { scope: './' }).then(function (reg) {
+        function track(w) {
+          if (!w) return;
+          w.addEventListener('statechange', function () {
+            if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(reg);   // নতুন Service Worker অপেক্ষায়
+          });
+        }
+        if (reg.waiting && navigator.serviceWorker.controller) showUpdate(reg);
+        track(reg.installing);
+        reg.addEventListener('updatefound', function () { track(reg.installing); });
+        navigator.serviceWorker.addEventListener('message', function (ev) {
+          if (ev.data && ev.data.type === 'CONTENT_UPDATED') showUpdate(reg);                     // পেজ বদলেছে
+        });
+        function check() {
+          reg.update().catch(function () {});
+          var c = navigator.serviceWorker.controller;
+          if (c) c.postMessage({ type: 'CHECK_PAGE', url: location.pathname });
+        }
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+        window.addEventListener('online', check);
+        setTimeout(check, 4000);
+        setInterval(check, 600000);                                                                // প্রতি ১০ মিনিটে
+      }).catch(function () {});
+    });
+  }
+</script>
+
+  <script>
+    // ===== সাইটে ঢুকলে "অ্যাপ ইনস্টল করবেন?" বার্তা =====
+    (function () {
+      try {
+        var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        if (standalone) { try { localStorage.setItem('pwa_installed', '1'); } catch (e) {} return; }
+        try { if (localStorage.getItem('pwa_installed') === '1') return; } catch (e) {}
+        if (navigator.getInstalledRelatedApps) navigator.getInstalledRelatedApps().then(function (a) { if (a && a.length) { try { localStorage.setItem('pwa_installed', '1'); } catch (e) {} var b = document.getElementById('pwaBar'); if (b) b.remove(); } }).catch(function () {});
+        var KEY = 'pwa_prompt_hide', DAYS = 7;
+        try { var t = parseInt(localStorage.getItem(KEY) || '0', 10); if (t && Date.now() - t < DAYS * 86400000) return; } catch (e) {}
+        var ev = null, shown = false;
+        var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+        function hide(remember) {
+          var b = document.getElementById('pwaBar'); if (b) b.remove();
+          if (remember) { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} }
+        }
+        function show() {
+          if (shown || document.getElementById('pwaBar')) return;
+          shown = true;
+          var bar = document.createElement('div');
+          bar.id = 'pwaBar';
+          bar.setAttribute('role', 'dialog');
+          bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;max-width:460px;margin:0 auto;background:#fff;color:#222;border:2px solid #d4af37;border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.3);padding:14px;font-family:inherit;display:flex;gap:12px;align-items:center;';
+          var msg = ios
+            ? 'অ্যাপের মতো ব্যবহার করতে নিচের <b>Share</b> বোতাম চেপে <b>"Add to Home Screen"</b> বাছুন।'
+            : 'এই সাইটটি অ্যাপ হিসেবে ইনস্টল করবেন? ইনস্টল করলে ফোন/কম্পিউটারে আইকন থাকবে এবং অফলাইনেও চলবে।';
+          bar.innerHTML = '<img src="icon-192.png" alt="" width="46" height="46" style="border-radius:10px;flex-shrink:0">' +
+            '<div style="flex:1;font-size:14px;line-height:1.5"><div style="font-weight:800;color:#4c6b1f;margin-bottom:2px">📲 অ্যাপ ইনস্টল করুন</div>' + msg + '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">' +
+            (ios ? '' : '<button id="pwaYes" type="button" style="background:#4c6b1f;color:#fff;border:0;border-radius:99px;padding:8px 16px;font:700 14px inherit;font-family:inherit;cursor:pointer">ইনস্টল</button>') +
+            '<button id="pwaNo" type="button" style="background:#eee;color:#333;border:0;border-radius:99px;padding:8px 16px;font:600 13px inherit;font-family:inherit;cursor:pointer">' + (ios ? 'Got it' : 'Not now') + '</button></div>';
+          document.body.appendChild(bar);
+          document.getElementById('pwaNo').onclick = function () { hide(true); };
+          var yes = document.getElementById('pwaYes');
+          if (yes) yes.onclick = function () {
+            if (!ev) { hide(false); return; }
+            ev.prompt();                                   // ব্রাউজারের অনুমতি-বক্স
+            ev.userChoice.then(function (c) { ev = null; hide(c && c.outcome !== 'accepted'); });
+          };
+        }
+
+        window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ev = e; setTimeout(show, 1500); });
+        window.addEventListener('appinstalled', function () { hide(false); try { localStorage.setItem('pwa_installed', '1'); localStorage.setItem(KEY, String(Date.now() + 3650 * 86400000)); } catch (e) {} });
+        if (ios) setTimeout(show, 2500);
+      } catch (e) {}
+    })();
+  </script>
+
+</body>
+</html>
